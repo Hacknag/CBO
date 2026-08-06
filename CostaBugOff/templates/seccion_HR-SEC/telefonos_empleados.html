@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+
+{% include 'plantillas/_default_head.html' %}
+
+<body>
+  <header class="topbar">
+    <div class="topbar__brand">
+      {% include 'plantillas/_logo.html' %}
+      <span class="topbar__view-tag" id="viewTag">Vista Telefonos de Empleados</span>
+    </div>
+    <div class="topbar__user" title="Usuario">A</div>
+  </header>
+
+  {% include 'plantillas/_navbar.html' %}
+
+  <main class="app">
+    <section class="panel active" id="panel-telefonos-empleados" data-title="Telefonos de Empleados">
+      <div class="panel__header">
+        <h1>Telefonos de Empleados</h1>
+      </div>
+      <div class="panel__body">
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <form method="get" class="filtro-form">
+            <label for="filtro-estado">Filtrar por estado:</label>
+            <select name="estado" id="filtro-estado" onchange="this.form.submit()">
+              <option value="" {% if not filtro %}selected{% endif %}>Todos</option>
+              {% for e in estados %}
+              <option value="{{ e[0] }}" {% if filtro==e[0]|string %}selected{% endif %}>{{ e[1] }}</option>
+              {% endfor %}
+            </select>
+          </form>
+
+          <form class="entity-form" id="formTelefonosEmpleados" data-entity="TelefonoEmpleado"
+            style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
+            <div class="field">
+              <label for="te-empleado">Empleado</label>
+              <select id="te-empleado" name="id_empleado" required>
+                <option value="">Selecciona un empleado</option>
+                {% for p in empleados %}
+                <option value="{{ p[0] }}">{{ p[1] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="field">
+              <label for="te-telefono">Teléfono</label>
+              <input type="text" id="te-telefono" name="telefono" placeholder="123-456-7890" required />
+            </div>
+            <div class="field">
+              <label for="te-tipo">Tipo</label>
+              <input type="text" id="te-tipo" name="tipo" placeholder="Personal / Trabajo / Facturación" required />
+            </div>
+            <div class="field">
+              <label for="te-estado">Estado</label>
+              <select id="te-estado" name="id_estado" required>
+                <option value="">Selecciona un estado</option>
+                {% for e in estados %}
+                <option value="{{ e[0] }}">{{ e[1] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-actions" style="grid-column: 1 / -1;">
+              <button type="button" id="btnAgregarTelefonoEmpleado" class="btn btn--primary btn-agregar">Agregar</button>
+              <button type="button" id="btnActualizarTelefonoEmpleado"
+                class="btn btn--secondary btn-actualizar">Actualizar</button>
+              <button type="button" id="btnDesactivarTelefonoEmpleado" class="btn-icon btn-delete">Desactivar</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table" data-entity="TelefonoEmpleado">
+            <thead>
+              <tr>
+                <th>ID Empleado</th>
+                <th>Empleado</th>
+                <th>Teléfono</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in telefonos %}
+              <tr>
+                <td>{{ t[0] }}</td>
+                <td>{{ t[1] }}</td>
+                <td>{{ t[2] }}</td>
+                <td>{{ t[3] }}</td>
+                <td>{{ t[4] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const URL_API_TELEFONOS_EMPLEADOS = 'http://127.0.0.1:5001/api/telefonos_empleados'
+
+    function obtenerDatosTelefonoEmpleado() {
+      return {
+        id_empleado: parseInt(document.getElementById('te-empleado').value),
+        telefono: document.getElementById('te-telefono').value,
+        tipo: document.getElementById('te-tipo').value,
+        id_estado: parseInt(document.getElementById('te-estado').value),
+      }
+    }
+
+    document.getElementById('btnAgregarTelefonoEmpleado').addEventListener('click', async () => {
+      const datos = obtenerDatosTelefonoEmpleado()
+      if (!datos.id_empleado || !datos.telefono || !datos.tipo || !datos.id_estado)
+        return alert('Llena Empleado, Teléfono, Tipo y Estado.')
+      try {
+        const respuesta = await fetch(`${URL_API_TELEFONOS_EMPLEADOS}/guardar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(datos),
+        })
+        const resultado = await respuesta.json()
+        alert(resultado.message)
+        if (respuesta.ok) {
+          document.getElementById('formTelefonosEmpleados').reset()
+          location.reload()
+        }
+      } catch (error) {
+        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
+      }
+    })
+
+    document.getElementById('btnActualizarTelefonoEmpleado').addEventListener('click', async () => {
+      const datos = obtenerDatosTelefonoEmpleado()
+      if (!datos.id_empleado || !datos.telefono || !datos.tipo || !datos.id_estado)
+        return alert('Llena Empleado, Teléfono, Tipo y Estado antes de actualizar.')
+      try {
+        const respuesta = await fetch(`${URL_API_TELEFONOS_EMPLEADOS}/actualizar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(datos),
+        })
+        const resultado = await respuesta.json()
+        alert(resultado.message)
+        if (respuesta.ok) {
+          document.getElementById('formTelefonosEmpleados').reset()
+          location.reload()
+        }
+      } catch (error) {
+        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
+      }
+    })
+
+    document.getElementById('btnDesactivarTelefonoEmpleado').addEventListener('click', async () => {
+      const datos = obtenerDatosTelefonoEmpleado()
+      if (!datos.id_empleado || !datos.telefono)
+        return alert('Selecciona el Empleado y el Teléfono a desactivar.')
+      try {
+        const respuesta = await fetch(
+          `${URL_API_TELEFONOS_EMPLEADOS}/eliminar/${datos.id_empleado}/${encodeURIComponent(datos.telefono)}`,
+          { method: 'POST' },
+        )
+        const resultado = await respuesta.json()
+        alert(resultado.message)
+        if (respuesta.ok) {
+          document.getElementById('formTelefonosEmpleados').reset()
+          location.reload()
+        }
+      } catch (error) {
+        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
+      }
+    })
+  </script>
+
+  {% include 'plantillas/_default_scripts.html' %}
+</body>
+
+</html>

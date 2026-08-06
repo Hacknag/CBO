@@ -24,6 +24,7 @@ from models.seccion_cliente.direcciones_clientes import insertar_direcciones_cli
 from models.seccion_HR_SEC.puestos import insertar_puesto, actualizar_puesto, eliminar_puesto_logico, obtener_puestos_general
 from models.seccion_HR_SEC.empleados import obtener_empleados, insertar_empleados, actualizar_empleados, obtener_puestos, eliminar_empleados_logica
 from models.seccion_HR_SEC.correos_empleados import insertar_correo_empleado, actualizar_correo_empleado, eliminar_correo_empleado_logico, obtener_correos_empleados
+from models.seccion_HR_SEC.telefonos_empleados import insertar_telefono_empleado, actualizar_telefono_empleado, eliminar_telefono_empleado_logico, obtener_telefonos_empleados
 
 #################### Imports Seccion Inventario y Proveedores ####################
 #################### Imports Seccion Inventario y Proveedores ####################
@@ -393,6 +394,45 @@ def api_actualizar_correo_empleado():
         return jsonify({"message": "¡Correo actualizado con éxito en Oracle!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+
+
+# ---------------- Telefonos Empleados (vista para Admin/HHRR) ----------------
+# ---------------- Telefonos Empleados (vista para Admin/HHRR) ----------------
+# ---------------- Telefonos Empleados (vista para Admin/HHRR) ----------------
+
+@app.route('/telefonos_empleados')
+def telefonos_empleados():
+    datos_telefonos = obtener_telefonos_empleados()
+    return render_template('seccion_HR-SEC/telefonos_empleados.html', telefonos=datos_telefonos)
+
+@app.route("/api/telefonos_empleados/guardar", methods=["POST"])
+def api_guardar_telefono_empleado():
+    datos = request.get_json()
+    try:
+        insertar_telefono_empleado(
+            ID_EMPLEADO=datos["id_empleado"],
+            TELEFONO=datos["telefono"],
+            TIPO=datos["tipo"],
+            ID_ESTADO=datos["id_estado"]
+        )
+        return jsonify({"message": "¡Teléfono agregado con éxito en Oracle!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+
+@app.route("/api/telefonos_empleados/actualizar", methods=["POST"])
+def api_actualizar_telefono_empleado():
+    datos = request.get_json()
+    try:
+        actualizar_telefono_empleado(
+            ID_EMPLEADO=datos["id_empleado"],
+            TELEFONO=datos["telefono"],
+            TIPO=datos["tipo"],
+            ID_ESTADO=datos["id_estado"]
+        )
+        return jsonify({"message": "¡Teléfono actualizado con éxito en Oracle!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+
 
 
 ###########################################################################################
@@ -1173,6 +1213,7 @@ def descargar_factura_pdf(id_factura):
 def mis_facturas():
     facturas = obtener_facturas_cliente(session["id_cliente"])
     return render_template("mis_facturas.html", facturas=facturas)
+    
 
 @app.route("/programar-visita")
 def programar_visita():
@@ -1206,6 +1247,9 @@ def registro():
         return render_template("registro.html", error=mensaje)
     return render_template("registro.html")
 
+@app.route("/reabastecimiento-inventario")
+def reabastecimiento_inventario():
+    return render_template("reabastecimiento_inventario.html")
 
 ####################################################################################################
 ####################################################################################################

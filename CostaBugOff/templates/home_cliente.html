@@ -15,16 +15,7 @@
       </div>
     </header>
 
-    <nav class="mainnav">
-      <ul>
-        <li><a class="nav-btn" href="/inicio-cliente">Inicio</a></li>
-        <li><a class="nav-btn" href="/planes">Planes</a></li>
-        <li><a class="nav-btn" href="/programar-visita">Programar Visita</a></li>
-        <li><a class="nav-btn" href="/informacion">Información</a></li>
-        <li><a class="nav-btn" href="/logout">Cerrar sesión</a></li>
-        
-      </ul>
-    </nav>
+    {% include 'plantillas/_navbarCliente.html' %}
 
     <main class="app">
       <section class="panel active" data-title="Inicio">
@@ -34,7 +25,137 @@
         <div class="panel__body">
           <p>Desde aquí puedes ver nuestros planes de suscripción, programar una visita o conocer más sobre nosotros.</p>
         </div>
+
+        <!-- ===== Carrusel informativo ===== -->
+        <div class="carousel" id="infoCarousel" aria-roledescription="carrusel" aria-label="Información destacada de CostaBugOff">
+          <div class="carousel__track-wrap">
+            <ul class="carousel__track" id="carouselTrack">
+
+              <li class="carousel__slide">
+                <div class="carousel__icon">🌿</div>
+                <div class="carousel__content">
+                  <span class="carousel__tag">Planes</span>
+                  <h2>Planes a tu medida</h2>
+                  <p>Elige entre planes residenciales o comerciales con visitas periódicas y control de plagas garantizado.</p>
+                  <a class="btn btn--secondary" href="/planes">Ver planes</a>
+                </div>
+              </li>
+
+              <li class="carousel__slide">
+                <div class="carousel__icon">🗓️</div>
+                <div class="carousel__content">
+                  <span class="carousel__tag">Visitas</span>
+                  <h2>Programa tu próxima visita</h2>
+                  <p>Agenda una fumigación en el horario que prefieras y recibe confirmación inmediata de tu técnico asignado.</p>
+                  <a class="btn btn--secondary" href="/programar_visita">Programar visita</a>
+                </div>
+              </li>
+
+              <li class="carousel__slide">
+                <div class="carousel__icon">🛡️</div>
+                <div class="carousel__content">
+                  <span class="carousel__tag">Prevención</span>
+                  <h2>Consejos de prevención</h2>
+                  <p>Mantén tu hogar libre de plagas: sella grietas, evita agua estancada y guarda los alimentos bien cerrados.</p>
+                  <a class="btn btn--secondary" href="/informacion">Más información</a>
+                </div>
+              </li>
+
+              <li class="carousel__slide">
+                <div class="carousel__icon">📋</div>
+                <div class="carousel__content">
+                  <span class="carousel__tag">Historial</span>
+                  <h2>Consulta tu historial</h2>
+                  <p>Revisa el detalle de tus visitas anteriores, productos aplicados y recomendaciones de tu técnico.</p>
+                  <a class="btn btn--secondary" href="/factura">Ver historial</a>
+                </div>
+              </li>
+
+            </ul>
+          </div>
+
+          <button class="carousel__btn carousel__btn--prev" id="carouselPrev" aria-label="Anterior" type="button">&#10094;</button>
+          <button class="carousel__btn carousel__btn--next" id="carouselNext" aria-label="Siguiente" type="button">&#10095;</button>
+
+          <div class="carousel__dots" id="carouselDots" role="tablist" aria-label="Seleccionar diapositiva"></div>
+        </div>
+
       </section>
     </main>
+
+  
+
+    <script>
+      (function () {
+        const track = document.getElementById('carouselTrack');
+        const slides = Array.from(track.children);
+        const prevBtn = document.getElementById('carouselPrev');
+        const nextBtn = document.getElementById('carouselNext');
+        const dotsWrap = document.getElementById('carouselDots');
+        const carousel = document.getElementById('infoCarousel');
+
+        let index = 0;
+        let autoplayTimer = null;
+        const AUTOPLAY_MS = 5000;
+
+        // Crear los puntos indicadores
+        slides.forEach((_, i) => {
+          const dot = document.createElement('button');
+          dot.type = 'button';
+          dot.className = 'carousel__dot';
+          dot.setAttribute('role', 'tab');
+          dot.setAttribute('aria-label', 'Ir a la diapositiva ' + (i + 1));
+          dot.addEventListener('click', () => goTo(i));
+          dotsWrap.appendChild(dot);
+        });
+        const dots = Array.from(dotsWrap.children);
+
+        function update() {
+          track.style.transform = 'translateX(' + (index * -100) + '%)';
+          dots.forEach((d, i) => d.classList.toggle('is-active', i === index));
+        }
+
+        function goTo(i) {
+          index = (i + slides.length) % slides.length;
+          update();
+        }
+
+        function next() { goTo(index + 1); }
+        function prev() { goTo(index - 1); }
+
+        function startAutoplay() {
+          stopAutoplay();
+          autoplayTimer = setInterval(next, AUTOPLAY_MS);
+        }
+        function stopAutoplay() {
+          if (autoplayTimer) clearInterval(autoplayTimer);
+        }
+
+        nextBtn.addEventListener('click', () => { next(); startAutoplay(); });
+        prevBtn.addEventListener('click', () => { prev(); startAutoplay(); });
+
+        carousel.addEventListener('mouseenter', stopAutoplay);
+        carousel.addEventListener('mouseleave', startAutoplay);
+
+        // Soporte básico para swipe en móvil
+        let startX = 0;
+        track.addEventListener('touchstart', (e) => {
+          startX = e.touches[0].clientX;
+          stopAutoplay();
+        }, { passive: true });
+        track.addEventListener('touchend', (e) => {
+          const diff = e.changedTouches[0].clientX - startX;
+          if (diff > 40) prev();
+          else if (diff < -40) next();
+          startAutoplay();
+        }, { passive: true });
+
+        update();
+        startAutoplay();
+      })();
+    </script>
+
+    {% include 'plantillas/_footer.html' %}
+    
   </body>
 </html>

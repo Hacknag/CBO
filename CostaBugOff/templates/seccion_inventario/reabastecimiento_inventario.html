@@ -17,42 +17,7 @@
       <div class="topbar__user" title="Usuario">A</div>
     </header>
 
-    <nav class="mainnav">
-      <ul>
-        <li class="dropdown">
-          <a class="nav-btn" href="#" data-section="clientes"> Clientes ▾ </a>
-          <div class="dropdown-content">
-            <a href="http://127.0.0.1:5001/">Lista de Clientes</a>
-            <a href="http://127.0.0.1:5001/telefonos_clientes">Teléfonos de Clientes</a>
-            <a href="http://127.0.0.1:5001/correos_clientes">Correos de Clientes</a>
-            <a href="http://127.0.0.1:5001/direcciones">Direcciones de Clientes</a>
-          </div>
-        </li>
-        <li class="dropdown">
-          <a class="nav-btn" href="#" data-section="ubicaciones"> Ubicaciones ▾ </a>
-          <div class="dropdown-content">
-            <a href="http://127.0.0.1:5001/provincias">Provincias</a>
-            <a href="http://127.0.0.1:5001/cantones">Cantones</a>
-            <a href="http://127.0.0.1:5001/distritos">Distritos</a>
-          </div>
-        </li>
-        <li><a class="nav-btn" href="http://127.0.0.1:5001/productos" data-section="productos">Productos</a></li>
-        <li><a class="nav-btn" href="http://127.0.0.1:5001/plagas" data-section="plagas">Plagas</a></li>
-        <li><a class="nav-btn" href="http://127.0.0.1:5001/productos_x_plaga" data-section="productosxplaga">Productos x Plaga</a></li>
-        <li><a class="nav-btn" href="http://127.0.0.1:5001/puestos" data-section="puestos">Puestos</a></li>
-        <li><a class="nav-btn" href="http://127.0.0.1:5001/Serviciosr" data-section="serviciosR">Servicios Realizados</a></li>
-        <li><a class="nav-btn" href="http://127.0.0.1:5001/servicios" data-section="servicios">Servicios</a></li>
-        <li><a class="nav-btn" href="http://127.0.0.1:5001/clientes_x_servicio" data-section="clientesxservicio">Clientes x Servicio</a></li>
-        <li><a class="nav-btn" href="http://127.0.0.1:5001/empleados" data-section="empleados">Empleados</a></li>
-        <li><a class="nav-btn" href="http://127.0.0.1:5001/correos_empleados" data-section="correosempleados">Correos de Empleados</a></li>
-        <li><a class="nav-btn" href="http://127.0.0.1:5001/visitas" data-section="visitas">Visitas</a></li>
-        <li><a class="nav-btn" href="http://127.0.0.1:5001/proveedores" data-section="proveedores">Proveedores</a></li>
-        <li><a class="nav-btn" href="http://127.0.0.1:5001/correos_proveedores" data-section="correosproveedores">Correos de Proveedores</a></li>
-        <li><a class="nav-btn" href="http://127.0.0.1:5001/reabastecimiento_inventario" data-section="reabastecimiento">Reabastecimiento de Inventario</a></li>
-        <li><a class="nav-btn" href="http://127.0.0.1:5001/usuarios" data-section="usuarios">Usuarios</a></li>
-        <li><a class="nav-btn" href="/logout">Cerrar sesión</a></li>
-      </ul>
-    </nav>
+    {% include 'plantillas/_navbar.html' %}
 
     <main class="app">
       <section class="panel active" id="panel-reabastecimiento" data-title="Reabastecimiento de Inventario">
