@@ -1,8 +1,8 @@
+import sys
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_cors import CORS
 from oracledb import IntegrityError
 from flask import Response
-from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 app.secret_key = "cambia-esto-por-algo-secreto-antes-de-entregar"
@@ -14,7 +14,7 @@ RUTAS_CLIENTE = (
 RUTAS_RRHH = ("/empleados", "/api/empleados", "/logout")
 RUTAS_BILLING = (
     "/facturas", "/factura", "/mis-facturas",
-    "/reporte-ventas",
+    "/reporte_ventas", "/facturas_billing",
     "/logout",
 )
 
@@ -40,10 +40,10 @@ from models.seccion_inventario.telefonos_proveedores import insertar_telefonos_p
 from models.seccion_inventario.correos_proveedores import insertar_correo_proveedor, actualizar_correo_proveedor, eliminar_correo_proveedor_logico, obtener_correos_proveedores
 #################### Imports Seccion Operaciones ####################
 #################### Imports Seccion Operaciones ####################
-from models.seccion_operaciones.plagas import obtener_plagas
-from models.seccion_operaciones.servicios import insertar_servicio, actualizar_servicio, eliminar_servicio_logico, obtener_servicios
-from models.seccion_operaciones.servicios_realizados import insertar_servicio_realizado, actualizar_servicio_realizado, obtener_servicios_realizados
-from models.seccion_operaciones.visitas import obtener_visitas
+from models.seccion_operaciones.plagas import obtener_plagas, insertar_plaga, actualizar_plaga, eliminar_plaga_logica
+from models.seccion_operaciones.servicios import insertar_servicio, actualizar_servicio, eliminar_servicio_logico, obtener_servicios   
+from models.seccion_operaciones.servicios_realizados import insertar_servicio_realizado, actualizar_servicio_realizado, obtener_servicios_realizados, eliminar_servicio_realizado_logico
+from models.seccion_operaciones.visitas import obtener_visitas, insertar_visita, actualizar_visita, eliminar_visita_logica
 from models.seccion_operaciones.cantones import insertar_canton, actualizar_canton, eliminar_cantones_logico, obtener_cantones
 from models.seccion_operaciones.provincias import insertar_provincia, actualizar_provincia, eliminar_provincia_logico, obtener_provincia
 from models.seccion_operaciones.distritos import obtener_distritos, insertar_distrito, actualizar_distrito, eliminar_distrito_logico
@@ -51,16 +51,15 @@ from models.seccion_operaciones.distritos import obtener_distritos, insertar_dis
 #################### Imports Seccion Facturacion y Finanzas ####################
 #################### Imports Seccion Facturacion y Finanzas ####################
 from models.seccion_fyf.suscripciones import insertar_suscripcion, actualizar_suscripcion, eliminar_suscripcion, obtener_suscripciones
-from models.seccion_fyf.metodos_pago import insertar_metodos_pago, actualizar_metodos_pago, eliminar_metodos_pago_logica, obtener_metodos_pago_main
+from models.seccion_fyf.metodos_pago import insertar_metodos_pago, actualizar_metodos_pago, eliminar_metodo_pago_logico, obtener_metodos_pago_main
 from models.seccion_fyf.pagos import insertar_pago, actualizar_pago, eliminar_pago, obtener_pagos
 from models.seccion_fyf.transacciones import insertar_transaccion, actualizar_transaccion, eliminar_transaccion, obtener_transacciones
 from models.seccion_fyf.detalle_transacciones import insertar_detalle_transaccion, actualizar_detalle_transaccion, eliminar_detalle_transaccion, obtener_detalle_transacciones
 from models.seccion_fyf.facturas import (
     obtener_metodos_pago, procesar_checkout, obtener_factura,
-    obtener_detalle_factura, obtener_facturas_cliente, obtener_todas_facturas
+    obtener_detalle_factura, obtener_facturas_cliente, obtener_todas_facturas, eliminar_factura_logico
 )
 from models.seccion_fyf.reporte_ventas import obtener_reporte_ventas
-from models.seccion_fyf.suscripciones_activas import obtener_suscripciones_activas
 
 
 from models.usuario import autenticar_usuario
@@ -85,22 +84,22 @@ def clientes():
 
 #INSERT
 #INSERT
-@app.route("/clientes/agregar", methods=["GET", "POST"])
+from flask import Flask, render_template, request, jsonify
+
+@app.route("/clientes/agregar", methods=["POST"])
 def agregar_cliente():
-    if request.method == "POST":
-        try:
-            insertar_cliente(
-                id_cliente=request.form["id_cliente"],
-                nombre=request.form["nombre"],
-                apellido_paterno=request.form["apellido_paterno"],
-                apellido_materno=request.form["apellido_materno"],
-                fecha_registro=None,
-                id_estado=request.form["id_estado"],
-            )
-            return redirect(url_for("clientes"))
-        except Exception as e:
-            return render_template("seccion_clientes/agregar_Clientes.html", error=f"Error al guardar: {e}")
-    return render_template("seccion_clientes/agregar_Clientes.html")
+    try:
+        insertar_cliente( 
+            nombre=request.form["nombre"],
+            apellido_paterno=request.form["apellido_paterno"],
+            apellido_materno=request.form["apellido_materno"],
+            fecha_registro=None,
+            id_estado=int(request.form["id_estado"]),
+        )
+        return jsonify({"success": True, "message": "Cliente agregado exitosamente"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error al guardar: {str(e)}"}), 400
+    
 
 #UPDATE
 #UPDATE
@@ -305,7 +304,7 @@ def api_actualizar_puesto():
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
 
-@app.route("/api/puestos/eliminar/<int:id_puesto>", methods=["POST"])
+@app.route("/delete/puestos/<int:id_puesto>", methods=["POST"])
 def api_eliminar_puesto(id_puesto):
     try:
         eliminar_puesto_logico(id_puesto)
@@ -521,13 +520,14 @@ def api_actualizar_proveedor():
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
-@app.route("/api/proveedores/eliminar/<int:id_proveedor>", methods=["POST"])
+
+@app.route("/delete/proveedores/<int:id_proveedor>", methods=["POST"])
 def api_eliminar_proveedor(id_proveedor):
     try:
         eliminar_proveedor_logico(id_proveedor)
-        return jsonify({"message": "¡Proveedor desactivado con éxito!"}), 200
+        return jsonify({'success': True, 'message': '¡Proveedor desactivado con éxito!'}), 200
     except Exception as e:
-        return jsonify({"message": f"Error al eliminar en Base de Datos: {str(e)}"}), 500
+        return jsonify({'success': False, 'message': f"Error al desactivar en Base de Datos: {str(e)}"}), 500
 
 
 # ---------------- Telefono Proveedores (vista para Admin/Empleado/Cliente) ----------------
@@ -621,6 +621,16 @@ def plagas():
     lista_plagas = obtener_plagas() 
     return render_template("seccion_operaciones/plagas.html", plagas=lista_plagas)
 
+@app.route('/delete/plagas/<int:id_plaga>', methods=['POST'])
+def eliminar_plaga(id_plaga):
+    try:
+        eliminar_plaga_logica(id_plaga)
+        return jsonify({'success': True, 'message': 'Plaga eliminada correctamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+    
+
+
 # ---------------- Servicios (vista para Admin/Empleado/Cliente) ----------------
 # ---------------- Servicios (vista para Admin/Empleado/Cliente) ----------------
 # ---------------- Servicios (vista para Admin/Empleado/Cliente) ----------------
@@ -631,20 +641,28 @@ def servicios():
     return render_template("seccion_operaciones/servicios.html", servicios=lista_servicios, filtro=id_estado)
 
 
+@app.route('/delete/servicios/<int:id_servicio>', methods=['POST'])
+def eliminar_servicio(id_servicio):
+    try:
+        eliminar_servicio_logico(id_servicio)
+        return jsonify({'success': True, 'message': 'Servicio eliminado correctamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+    
 
 
 # ---------------- Servicios Realizados (vista para Admin/Empleado/Cliente) ----------------
 # ---------------- Servicios Realizados (vista para Admin/Empleado/Cliente) ----------------
 # ---------------- Servicios Realizados (vista para Admin/Empleado/Cliente) ----------------
-@app.route("/serviciosr")
-def serviciosr():
+@app.route("/servicios_realizados")
+def servicios_realizados():
     id_estado = request.args.get("estado")  # vacío = Todos, o el ID de cualquier estado del catálogo
     lista_servicios_realizados = obtener_servicios_realizados(id_estado)
     lista_estados = obtener_estados()
-    return render_template("seccion_operaciones/serviciosr.html", serviciosr=lista_servicios_realizados, filtro=id_estado, estados=lista_estados)
+    return render_template("seccion_operaciones/servicios_realizados.html", serviciosr=lista_servicios_realizados, filtro=id_estado, estados=lista_estados)
 
 
-@app.route("/api/serviciosr/guardar", methods=["POST"])
+@app.route("/api/servicios_realizados/guardar", methods=["POST"])
 def api_guardar_servicio_realizado():
     datos = request.get_json()
     try:
@@ -659,7 +677,7 @@ def api_guardar_servicio_realizado():
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
 
-@app.route("/api/serviciosr/actualizar", methods=["POST"])
+@app.route("/api/servicios_realizados/actualizar", methods=["POST"])
 def api_actualizar_servicio_realizado():
     datos = request.get_json()
     try:
@@ -673,6 +691,15 @@ def api_actualizar_servicio_realizado():
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
+@app.route('/delete/servicios_realizados/<int:id_servicio_realizado>', methods=['POST'])
+def eliminar_servicio_realizado(id_servicio_realizado):
+    try:
+        eliminar_servicio_realizado_logico(id_servicio_realizado)
+        return jsonify({'success': True, 'message': 'Servicio eliminado correctamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+    
+
 # ---------------- Visitas (vista para Admin/Empleado/Cliente) ----------------
 # ---------------- Visitas (vista para Admin/Empleado/Cliente) ----------------
 # ---------------- Visitas (vista para Admin/Empleado/Cliente) ----------------
@@ -681,6 +708,14 @@ def visitas():
     lista_visitas = obtener_visitas()
     return render_template("seccion_operaciones/visitas.html", visitas=lista_visitas)
 
+@app.route('/delete/visitas/<int:id_visita>', methods=['POST'])
+def eliminar_visita(id_visita):
+    try:
+        eliminar_visita_logica(id_visita)
+        return jsonify({'success': True, 'message': 'Visita eliminada correctamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+    
 # ---------------- Provincias (vista para Admin) ----------------
 # ---------------- Provincias (vista para Admin) ----------------
 # ---------------- Provincias (vista para Admin) ----------------
@@ -825,7 +860,16 @@ def api_eliminar_suscripcion(id_suscripcion):
 @app.route("/metodos_pago")
 def metodos_pago():
     lista_metodos = obtener_metodos_pago_main()
-    return render_template("seccion_fyf/metodos_pago.html", metodos=lista_metodos)
+    return render_template("seccion_fyf/metodos_pago.html", metodos_pago=lista_metodos)
+
+@app.route("/delete/metodos_pago/<int:id_metodo_pago>", methods=["POST"])
+def eliminar_metodo_pago(id_metodo_pago):
+    try:
+        eliminar_metodo_pago_logico(id_metodo_pago)
+        return jsonify({'success': True, 'message': 'Método de pago desactivado con éxito!'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': f"Error al desactivar en Base de Datos: {str(e)}"}), 500
+
 
 # ---------------- Pagos (vista para Admin/Empleado/Cliente) ----------------
 # ---------------- Pagos (vista para Admin/Empleado/Cliente) ----------------
@@ -926,7 +970,7 @@ def api_eliminar_transaccion(id_transaccion):
 @app.route("/detalle_transacciones")
 def detalle_transacciones():
     lista_detalle = obtener_detalle_transacciones()
-    return render_template("seccion_fyf/detalle_transacciones.html", detalle=lista_detalle)
+    return render_template("seccion_fyf/detalle_transacciones.html", detalle_transacciones=lista_detalle)
 
 @app.route("/api/proveedores/guardar", methods=["POST"])
 def api_guardar_proveedor():
@@ -962,8 +1006,7 @@ def api_actualizar_detalle_transaccion():
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
-
-@app.route("/api/detalle_transacciones/eliminar/<int:id_detalle_transaccion>", methods=["POST"])
+@app.route("/delete/detalle_transacciones/<int:id_detalle_transaccion>", methods=["POST"])
 def api_eliminar_detalle_transaccion(id_detalle_transaccion):
     try:
         eliminar_detalle_transaccion(id_detalle_transaccion)
@@ -986,14 +1029,71 @@ def facturas_admin():
         facturas = obtener_facturas_cliente(id_cliente)
     else:
         facturas = obtener_todas_facturas()
-    plantilla = "seccion_fyf/facturas_billing.html" if session.get("rol") == "Billing" else "seccion_fyf/facturas_admin.html"
     return render_template(
-        plantilla,
+        "seccion_fyf/facturas_admin.html",
         facturas=facturas,
         clientes=clientes,
         id_cliente_seleccionado=id_cliente,
     )
 
+@app.route("/facturas_billing")
+def facturas_billing():
+    id_cliente = request.args.get("id_cliente", type=int)
+    clientes = sorted(
+        obtener_clientes(),
+        key=lambda c: ((c[1] or ""), (c[2] or ""), (c[3] or "")),
+    )
+    if id_cliente:
+        facturas = obtener_facturas_cliente(id_cliente)
+    else:
+        facturas = obtener_todas_facturas()
+    return render_template(
+        "seccion_fyf/facturas_billing.html",
+        facturas=facturas,
+        clientes=clientes,
+        id_cliente_seleccionado=id_cliente,
+    )
+
+
+# @app.route("/facturas")
+# def facturas_admin():
+#     id_cliente = request.args.get("id_cliente", type=int)
+#     clientes = sorted(
+#         obtener_clientes(),
+#         key=lambda c: ((c[1] or ""), (c[2] or ""), (c[3] or "")),
+#     )
+#     if id_cliente:
+#         facturas = obtener_facturas_cliente(id_cliente)
+#     else:
+#         facturas = obtener_todas_facturas()
+#     plantilla = "seccion_fyf/facturas_billing.html" if session.get("rol") == "Billing" else "seccion_fyf/facturas_admin.html"
+#     return render_template(
+#         plantilla,
+#         facturas=facturas,
+#         clientes=clientes,
+#         id_cliente_seleccionado=id_cliente,
+#     )
+
+@app.route("/delete/facturas/<int:id_factura>", methods=["POST"])
+def api_eliminar_factura(id_factura):
+    try:
+        eliminar_factura_logico(id_factura)
+        return jsonify({"message": "¡Factura eliminada con éxito!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al eliminar en Base de Datos: {str(e)}"}), 500
+
+###########################################################################################
+################################# SECCION - FACTURA ADMIN ################################
+###########################################################################################
+# @app.route("/planes")
+# def planes():
+#     lista_productos = obtener_productos()
+#     lista_suscripciones = obtener_suscripciones()
+#     return render_template(
+#         "seccion_facturaA/planes.html",
+#         productos=lista_productos,
+#         suscripciones=lista_suscripciones,
+#     )
 
 MESES_NOMBRE = {
     1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril", 5: "Mayo", 6: "Junio",
@@ -1001,7 +1101,7 @@ MESES_NOMBRE = {
 }
 
 
-@app.route("/reporte-ventas")
+@app.route("/reporte_ventas")
 def reporte_ventas():
     filas = obtener_reporte_ventas()
     ventas = [
@@ -1018,105 +1118,61 @@ def reporte_ventas():
     return render_template("seccion_fyf/reporte_ventas.html", ventas=ventas)
 
 
-DIAS_AVISO_RENOVACION = 7
+# # ---------------- Carrito de compras ----------------
+# @app.route("/carrito/agregar", methods=["POST"])
+# def carrito_agregar():
+#     datos = request.get_json()
+#     tipo = datos["tipo"]  # "producto" o "suscripcion"
+#     item_id = int(datos["id"])
+#     nombre = datos["nombre"]
+#     precio = float(datos["precio"])
+#     cantidad = int(datos.get("cantidad", 1))
+
+#     carrito = session.get("carrito", [])
+
+#     for item in carrito:
+#         if item["tipo"] == tipo and item["id"] == item_id:
+#             item["cantidad"] += cantidad
+#             break
+#     else:
+#         carrito.append({
+#             "tipo": tipo, "id": item_id, "nombre": nombre,
+#             "precio_unitario": precio, "cantidad": cantidad,
+#         })
+
+#     session["carrito"] = carrito
+#     return jsonify({"message": "Agregado al carrito", "total_items": len(carrito)}), 200
 
 
-@app.route("/suscripciones-activas")
-def suscripciones_activas():
-    suscripciones = obtener_suscripciones_activas()
-    ahora = datetime.now()
-    for s in suscripciones:
-        fecha = s.get("FECHA_PROXIMA_RENOVACION")
-        dias_restantes = (fecha - ahora).days if fecha else None
-        s["dias_restantes"] = dias_restantes
-        s["por_vencer"] = dias_restantes is not None and 0 <= dias_restantes <= DIAS_AVISO_RENOVACION
-    return render_template("seccion_fyf/suscripciones_activas.html", suscripciones=suscripciones)
+# @app.route("/carrito/quitar", methods=["POST"])
+# def carrito_quitar():
+#     datos = request.get_json()
+#     tipo = datos["tipo"]
+#     item_id = int(datos["id"])
+
+#     carrito = session.get("carrito", [])
+#     carrito = [i for i in carrito if not (i["tipo"] == tipo and i["id"] == item_id)]
+#     session["carrito"] = carrito
+#     return jsonify({"message": "Quitado del carrito"}), 200
+
+# @app.route("/carrito")
+# def carrito():
+#     carrito_actual = session.get("carrito", [])
+#     total = sum(i["cantidad"] * i["precio_unitario"] for i in carrito_actual)
+#     metodos_pago = obtener_metodos_pago()
+#     return render_template(
+#         "seccion_facturaA/carrito.html",
+#         carrito=carrito_actual,
+#         total=total,
+#         metodos_pago=metodos_pago,
+#     )
+
+# @app.route("/mis-facturas")
+# def mis_facturas():
+#     facturas = obtener_facturas_cliente(session["id_cliente"])
+#     return render_template("seccion_facturaA/mis_facturas.html", facturas=facturas)
 
 
-###########################################################################################
-################################## SECCION - OTROS ##################################
-###########################################################################################
-# ---------------- OLVIDE PASSWORD (vista para Admin/Empleado/Cliente) ----------------
-# ---------------- OLVIDE PASSWORD (vista para Admin/Empleado/Cliente) ----------------
-# ---------------- OLVIDE PASSWORD (vista para Admin/Empleado/Cliente) ----------------
-@app.route("/olvide-password")
-def olvide_password():
-    return render_template("olvide_password.html")
-
-# Ruta que recibe la petición Fetch del JavaScript
-@app.route('/olvide-password/reset', methods=['POST'])
-def reset_password():
-    try:
-        data = request.get_json()
-        user_email = data.get('email')
-
-        if not user_email:
-            return jsonify({'success': False, 'error': 'El correo es requerido.'}), 400
-        
-        else:              
-            # Llama a la función que está dentro de olvide_password.py
-            get_usuario_id(user_email)
-
-            return jsonify({
-                'success': True, 
-                'message': 'Nueva contraseña enviada con éxito.'
-            }), 200
-
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 400
-
-
-
-
-@app.before_request
-def verificar_acceso():
-    if request.path.startswith("/static") or request.path in ("/login", "/registro", "/olvide-password"):
-        return
-    if "id_usuario" not in session:
-        return redirect(url_for("login"))
-
-    rol = session.get("rol")
-
-    if rol == "Cliente" and not request.path.startswith(RUTAS_CLIENTE):
-        return redirect(url_for("inicio_cliente"))
-
-    if rol == "RRHH" and not request.path.startswith(RUTAS_RRHH):
-        return redirect(url_for("empleados"))
-
-    if rol == "Billing" and not request.path.startswith(RUTAS_BILLING):
-        return redirect(url_for("facturas_admin"))
-
-    if rol == "Empleado" and request.path.startswith(("/empleados", "/api/empleados", "/reporte-ventas")):
-        return redirect(url_for("clientes"))
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        correo = request.form.get("correo")
-        password = request.form.get("password")
-        usuario, mensaje = autenticar_usuario(correo, password)
-        if usuario:
-            session["id_usuario"] = usuario["id_usuario"]
-            session["id_cliente"] = usuario["id_cliente"]
-            session["correo"] = correo
-            session["rol"] = usuario["rol"]
-            session["nombre"] = correo
-            if usuario["rol"] == "Cliente":
-                return redirect(url_for("inicio_cliente"))
-            if usuario["rol"] == "RRHH":
-                return redirect(url_for("empleados"))
-            return redirect(url_for("clientes"))
-        return render_template("login.html", error=mensaje)
-    return render_template("login.html")
-
-
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("login"))
-
- 
 @app.route("/planes")
 def planes():
     lista_productos = obtener_productos()
@@ -1126,6 +1182,7 @@ def planes():
         productos=lista_productos,
         suscripciones=lista_suscripciones,
     )
+
 
 # ---------------- Carrito de compras ----------------
 @app.route("/carrito/agregar", methods=["POST"])
@@ -1176,6 +1233,102 @@ def carrito():
         metodos_pago=metodos_pago,
     )
 
+@app.route("/mis-facturas")
+def mis_facturas():
+    facturas = obtener_facturas_cliente(session["id_cliente"])
+    return render_template("mis_facturas.html", facturas=facturas)
+
+###########################################################################################
+################################## SECCION - OTROS ##################################
+###########################################################################################
+# ---------------- OLVIDE PASSWORD (vista para Admin/Empleado/Cliente) ----------------
+# ---------------- OLVIDE PASSWORD (vista para Admin/Empleado/Cliente) ----------------
+# ---------------- OLVIDE PASSWORD (vista para Admin/Empleado/Cliente) ----------------
+@app.route("/olvide-password")
+def olvide_password():
+    print(f"--> RECEIVED OLVIDE-PASSWORD", flush=True)
+    return render_template("olvide_password.html")
+
+# Ruta que recibe la petición Fetch del JavaScript
+@app.route('/olvide-password/reset/<email>', methods=['POST'])
+def reset_password(email):
+    print(f"--> RECEIVED RESET REQUEST FOR: {email}", flush=True)
+    try:
+        # data = request.get_json()
+        # user_email = data.get('email')
+
+        if not email:
+            return jsonify({'success': False, 'error': 'El correo es requerido.'}), 400
+        
+        else:              
+            # Llama a la función que está dentro de olvide_password.py
+            get_usuario_id(email)
+
+            return jsonify({
+                'success': True, 
+                'message': 'Nueva contraseña enviada con éxito.'
+            }), 200
+
+    except Exception as e:
+        app.logger.error(f"--> REQUEST not RECEIVED FOR: {email}")
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+
+
+
+@app.before_request
+def verificar_acceso():
+    if request.path.startswith("/static") or request.path in ("/login", "/registro") or request.path.startswith("/olvide-password"):
+        return
+    if "id_usuario" not in session:
+        return redirect(url_for("login"))
+
+    rol = session.get("rol")
+
+    if rol == "Administrador":
+        return None
+    
+    if rol == "Cliente" and not request.path.startswith(RUTAS_CLIENTE):
+        return redirect(url_for("inicio_cliente"))
+
+    if rol == "RRHH" and not request.path.startswith(RUTAS_RRHH):
+        return redirect(url_for("empleados"))
+
+    if rol == "Billing" and not request.path.startswith(RUTAS_BILLING):
+        return redirect(url_for("facturas_billing"))
+
+    if rol == "Empleado" and request.path.startswith(("/empleados", "/api/empleados", "/reporte-ventas")):
+        return redirect(url_for("clientes"))
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        correo = request.form.get("correo")
+        password = request.form.get("password")
+        usuario, mensaje = autenticar_usuario(correo, password)
+        if usuario:
+            session["id_usuario"] = usuario["id_usuario"]
+            session["id_cliente"] = usuario["id_cliente"]
+            session["correo"] = correo
+            session["rol"] = usuario["rol"]
+            session["nombre"] = correo
+            if usuario["rol"] == "Cliente":
+                return redirect(url_for("inicio_cliente"))
+            if usuario["rol"] == "RRHH":
+                return redirect(url_for("empleados"))
+            return redirect(url_for("clientes"))
+        return render_template("login.html", error=mensaje)
+    return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+ 
+
 @app.route("/checkout", methods=["POST"])
 def checkout():
     carrito_actual = session.get("carrito", [])
@@ -1219,10 +1372,7 @@ def descargar_factura_pdf(id_factura):
         headers={"Content-Disposition": f"inline; filename=factura_{factura['NUMERO']}.pdf"},
     )
 
-@app.route("/mis-facturas")
-def mis_facturas():
-    facturas = obtener_facturas_cliente(session["id_cliente"])
-    return render_template("mis_facturas.html", facturas=facturas)
+
 
 @app.route("/programar-visita")
 def programar_visita():
