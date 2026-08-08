@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+{% if session.get('rol') == 'Cliente' %}
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CostaBugOff - Contacto</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
+{% else %}
+{% include 'plantillas/_default_head.html' %}
+{% endif %}
+
+<body>
+  {% if session.get('rol') == 'Cliente' %}
+  <header class="topbar">
+    <div class="topbar__brand">
+      <img class="logo-bug" src="/static/img/Jeremy.png" alt="CostaBugOff" />
+      <span class="topbar__logo">CostaBugOff</span>
+      <span class="topbar__view-tag">Contacto</span>
+    </div>
+  </header>
+
+  <nav class="mainnav">
+    <ul>
+      <li><a class="nav-btn" href="/inicio-cliente">Inicio</a></li>
+      <li><a class="nav-btn" href="/planes">Planes</a></li>
+      <li><a class="nav-btn" href="/carrito">Carrito</a></li>
+      <li><a class="nav-btn" href="/mis-facturas">Mis facturas</a></li>
+      <li><a class="nav-btn" href="/programar-visita">Programar Visita</a></li>
+      <li><a class="nav-btn" href="/informacion">Información</a></li>
+      <li><a class="nav-btn" href="/mi-perfil">Mi Perfil</a></li>
+      <li><a class="nav-btn" href="/contacto">Contacto</a></li>
+      <li><a class="nav-btn" href="/logout">Cerrar sesión</a></li>
+    </ul>
+  </nav>
+  {% else %}
+  <header class="topbar">
+    <div class="topbar__brand">
+      {% include 'plantillas/_logo.html' %}
+      <span class="topbar__view-tag" id="viewTag">Contacto</span>
+    </div>
+    <div class="topbar__user" title="Usuario">A</div>
+  </header>
+
+  {% include 'plantillas/_navbar.html' %}
+  {% endif %}
+
+  <main class="app">
+    <section class="panel active" data-title="Contacto">
+      <div class="panel__header">
+        <h1>Contáctanos</h1>
+      </div>
+      <div class="panel__body">
+        <p>¿Tienes dudas o necesitas ayuda? Escríbenos y te responderemos a la brevedad.</p>
+        <p><strong>Correo:</strong> costabugoffcostarica@gmail.com</p>
+
+        {% if enviado %}
+        <p style="color: green;">¡Tu mensaje fue enviado con éxito! Pronto nos pondremos en contacto contigo.</p>
+        {% endif %}
+        {% if error %}
+        <p style="color: red;">{{ error }}</p>
+        {% endif %}
+
+        <form class="entity-form" id="formContacto" method="POST" action="/contacto">
+          <div class="field">
+            <label for="contacto-nombre">Nombre</label>
+            <input type="text" id="contacto-nombre" name="nombre" placeholder="Tu nombre" required />
+          </div>
+          <div class="field">
+            <label for="contacto-correo">Correo</label>
+            <input type="email" id="contacto-correo" name="correo" placeholder="Tu correo" required />
+          </div>
+          <div class="field" style="grid-column: 1 / -1;">
+            <label for="contacto-mensaje">Mensaje</label>
+            <textarea id="contacto-mensaje" name="mensaje" placeholder="¿En qué te podemos ayudar?" required></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn--primary">Enviar Mensaje</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  {% if session.get('rol') != 'Cliente' %}
+  {% include 'plantillas/_default_scripts.html' %}
+  {% endif %}
+</body>
+
+</html>

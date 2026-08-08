@@ -17,7 +17,7 @@
   </header>
 
   <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-pagos" data-title="Pagos">
+    <section class="panel active mt-5" id="panel-pagos" data-title="Pagos">
       <div class="panel__header">
         <h1>Pagos</h1>
       </div>
@@ -26,6 +26,7 @@
           <table class="data-table" data-entity="Pago">
             <thead>
               <tr>
+                <th>ID Pago</th>
                 <th>Fecha</th>
                 <th>Metodo de Pago</th>
                 <th>Estado</th>
@@ -33,10 +34,11 @@
             </thead>
             <tbody>
               {% for p in pagos %}
-              <tr>
+              <tr data-id="{{ p[0] }}" data-entity="pagos">
                 <td>{{ p[0] }}</td>
                 <td>{{ p[1] }}</td>
                 <td>{{ p[2] }}</td>
+                <td>{{ p[3] }}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -46,43 +48,38 @@
         <form class="entity-form" id="formPagos" data-entity="Pago">
           <div class="field">
             <label for="pago-id">ID Pago</label>
-            <input type="number" id="pago-id" name="id_transaccion" placeholder="1" required />
+            <input type="number" id="pago-id" name="id_pago" placeholder="1" required />
           </div>
           <div class="field">
             <label for="pago-fecha">Fecha de Pago</label>
             <input type="date" id="pago-fecha" name="fecha" placeholder="Fecha de Pago" required />
           </div>
-          name="id_pago"
-          placeholder="ID de Pago"
-          required
-          />
-      </div>
-      <div class="field">
-        <label for="pago-metodo">Método de Pago</label>
-        <input type="text" id="pago-metodo" name="metodo_pago" placeholder="Método de Pago" required />
-      </div>
-      required
-      />
-      </div>
-      <div class="field">
-        <label for="pago-estado">ID Estado</label>
-        <input type="number" id="pago-estado" name="id_estado" placeholder="1 = Activo, 2 = Inactivo" required />
-      </div>
+          <div class="field">
+            <label for="pago-metodo">Método de Pago</label>
+            <select id="pago-metodo" name="id_metodo_pago" required>
+              <option value="">Selecciona un método de pago</option>
+              {% for mp in metodos_pago %}
+              <option value="{{ mp[0] }}">{{ mp[1] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field">
+            <label for="pago-estado">ID Estado</label>
+            <input type="number" id="pago-estado" name="id_estado" placeholder="1 = Activo, 2 = Inactivo" required />
+          </div>
 
-      <div class="form-actions">
-        <button type="button" id="btnAgregar" class="btn btn--primary">
-          Agregar
-        </button>
-        <button type="button" id="btnActualizar" class="btn btn--secondary">
-          Actualizar
-        </button>
-        <button type="button" id="btnEliminar" class="btn-icon btn-delete">
-          Eliminar
-        </button>
-      </div>
-      </form>
-
-
+          <div class="form-actions">
+            <button type="button" id="btnAgregar" class="btn btn--primary">
+              Agregar
+            </button>
+            <button type="button" id="btnActualizar" class="btn btn--secondary">
+              Actualizar
+            </button>
+            <button type="button" id="btnEliminar" class="btn-icon btn-delete">
+              Eliminar
+            </button>
+          </div>
+        </form>
       </div>
     </section>
   </main>

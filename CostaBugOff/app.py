@@ -30,6 +30,8 @@ from models.seccion_cliente.direcciones_clientes import insertar_direcciones_cli
 from models.seccion_HR_SEC.puestos import insertar_puesto, actualizar_puesto, eliminar_puesto_logico, obtener_puestos_general
 from models.seccion_HR_SEC.empleados import obtener_empleados, insertar_empleados, actualizar_empleados, obtener_puestos, eliminar_empleados_logica
 from models.seccion_HR_SEC.correos_empleados import insertar_correo_empleado, actualizar_correo_empleado, eliminar_correo_empleado_logico, obtener_correos_empleados
+from models.seccion_HR_SEC.roles_permisos import obtener_roles_permisos, obtener_roles, obtener_permisos, insertar_permiso_x_rol, eliminar_permiso_x_rol_logico
+from models.seccion_HR_SEC.usuarios import obtener_usuarios, eliminar_usuario_logico
 
 #################### Imports Seccion Inventario y Proveedores ####################
 #################### Imports Seccion Inventario y Proveedores ####################
@@ -38,6 +40,8 @@ from models.seccion_inventario.productos_x_proveedor import insertar_producto_x_
 from models.seccion_inventario.proveedores import insertar_proveedor, actualizar_proveedor, eliminar_proveedor_logico, obtener_proveedores
 from models.seccion_inventario.telefonos_proveedores import insertar_telefonos_proveedores, actualizar_telefonos_proveedores, eliminar_telefonos_proveedores_logica, obtener_telefonos_proveedores
 from models.seccion_inventario.correos_proveedores import insertar_correo_proveedor, actualizar_correo_proveedor, eliminar_correo_proveedor_logico, obtener_correos_proveedores
+from models.seccion_inventario.reabastecimiento_inventario import insertar_reabastecimiento, actualizar_reabastecimiento, eliminar_reabastecimiento_logico, obtener_reabastecimientos
+
 #################### Imports Seccion Operaciones ####################
 #################### Imports Seccion Operaciones ####################
 from models.seccion_operaciones.plagas import obtener_plagas, insertar_plaga, actualizar_plaga, eliminar_plaga_logica
@@ -62,11 +66,12 @@ from models.seccion_fyf.facturas import (
 from models.seccion_fyf.reporte_ventas import obtener_reporte_ventas
 
 
+
 from models.usuario import autenticar_usuario
 from models.estado import obtener_estados
 from models.pdf_factura import generar_pdf_factura
 from models.olvide_password import generar_password, send_email, actualizar_usuario, get_usuario_id
-
+from models.contacto import enviar_correo_contacto
 
 
 
@@ -401,6 +406,57 @@ def api_actualizar_correo_empleado():
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
+# ---------------- Roles y Permisos  ----------------
+# ---------------- Roles y Permisos   ----------------
+# ---------------- Roles y Permisos  ----------------
+@app.route("/roles_permisos")
+def roles_permisos():
+    lista_roles_permisos = obtener_roles_permisos()
+    lista_roles = obtener_roles()
+    lista_permisos = obtener_permisos()
+    return render_template(
+        "seccion_HR-SEC/roles_permisos.html",
+        roles_permisos=lista_roles_permisos,
+        roles=lista_roles,
+        permisos=lista_permisos,
+    )
+
+@app.route("/api/roles_permisos/guardar", methods=["POST"])
+def api_guardar_rol_permiso():
+    datos = request.get_json()
+    try:
+        insertar_permiso_x_rol(
+            id_rol=datos["id_rol"],
+            id_permiso=datos["id_permiso"]
+        )
+        return jsonify({"message": "¡Permiso asignado al rol con éxito!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+
+@app.route("/api/roles_permisos/eliminar/<int:id_rol>/<int:id_permiso>", methods=["POST"])
+def api_eliminar_rol_permiso(id_rol, id_permiso):
+    try:
+        eliminar_permiso_x_rol_logico(id_rol, id_permiso)
+        return jsonify({"message": "¡Permiso removido del rol con éxito!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al eliminar en Base de Datos: {str(e)}"}), 500
+
+
+# ---------------- Usuarios (vista para Admin/HHRR) ----------------
+# ---------------- Usuarios (vista para Admin/HHRR) ----------------
+# ---------------- Usuarios (vista para Admin/HHRR) ----------------
+@app.route("/usuarios")
+def usuarios():
+    lista_usuarios = obtener_usuarios()
+    return render_template("seccion_HR-SEC/usuarios.html", usuarios=lista_usuarios)
+
+@app.route("/delete/usuarios/<int:id_usuario>", methods=["POST"])
+def api_eliminar_usuario(id_usuario):
+    try:
+        eliminar_usuario_logico(id_usuario)
+        return jsonify({'success': True, 'message': '¡Usuario desactivado con éxito!'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': f"Error al desactivar en Base de Datos: {str(e)}"}), 500
 
 ###########################################################################################
 ############################ SECCION - INVENTARIO Y PROVEEDORES ###########################
@@ -480,6 +536,56 @@ def api_eliminar_producto_x_proveedor(id_proveedor, id_producto):
     try:
         eliminar_producto_x_proveedor_logico(id_producto, id_proveedor)
         return jsonify({"message": "¡Relación desactivada con éxito!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al desactivar en Base de Datos: {str(e)}"}), 500
+
+
+# ---------------- Reabastecimiento de Inventario ----------------
+# ---------------- Reabastecimiento de Inventario ----------------
+# ---------------- Reabastecimiento de Inventario ----------------
+@app.route("/reabastecimiento_inventario")
+def reabastecimiento_inventario():
+    id_estado = request.args.get("estado")  # "1"=Activo, "2"=Inactivo, vacío=Todos
+    lista_reabastecimientos = obtener_reabastecimientos(id_estado)
+    lista_estados = obtener_estados()
+    return render_template(
+        "seccion_inventario/reabastecimiento_inventario.html",
+        reabastecimientos=lista_reabastecimientos,
+        estados=lista_estados,
+        filtro=id_estado,
+    )
+
+@app.route("/api/reabastecimiento_inventario/guardar", methods=["POST"])
+def api_guardar_reabastecimiento():
+    datos = request.get_json()
+    try:
+        insertar_reabastecimiento(
+            id_reabastecimiento=datos["id_reabastecimiento"],
+            cantidad=datos["cantidad"],
+            id_estado=datos["id_estado"]
+        )
+        return jsonify({"message": "¡Reabastecimiento agregado con éxito en Oracle!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+
+@app.route("/api/reabastecimiento_inventario/actualizar", methods=["POST"])
+def api_actualizar_reabastecimiento():
+    datos = request.get_json()
+    try:
+        actualizar_reabastecimiento(
+            id_reabastecimiento=datos["id_reabastecimiento"],
+            cantidad=datos["cantidad"],
+            id_estado=datos["id_estado"]
+        )
+        return jsonify({"message": "¡Reabastecimiento actualizado con éxito!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+
+@app.route("/api/reabastecimiento_inventario/eliminar/<int:id_reabastecimiento>", methods=["POST"])
+def api_eliminar_reabastecimiento(id_reabastecimiento):
+    try:
+        eliminar_reabastecimiento_logico(id_reabastecimiento)
+        return jsonify({"message": "¡Reabastecimiento desactivado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al desactivar en Base de Datos: {str(e)}"}), 500
 
@@ -877,6 +983,7 @@ def eliminar_metodo_pago(id_metodo_pago):
 @app.route("/pagos")
 def pagos():
     lista_pagos = obtener_pagos()
+    lista_metodos_pago = obtener_metodos_pago_main()
     return render_template("seccion_fyf/pagos.html", pagos=lista_pagos)
 
 @app.route("/api/pagos/guardar", methods=["POST"])
@@ -885,9 +992,9 @@ def api_guardar_pago():
     try:
         insertar_pago(
             id_pago=datos["id_pago"],
-            nombre=datos["nombre"],
-            id_reabastecimiento=datos.get("id_reabastecimiento"),
-            id_estado= 1
+            fecha=datos["fecha"],
+            id_metodo_pago=datos["id_metodo_pago"],
+            id_estado=datos.get("id_estado", 1)
         )
         return jsonify({"message": "¡Pago agregado con éxito en Oracle!"}), 200
     except Exception as e:
@@ -916,8 +1023,51 @@ def api_eliminar_pago(id_pago):
         return jsonify({"message": "¡Pago eliminado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al eliminar en Base de Datos: {str(e)}"}), 500
+# @app.route("/pagos")
+# def pagos():
+#     lista_pagos = obtener_pagos()
+#     return render_template("seccion_fyf/pagos.html", pagos=lista_pagos)
 
-    
+# @app.route("/api/pagos/guardar", methods=["POST"])
+# def api_guardar_pago():
+#     datos = request.get_json()
+#     try:
+#         insertar_pago(
+#             id_pago=datos["id_pago"],
+#             nombre=datos["nombre"],
+#             id_reabastecimiento=datos.get("id_reabastecimiento"),
+#             id_estado= 1
+#         )
+#         return jsonify({"message": "¡Pago agregado con éxito en Oracle!"}), 200
+#     except Exception as e:
+#         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+
+
+# @app.route("/api/pagos/actualizar", methods=["POST"])
+# def api_actualizar_pago():
+#     datos = request.get_json()
+#     try:
+#         actualizar_pago(
+#             id_pago=datos["id_pago"],
+#             nombre=datos["nombre"],
+#             id_reabastecimiento=datos.get("id_reabastecimiento"),
+#             id_estado=1
+#         )
+#         return jsonify({"message": "¡Pago actualizado con éxito!"}), 200
+#     except Exception as e:
+#         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+
+
+# @app.route("/api/pagos/eliminar/<int:id_pago>", methods=["POST"])
+# def api_eliminar_pago(id_pago):
+#     try:
+#         eliminar_pago(id_pago)
+#         return jsonify({"message": "¡Pago eliminado con éxito!"}), 200
+#     except Exception as e:
+#         return jsonify({"message": f"Error al eliminar en Base de Datos: {str(e)}"}), 500
+
+
+
 # ---------------- Transacciones (vista para Admin/Empleado/Cliente) ----------------
 # ---------------- Transacciones (vista para Admin/Empleado/Cliente) ----------------
 # ---------------- Transacciones (vista para Admin/Empleado/Cliente) ----------------
@@ -1275,6 +1425,10 @@ def reset_password(email):
 
 
 
+# ---------------- LOGIN / INICIO DE SECCION ----------------
+# ---------------- LOGIN / INICIO DE SECCION ----------------
+# ---------------- LOGIN / INICIO DE SECCION ----------------
+
 
 @app.before_request
 def verificar_acceso():
@@ -1327,7 +1481,51 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
- 
+
+# ---------------- Contacto  ----------------
+# ---------------- Contacto  ----------------
+# ---------------- Contacto ) ----------------
+@app.route("/contacto", methods=["GET", "POST"])
+def contacto():
+    if request.method == "POST":
+        try:
+            enviar_correo_contacto(
+                nombre=request.form["nombre"],
+                correo=request.form["correo"],
+                mensaje=request.form["mensaje"],
+            )
+            return render_template("contacto.html", enviado=True)
+        except Exception as e:
+            return render_template("contacto.html", error=f"No se pudo enviar el mensaje: {str(e)}")
+    return render_template("contacto.html")
+
+
+# ---------------- Mi Perfil  ----------------
+# ---------------- Mi Perfil  ----------------
+# ---------------- Mi Perfil  ----------------
+@app.route("/mi_perfil", methods=["GET", "POST"])
+def mi_perfil():
+    rol = session.get("rol")
+    cliente = None
+    if rol == "Cliente":
+        id_cliente = session.get("id_cliente")
+        if request.method == "POST":
+            try:
+                actualizar_cliente(
+                    id_cliente=id_cliente,
+                    nombre=request.form["nombre"],
+                    apellido_paterno=request.form["apellido_paterno"],
+                    apellido_materno=request.form["apellido_materno"],
+                    id_estado=1,
+                )
+            except Exception as e:
+                cliente = next((c for c in obtener_clientes() if c[0] == id_cliente), None)
+                return render_template("mi_perfil.html", cliente=cliente, error=f"No se pudo actualizar el perfil: {str(e)}")
+        cliente = next((c for c in obtener_clientes() if c[0] == id_cliente), None)
+    return render_template("mi_perfil.html", cliente=cliente)
+
+
+
 
 @app.route("/checkout", methods=["POST"])
 def checkout():
@@ -1371,8 +1569,6 @@ def descargar_factura_pdf(id_factura):
         mimetype="application/pdf",
         headers={"Content-Disposition": f"inline; filename=factura_{factura['NUMERO']}.pdf"},
     )
-
-
 
 @app.route("/programar-visita")
 def programar_visita():
