@@ -4,12 +4,12 @@ from db import get_connection
 
 # ---------------- Insertar Clientes ---------------- #
 # ---------------- Insertar Clientes ---------------- #
-def insertar_cliente(id_cliente, nombre, apellido_paterno, apellido_materno, fecha_registro, id_estado):
+def insertar_cliente(nombre, apellido_paterno, apellido_materno, fecha_registro, id_estado):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
         cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_CLIENTES_INSERT_SP", [
-            id_cliente, nombre, apellido_paterno, apellido_materno, id_estado
+            nombre, apellido_paterno, apellido_materno, id_estado
         ])
         conexion.commit()
     except Exception as e:

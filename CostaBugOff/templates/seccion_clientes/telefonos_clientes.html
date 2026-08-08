@@ -22,19 +22,19 @@
       </div>
 
       {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
           <label for="filtro-busqueda">Buscar Telefono:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="TelefonoCliente"
             placeholder="Escribe el nombre o el numero de telefono del cliente." />
-        </form>
+        </div>
       </div>
       <!-- TABLA DE TELEFONOS -->
       <!-- TABLA DE TELEFONOS -->
       <div class="panel__body">
         {# Tabla #}
-        <div class="table-wrap">
-          <table class="data-table" data-entity="TelefonoCliente">
+        <div class="table-wrap overflow-auto">
+          <table class="data-table overflow-auto" data-entity="TelefonoCliente">
             <thead>
               <tr>
                 <th>Cliente</th>

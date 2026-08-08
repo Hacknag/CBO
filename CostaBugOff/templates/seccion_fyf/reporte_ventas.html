@@ -4,24 +4,22 @@
 {% include 'plantillas/_default_head.html' %}
 
 <body>
-  <header class="topbar">
-    <div class="topbar__brand">
-      {% include 'plantillas/_logo.html' %}
-      <span class="topbar__view-tag" id="viewTag">Reporte de Ventas</span>
-    </div>
-    <div class="topbar__user" title="Usuario">A</div>
+  <header>
+    {# NAVBAR #}
+    {# NAVBAR #}
+    {% with brand_tag="Vista Reporte de Ventas" %}
+    {% include 'plantillas/_navbar_billing.html' %}
+    {% endwith %}
   </header>
-
-  {% include 'plantillas/_navbar.html' %}
-
-  <main class="app">
-    <section class="panel active" id="panel-reporte_ventas" data-title="reporte_ventas">
+  <main class="app mt-5 pt-4">
+    <section class="panel active mt-5 pt-4" id="panel-reporte_ventas" data-title="reporte_ventas">
       <div class="panel__header">
         <h1>Reporte de Ventas Mensuales</h1>
       </div>
       <div class="panel__body panel__body--full">
         {% if not ventas %}
-        <p>Todavía no hay datos de ventas mensuales. Hay que correr el job (FIDE_JOB_VENTAS_MENSUALES) al menos una vez.</p>
+        <p>Todavía no hay datos de ventas mensuales. Hay que correr el job (FIDE_JOB_VENTAS_MENSUALES) al menos una vez.
+        </p>
         {% else %}
         <div class="table-wrap">
           <table class="data-table">
@@ -51,7 +49,12 @@
       </div>
     </section>
   </main>
+  {# FOOTER #}
+  {# FOOTER #}
+  {% include 'plantillas/_footer_inicio.html' %}
 
+  {# SCRIPTS #}
+  {# SCRIPTS #}
   {% include 'plantillas/_default_scripts.html' %}
 </body>
 

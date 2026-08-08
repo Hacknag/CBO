@@ -100,3 +100,12 @@
     crossorigin="anonymous"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    const input = document.getElementById('filtro-busqueda');
+
+    // Calculate width ONCE on load based solely on placeholder length
+    if (input && input.placeholder) {
+        input.style.width = `${input.placeholder.length + 4}ch`;
+    }
+</script>

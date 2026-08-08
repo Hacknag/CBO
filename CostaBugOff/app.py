@@ -14,7 +14,7 @@ RUTAS_CLIENTE = (
 RUTAS_RRHH = ("/empleados", "/api/empleados", "/logout")
 RUTAS_BILLING = (
     "/facturas", "/factura", "/mis-facturas",
-    "/reporte-ventas",
+    "/reporte_ventas", "/facturas_billing",
     "/logout",
 )
 
@@ -84,22 +84,22 @@ def clientes():
 
 #INSERT
 #INSERT
-@app.route("/clientes/agregar", methods=["GET", "POST"])
+from flask import Flask, render_template, request, jsonify
+
+@app.route("/clientes/agregar", methods=["POST"])
 def agregar_cliente():
-    if request.method == "POST":
-        try:
-            insertar_cliente(
-                id_cliente=request.form["id_cliente"],
-                nombre=request.form["nombre"],
-                apellido_paterno=request.form["apellido_paterno"],
-                apellido_materno=request.form["apellido_materno"],
-                fecha_registro=None,
-                id_estado=request.form["id_estado"],
-            )
-            return redirect(url_for("clientes"))
-        except Exception as e:
-            return render_template("seccion_clientes/agregar_Clientes.html", error=f"Error al guardar: {e}")
-    return render_template("seccion_clientes/agregar_Clientes.html")
+    try:
+        insertar_cliente( 
+            nombre=request.form["nombre"],
+            apellido_paterno=request.form["apellido_paterno"],
+            apellido_materno=request.form["apellido_materno"],
+            fecha_registro=None,
+            id_estado=int(request.form["id_estado"]),
+        )
+        return jsonify({"success": True, "message": "Cliente agregado exitosamente"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error al guardar: {str(e)}"}), 400
+    
 
 #UPDATE
 #UPDATE
@@ -1036,6 +1036,44 @@ def facturas_admin():
         id_cliente_seleccionado=id_cliente,
     )
 
+@app.route("/facturas_billing")
+def facturas_billing():
+    id_cliente = request.args.get("id_cliente", type=int)
+    clientes = sorted(
+        obtener_clientes(),
+        key=lambda c: ((c[1] or ""), (c[2] or ""), (c[3] or "")),
+    )
+    if id_cliente:
+        facturas = obtener_facturas_cliente(id_cliente)
+    else:
+        facturas = obtener_todas_facturas()
+    return render_template(
+        "seccion_fyf/facturas_billing.html",
+        facturas=facturas,
+        clientes=clientes,
+        id_cliente_seleccionado=id_cliente,
+    )
+
+
+# @app.route("/facturas")
+# def facturas_admin():
+#     id_cliente = request.args.get("id_cliente", type=int)
+#     clientes = sorted(
+#         obtener_clientes(),
+#         key=lambda c: ((c[1] or ""), (c[2] or ""), (c[3] or "")),
+#     )
+#     if id_cliente:
+#         facturas = obtener_facturas_cliente(id_cliente)
+#     else:
+#         facturas = obtener_todas_facturas()
+#     plantilla = "seccion_fyf/facturas_billing.html" if session.get("rol") == "Billing" else "seccion_fyf/facturas_admin.html"
+#     return render_template(
+#         plantilla,
+#         facturas=facturas,
+#         clientes=clientes,
+#         id_cliente_seleccionado=id_cliente,
+#     )
+
 @app.route("/delete/facturas/<int:id_factura>", methods=["POST"])
 def api_eliminar_factura(id_factura):
     try:
@@ -1063,7 +1101,7 @@ MESES_NOMBRE = {
 }
 
 
-@app.route("/reporte-ventas")
+@app.route("/reporte_ventas")
 def reporte_ventas():
     filas = obtener_reporte_ventas()
     ventas = [
@@ -1247,6 +1285,9 @@ def verificar_acceso():
 
     rol = session.get("rol")
 
+    if rol == "Administrador":
+        return None
+    
     if rol == "Cliente" and not request.path.startswith(RUTAS_CLIENTE):
         return redirect(url_for("inicio_cliente"))
 
@@ -1254,7 +1295,7 @@ def verificar_acceso():
         return redirect(url_for("empleados"))
 
     if rol == "Billing" and not request.path.startswith(RUTAS_BILLING):
-        return redirect(url_for("facturas_admin"))
+        return redirect(url_for("facturas_billing"))
 
     if rol == "Empleado" and request.path.startswith(("/empleados", "/api/empleados", "/reporte-ventas")):
         return redirect(url_for("clientes"))

@@ -16,17 +16,17 @@
     {% endwith %}
   </header>
   <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-clientes" data-title="Clientes">
+    <section class="panel active mt-5 `" id="panel-clientes" data-title="Clientes">
       <div class="panel__header">
         <h1>Clientes</h1>
       </div>
       {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
           <label for="filtro-busqueda">Buscar cliente:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="cliente"
             placeholder="Escribe el nombre o el apellido del cliente." />
-        </form>
+        </div>
       </div>
       <div class="panel__body">
         {# Tabla #}
@@ -47,7 +47,7 @@
                 <td>{{ c[1] }}</td>
                 <td>{{ c[2] }}</td>
                 <td>{{ c[3] }}</td>
-                <td>{{ c[4] }}</td>
+                <td>{{ c[4]|capitalize }}</td>
                 <td>
                   <button class="delete-btn" onclick="deleteRow(this)">
                     <i class="fa-solid fa-trash"></i>
@@ -58,8 +58,35 @@
             </tbody>
           </table>
         </div>
+        <div class="form-card">
+          <h2>Agregar Clientes</h2>
+          <p class="sub">Completa los campos para agregar un cliente nuevo.</p>
 
-        <form class="entity-form" data-entity="Cliente">
+          <div class="field">
+            <label>Nombre</label>
+            <input type="text" id="nombre" placeholder="Nombre del cliente">
+          </div>
+          <div class="field">
+            <label>Primer apellido</label>
+            <input type="text" id="apellido_paterno" placeholder="Primer apellido">
+          </div>
+          <div class="field">
+            <label>Segundo apellido</label>
+            <input type="text" id="apellido_materno" placeholder="Segundo apellido">
+          </div>
+          <div class="field id-field">
+            <label>Estado del Cliente</label>
+            <select name="estados" id="estado">
+              <option value="1">Activo</option>
+              <option value="2">Inactivo</option>
+            </select>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="AgregarCliente">Agregar cliente</button>
+          </div>
+        </div>
+        {# <form class="entity-form" data-entity="Cliente">
           <div class="field">
             <label for="cli-nombre">Nombre</label>
             <input type="text" id="cli-nombre" name="nombre" placeholder="Nombre del cliente" />
@@ -86,7 +113,7 @@
               Actualizar por ID
             </button>
           </div>
-        </form>
+        </form> #}
       </div>
     </section>
   </main>
@@ -98,6 +125,7 @@
 
   {# SCRIPTS #}
   {# SCRIPTS #}
+  {% include 'plantillas/_default_scripts.html' %}
   <script>
     document
       .querySelector('.btn-update-lookup')
@@ -107,7 +135,78 @@
       })
   </script>
 
-  {% include 'plantillas/_default_scripts.html' %}
+  <script>
+    document.getElementById('AgregarCliente').addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const nombre = document.getElementById('nombre').value;
+      const apellidoPaterno = document.getElementById('apellido_paterno').value;
+      const apellidoMaterno = document.getElementById('apellido_materno').value;
+      const idEstado = document.getElementById('estado').value;
+
+      // Validación rápida con SweetAlert
+      if (!nombre.trim() || !apellidoPaterno.trim() || !apellidoMaterno.trim()) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campos incompletos',
+          text: 'Por favor complete el nombre, el primer apellido y el segundo apellido para continuar.',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('nombre', nombre);
+      formData.append('apellido_paterno', apellidoPaterno);
+      formData.append('apellido_materno', apellidoMaterno);
+      formData.append('id_estado', idEstado);
+
+      try {
+        const response = await fetch('/clientes/agregar', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Modal de éxito
+          Swal.fire({
+            icon: 'success',
+            title: '¡Guardado!',
+            text: result.message,
+            confirmButtonColor: '#3085d6'
+          }).then(() => {
+            // Limpiar inputs
+            document.getElementById('nombre').value = '';
+            document.getElementById('apellido_paterno').value = '';
+            document.getElementById('apellido_materno').value = '';
+
+            // Recargar la página para refrescar la tabla de clientes
+            location.reload();
+          });
+        } else {
+          // Modal de error retornado por la base de datos/Flask
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: result.message,
+            confirmButtonColor: '#d33'
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        // Modal de error de red
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de conexión',
+          text: 'No se pudo conectar con el servidor.',
+          confirmButtonColor: '#d33'
+        });
+      }
+    });
+  </script>
+
 </body>
 
 </html>

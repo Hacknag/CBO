@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+
+{% include 'plantillas/_default_head.html' %}
+
+<body>
+    <header>
+        {# NAVBAR #}
+        {# NAVBAR #}
+        {% with brand_tag="Vista Facturas" %}
+        {% include 'plantillas/_navbar_billing.html' %}
+        {% endwith %}
+    </header>
+    <main class="app mt-5 pt-4">
+        <section class="panel active mt-5 pt-4" data-title="Facturas">
+            <div class="panel__header">
+                <h1>Facturas</h1>
+            </div>
+            <div class="panel__body panel__body--full">
+                <form method="get" action="/facturas" class="filtro-toolbar">
+                    <div class="field">
+                        <label for="filtro-cliente">Filtrar por cliente</label>
+                        <select id="filtro-cliente" name="id_cliente" onchange="this.form.submit()">
+                            <option value="">Todos los clientes</option>
+                            {% for c in clientes %}
+                            <option value="{{ c[0] }}" {% if id_cliente_seleccionado and
+                                id_cliente_seleccionado|int==c[0]|int %}selected{% endif %}>
+                                {{ c[1] }} {{ c[2] }} {{ c[3] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% if id_cliente_seleccionado %}
+                    <a class="btn btn--secondary filtro-limpiar" href="/facturas">Quitar filtro</a>
+                    {% endif %}
+                </form>
+                {% if not facturas %}
+                <p>
+                    {% if id_cliente_seleccionado %}
+                    Este cliente no tiene facturas registradas.
+                    {% else %}
+                    Todavía no hay facturas registradas.
+                    {% endif %}
+                </p>
+                {% else %}
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                                <th>Correo</th>
+                                <th>Total</th>
+                                <th>Método de pago</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for f in facturas %}
+                            <tr>
+                                <td>{{ f.NUMERO }}</td>
+                                <td>{{ f.FECHA }}</td>
+                                <td>{{ f.NOMBRE_CLIENTE }}</td>
+                                <td>{{ f.CORREO_CLIENTE }}</td>
+                                <td>₡{{ "%.2f"|format(f.TOTAL or 0) }}</td>
+                                <td>{{ f.METODO_PAGO }}</td>
+                                <td><a class="btn btn--primary" href="/factura/{{ f.ID_FACTURA }}">Ver</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+    {# FOOTER #}
+    {# FOOTER #}
+    {% include 'plantillas/_footer_inicio.html' %}
+
+    {# SCRIPTS #}
+    {# SCRIPTS #}
+    {% include 'plantillas/_default_scripts.html' %}
+</body>
+
+</html>

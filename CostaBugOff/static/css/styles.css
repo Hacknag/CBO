@@ -16,10 +16,10 @@
   --moss-dark: #2E4F37;
   --panel: #FFFFFF;
   --bg: #F7F3EC;
+  --row-alt: #FBF8F2;
 
   /* TO BE CHECKED */
   --paper: #F5F4EF;
-
   --brick: #A3402C;
   --brick-dark: #82301F;
   --amber: #C88A2E;
@@ -56,7 +56,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 28px;
+  padding: 2px 28px;
   border-bottom: 3px solid var(--gold);
 }
 
@@ -79,6 +79,10 @@ nav.mainnav a {
 
 nav.mainnav .dropdown-toggle:focus {
   color: var(--white);
+}
+
+nav.mainnav .dropdown-toggle:focus:hover {
+  color: var(--brown-dk);
 }
 
 nav.mainnav a {
@@ -204,6 +208,90 @@ footer p {
   color: var(--white);
 }
 
+/*#########################################*/
+/*###############PANEL BODY################*/
+/*#########################################*/
+.panel__body {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 24px;
+  align-items: start;
+}
+
+.panel__body_inverse {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  align-items: start;
+
+}
+
+/*#########################################*/
+/*###############SEARCH BAR################*/
+/*#########################################*/
+.search-row {
+  margin-bottom: 16px;
+}
+
+.search-row label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  margin-bottom: 6px;
+}
+
+.search-row input {
+  display: block !important;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+}
+
+/*#########################################*/
+/*########ACTUALIZAR CLIENTE CARD##########*/
+/*#########################################*/
+.form-card {
+  background: var(--panel);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+  padding: 22px;
+  position: sticky;
+  top: 20px;
+}
+
+.form-card .sub {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin: 0 0 18px;
+}
+
+.field {
+  margin-bottom: 14px;
+}
+
+.btn-primary {
+  background: var(--green);
+}
+
+.btn-primary:hover {
+  background: var(--moss-dark);
+}
+
+/*#########################################*/
+/*#################TABLA###################*/
+/*#########################################*/
+tbody tr:nth-child(even) {
+  background: var(--row-alt);
+}
 
 .delete-btn {
   background: none;
@@ -315,20 +403,7 @@ footer p {
   font-weight: 600;
 }
 
-.panel__body {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 24px;
-  align-items: start;
-}
 
-.panel__body_inverse {
-  display: grid;
-  grid-template-columns: 1fr 1.4fr;
-  gap: 24px;
-  align-items: start;
-
-}
 
 
 /* Facturas Start */
@@ -363,6 +438,7 @@ footer p {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: auto;
+  height: 70vh;
 }
 
 .data-table {
@@ -474,9 +550,7 @@ footer p {
   color: #fff;
 }
 
-.btn--primary:hover {
-  background: var(--moss-dark);
-}
+
 
 .btn--secondary {
   background: #fff;
