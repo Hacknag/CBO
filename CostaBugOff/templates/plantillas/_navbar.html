@@ -11,7 +11,7 @@
     </div>
     <nav class="mainnav navbar navbar-expand-lg">
         <ul class="navbar-nav ms-auto mb-2">
-            {# Dropdown de Clientes #}
+            {% if session.get('rol') != 'Billing' %}
             {# Dropdown de Clientes #}
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
@@ -141,14 +141,16 @@
                     </li>
                 </ul>
             </li>
+            {% endif %}
             {# Dropdown de Facturación y Finanzas #}
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                    aria-expanded="false" data-section="Operaciones">
+                    aria-expanded="false" data-section="Facturacion y Finanzas">
                     Facturación y Finanzas
                 </a>
                 <!-- Contenido oculto del dropdown -->
                 <ul class="dropdown-menu dropdown-background">
+                    {% if session.get('rol') != 'Billing' %}
                     <li>
                         <a class="dropdown-item" href="{{ url_for('suscripciones') }}"
                             data-section="suscripciones">Suscripciones</a>
@@ -166,8 +168,23 @@
                             data-section="transacciones">Transacciones</a>
                     </li>
                     <li>
+                        <a class="dropdown-item" href="{{ url_for('detalle_transacciones') }}"
+                            data-section="detalle_transacciones">Detalle de Transacciones</a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('suscripciones_activas') }}"
+                            data-section="suscripciones_activas">Suscripciones Activas</a>
+                    </li>
+                    {% endif %}
+                    <li>
                         <a class="dropdown-item" href="/facturas" data-section="facturas">Facturas</a>
                     </li>
+                    {% if session.get('rol') != 'Empleado' %}
+                    <li>
+                        <a class="dropdown-item" href="{{ url_for('reporte_ventas') }}"
+                            data-section="reporte_ventas">Reporte de Ventas</a>
+                    </li>
+                    {% endif %}
                 </ul>
             </li>
         </ul>

@@ -1,40 +1,29 @@
 <!doctype html>
 <html lang="es">
-
-<head>
-  {% include 'plantillas/_default_head.html' %}
-</head>
+{% include 'plantillas/_default_head.html' %}
 
 <!--http://127.0.0.1:5001/productos para correr productos -->
 <!--correr con control + ñ y despues ingresar python app.py para que ande -->
 
 <body>
-  <header>
-    {# NAVBAR #}
-    {# NAVBAR #}
-    {% with brand_tag="Vista Productos" %}
-    {% include 'plantillas/_navbar.html' %}
-    {% endwith %}
+  <header class="topbar">
+    <div class="topbar__brand">
+      {% include 'plantillas/_logo.html' %}
+      <span class="topbar__view-tag" id="viewTag">Vista Clientes</span>
+    </div>
+    <div class="topbar__user" title="Usuario">A</div>
   </header>
 
-  <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-productos" data-title="Productos">
+  {% include 'plantillas/_navbar.html' %}
+
+  <main class="app">
+    <section class="panel active" id="panel-productos" data-title="Productos">
       <div class="panel__header">
         <h1>Productos</h1>
       </div>
-      {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
-          <label for="filtro-busqueda">Buscar Producto:</label>
-          <input type="text" id="filtro-busqueda" data-filter-target="producto"
-            placeholder="Escribe el nombre o la descripcion del producto." />
-        </form>
-      </div>
-      <!-- TABLA DE PRODUCTOS -->
-      <!-- TABLA DE PRODUCTOS -->
       <div class="panel__body">
         <div class="table-wrap">
-          <table class="data-table" data-entity="producto">
+          <table class="data-table" data-entity="Producto">
             <thead>
               <tr>
                 <th>Nombre</th>
@@ -47,7 +36,7 @@
             </thead>
             <tbody>
               {% for p in productos %}
-              <tr data-id="{{ p[0] }}" data-entity="producto">
+              <tr data-id="{{ p[0] }}" data-entity="productos">
                 <td>{{ p[1] }}</td>
                 <td>{{ p[2] }}</td>
                 <td>{{ p[3] }}</td>
@@ -163,13 +152,6 @@
     </section>
   </main>
 
-  {# FOOTER #}
-  {# FOOTER #}
-  {% include 'plantillas/_footer.html' %}
-
-
-  {# SCRIPTS #}
-  {# SCRIPTS #}
   <script>
     const URL_API = 'http://127.0.0.1:5001/api/productos'
 

@@ -1,37 +1,28 @@
 <!doctype html>
 <html lang="es">
 
-<head>
-  {% include 'plantillas/_default_head.html' %}
-</head>
-<!--http://127.0.0.1:5001/correos_proveedores para correr correos de proveedores -->
-<!--correr con control + ñ y despues ingresar python app.py para que ande -->
+{% include 'plantillas/_default_head.html' %}
 
 <body>
-  <header>
-    {# NAVBAR #}
-    {# NAVBAR #}
-    {% with brand_tag="Vista Correos de Proveedores" %}
-    {% include 'plantillas/_navbar.html' %}
-    {% endwith %}
+  <header class="topbar">
+    <div class="topbar__brand">
+      {% include 'plantillas/_logo.html' %}
+      <span class="topbar__view-tag" id="viewTag">Vista Correos de Proveedores</span>
+    </div>
+    <div class="topbar__user" title="Usuario">A</div>
   </header>
 
-  <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-correos-proveedores" data-title="Correos de Proveedores">
+  {% include 'plantillas/_navbar.html' %}
+
+
+  <main class="app">
+    <section class="panel active" id="panel-correos-proveedores" data-title="Correos de Proveedores">
       <div class="panel__header">
         <h1>Correos de Proveedores</h1>
       </div>
-      {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
-          <label for="filtro-busqueda">Buscar Correo:</label>
-          <input type="text" id="filtro-busqueda" data-filter-target="correoProveedor"
-            placeholder="Escribe el nombre o el correo del proveedor." />
-        </form>
-      </div>
-      <div class="panel__body_inverse">
+      <div class="panel__body">
         <div style="display:flex; flex-direction:column; gap:16px;">
-          {# <form method="get" class="filtro-form">
+          <form method="get" class="filtro-form">
             <label for="filtro-estado">Filtrar por estado:</label>
             <select name="estado" id="filtro-estado" onchange="this.form.submit()">
               <option value="" {% if not filtro %}selected{% endif %}>Todos</option>
@@ -39,9 +30,9 @@
               <option value="{{ e[0] }}" {% if filtro==e[0]|string %}selected{% endif %}>{{ e[1] }}</option>
               {% endfor %}
             </select>
-          </form> #}
+          </form>
 
-          <form class="entity-form" id="formCorreosProveedores" data-entity="correoProveedor"
+          <form class="entity-form" id="formCorreosProveedores" data-entity="CorreoProveedor"
             style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
             <div class="field">
               <label for="cp-proveedor">Proveedor</label>
@@ -79,7 +70,7 @@
         </div>
 
         <div class="table-wrap">
-          <table class="data-table" data-entity="correoProveedor">
+          <table class="data-table" data-entity="CorreoProveedor">
             <thead>
               <tr>
                 <th>ID Proveedor</th>
@@ -105,13 +96,6 @@
       </div>
     </section>
   </main>
-  {# FOOTER #}
-  {# FOOTER #}
-  {% include 'plantillas/_footer.html' %}
-
-
-  {# SCRIPTS #}
-  {# SCRIPTS #}
 
   <script>
     const URL_API_CORREOS_PROVEEDORES = 'http://127.0.0.1:5001/api/correos_proveedores'

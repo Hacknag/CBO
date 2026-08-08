@@ -1,35 +1,25 @@
 <!doctype html>
 <html lang="es">
 
-<head>
-  {% include 'plantillas/_default_head.html' %}
-</head>
-<!--http://127.0.0.1:5001/ para correr clientes -->
-<!--correr con control + ñ y despues ingresar python app.py para que ande -->
+{% include 'plantillas/_default_head.html' %}
 
 <body>
-  <header>
-    {# NAVBAR #}
-    {# NAVBAR #}
-    {% with brand_tag="Vista Clientes" %}
-    {% include 'plantillas/_navbar.html' %}
-    {% endwith %}
+  <header class="topbar">
+    <div class="topbar__brand">
+      {% include 'plantillas/_logo.html' %}
+      <span class="topbar__view-tag" id="viewTag">Vista Clientes</span>
+    </div>
+    <div class="topbar__user" title="Usuario">A</div>
   </header>
-  <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-clientes" data-title="Clientes">
+  {% include 'plantillas/_navbar.html' %}
+
+  <main class="app">
+    <section class="panel active" id="panel-clientes" data-title="Clientes">
       <div class="panel__header">
         <h1>Clientes</h1>
-      </div>
-      {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
-          <label for="filtro-busqueda">Buscar cliente:</label>
-          <input type="text" id="filtro-busqueda" data-filter-target="cliente"
-            placeholder="Escribe el nombre o el apellido del cliente." />
-        </form>
+
       </div>
       <div class="panel__body">
-        {# Tabla #}
         <div class="table-wrap">
           <table class="data-table" data-entity="cliente">
             <thead>
@@ -91,13 +81,6 @@
     </section>
   </main>
 
-  {# FOOTER #}
-  {# FOOTER #}
-  {% include 'plantillas/_footer.html' %}
-
-
-  {# SCRIPTS #}
-  {# SCRIPTS #}
   <script>
     document
       .querySelector('.btn-update-lookup')
@@ -106,7 +89,6 @@
         if (id) window.location.href = `/clientes/editar/${id}`
       })
   </script>
-
   {% include 'plantillas/_default_scripts.html' %}
 </body>
 

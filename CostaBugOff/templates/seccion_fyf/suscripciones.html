@@ -1,38 +1,27 @@
 <!doctype html>
 <html lang="es">
-
-<head>
-  {% include 'plantillas/_default_head.html' %}
-</head>
-<!--http://127.0.0.1:5001/suscripciones para correr suscripciones -->
+{% include 'plantillas/_default_head.html' %}
+<!--http://127.0.0.1:5001/productos para correr productos -->
 <!--correr con control + ñ y despues ingresar python app.py para que ande -->
 
 <body>
-  <header>
-    {# NAVBAR #}
-    {# NAVBAR #}
-    {% with brand_tag="Vista Suscripciones" %}
-    {% include 'plantillas/_navbar.html' %}
-    {% endwith %}
+  <header class="topbar">
+    <div class="topbar__brand">
+      {% include 'plantillas/_logo.html' %}
+      <span class="topbar__view-tag" id="viewTag">Vista Suscripciones</span>
+    </div>
+    <div class="topbar__user" title="Usuario">A</div>
   </header>
-  <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-suscripciones" data-title="suscripciones">
+
+  {% include 'plantillas/_navbar.html' %}
+  <main class="app">
+    <section class="panel active" id="panel-suscripciones" data-title="Suscripciones">
       <div class="panel__header">
         <h1>Suscripciones</h1>
       </div>
-      {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
-          <label for="filtro-busqueda">Buscar Suscripción:</label>
-          <input type="text" id="filtro-busqueda" data-filter-target="suscripciones"
-            placeholder="Escribe el nombre o el numero de telefono del cliente." />
-        </form>
-      </div>
-      <!-- TABLA DE SUSCRIPCIONES -->
-      <!-- TABLA DE SUSCRIPCIONES -->
       <div class="panel__body">
         <div class="table-wrap">
-          <table class="data-table" data-entity="suscripciones">
+          <table class="data-table" data-entity="Suscripcion">
             <thead>
               <tr>
                 <th>Suscripciones</th>
@@ -41,7 +30,6 @@
                 <th>ID Pago</th>
                 <th>Estado</th>
                 <th>Precio</th>
-                <th>Borrar</th>
               </tr>
             </thead>
             <tbody>
@@ -53,11 +41,6 @@
                 <td>{{ s[3] }}</td>
                 <td>{{ s[4] }}</td>
                 <td>{{ s[5] }}</td>
-                <td>
-                  <button class="delete-btn" onclick="deleteRow(this)">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </td>
               </tr>
               {% endfor %}
             </tbody>
@@ -81,6 +64,8 @@
             <label for="subs-id-pago">ID de pago</label>
             <input type="number" id="subs-id-pago" name="id_pago" placeholder="ID de Pago" required />
           </div>
+          required
+          />
       </div>
       <div class="field">
         <label for="subs-estado">Estado</label>
@@ -113,13 +98,7 @@
       </div>
     </section>
   </main>
-  {# FOOTER #}
-  {# FOOTER #}
-  {% include 'plantillas/_footer.html' %}
 
-
-  {# SCRIPTS #}
-  {# SCRIPTS #}
   <script>
     const URL_API = 'http://127.0.0.1:5001/api/suscripciones'
 

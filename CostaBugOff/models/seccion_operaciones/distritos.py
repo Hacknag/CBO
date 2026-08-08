@@ -38,7 +38,7 @@ def eliminar_distrito_logico(id_distrito):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_DISTRITOS_DELETE_SP", [
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_DISTRITOS_DELETE", [
             id_distrito
         ])
         conexion.commit()

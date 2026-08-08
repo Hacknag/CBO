@@ -37,6 +37,11 @@ def _siguiente_id(cursor, tabla, columna_id):
     return cursor.fetchone()[0]
 
 
+# Duracion por defecto de una suscripcion antes de que le toque renovar.
+# Todos los planes del catalogo se facturan mensual, por eso 30 dias fijos.
+DIAS_DURACION_SUSCRIPCION = 30
+
+
 def procesar_checkout(id_cliente, id_metodo_pago, direccion, telefono, carrito):
     """
     carrito: lista de dicts, cada uno con:
@@ -86,6 +91,18 @@ def procesar_checkout(id_cliente, id_metodo_pago, direccion, telefono, carrito):
                 item["cantidad"], item["precio_unitario"]
             ])
             id_detalle += 1
+
+        # 4.5. Si compro una suscripcion, ademas de la linea de la factura,
+        # se crea/renueva su registro de suscripcion activa (para el modulo
+        # de Renovaciones: cliente + plan + metodo de pago + fecha de vencimiento)
+        for item in carrito:
+            if item["tipo"] != "suscripcion":
+                continue
+            v_id_cliente_suscripcion = cursor.var(oracledb.NUMBER)
+            cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_CLIENTES_SUSCRIPCIONES_INSERT_SP", [
+                id_cliente, item["id"], id_metodo_pago,
+                DIAS_DURACION_SUSCRIPCION, v_id_cliente_suscripcion
+            ])
 
         # 5. Descontar stock (cursor de Charlie, recorre el detalle de la transaccion)
         cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_DESCONTAR_STOCK_SP", [
@@ -155,19 +172,3 @@ def obtener_facturas_cliente(id_cliente):
         cursor.close()
         conn.close()
     return [dict(zip(columnas, fila)) for fila in filas]
-
-
-def eliminar_factura_logico(id_factura):
-    conexion = get_connection()
-    try:
-        cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_FACTURAS_DELETE_SP", [
-            id_factura
-        ])
-        conexion.commit()
-    except Exception as e:
-        conexion.rollback()
-        raise e
-    finally:
-        cursor.close()
-        conexion.close()

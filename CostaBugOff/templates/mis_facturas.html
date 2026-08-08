@@ -1,62 +1,66 @@
 <!doctype html>
 <html lang="es">
-
-<head>
-  {% include 'plantillas/_default_head.html' %}
-</head>
-
-<body>
-  <header>
-    {# NAVBAR #}
-    {# NAVBAR #}
-    {% with brand_tag="Vista Factura" %}
-    {% include 'plantillas/_navbar_factura.html' %}
-    {% endwith %}
-  </header>
-
-  <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" style="height: 65vh;" data-title="Mis facturas">
-      <div class="panel__header">
-        <h1>Mis facturas</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CostaBugOff - Mis facturas</title>
+    <link rel="stylesheet" href="/static/css/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__brand">
+        <img class="logo-bug" src="/static/img/Jeremy.png" alt="CostaBugOff" />
+        <span class="topbar__logo">CostaBugOff</span>
+        <span class="topbar__view-tag">Mis facturas</span>
       </div>
-      <div class="panel__body">
-        {% if not facturas %}
-        <p>Todavía no tienes compras registradas.</p>
-        {% else %}
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Número</th>
-                <th>Fecha</th>
-                <th>Total</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for f in facturas %}
-              <tr>
-                <td>{{ f.NUMERO }}</td>
-                <td>{{ f.FECHA }}</td>
-                <td>₡{{ "%.2f"|format(f.TOTAL or 0) }}</td>
-                <td><a class="btn btn--primary" href="/factura/{{ f.ID_FACTURA }}">Ver</a></td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+    </header>
+
+    <nav class="mainnav">
+      <ul>
+        <li><a class="nav-btn" href="/inicio-cliente">Inicio</a></li>
+        <li><a class="nav-btn" href="/planes">Planes</a></li>
+        <li><a class="nav-btn" href="/carrito">Carrito</a></li>
+        <li><a class="nav-btn" href="/mis-facturas">Mis facturas</a></li>
+        <li><a class="nav-btn" href="/programar-visita">Programar Visita</a></li>
+        <li><a class="nav-btn" href="/informacion">Información</a></li>
+        <li><a class="nav-btn" href="/logout">Cerrar sesión</a></li>
+      </ul>
+    </nav>
+
+    <main class="app">
+      <section class="panel active" data-title="Mis facturas">
+        <div class="panel__header">
+          <h1>Mis facturas</h1>
         </div>
-        {% endif %}
-      </div>
-    </section>
-  </main>
-  {# FOOTER #}
-  {# FOOTER #}
-  {% include 'plantillas/_footer.html' %}
-
-
-  {# SCRIPTS #}
-  {# SCRIPTS #}
-  {% include 'plantillas/_default_scripts.html' %}
-</body>
-
+        <div class="panel__body">
+          {% if not facturas %}
+          <p>Todavía no tienes compras registradas.</p>
+          {% else %}
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Número</th>
+                  <th>Fecha</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for f in facturas %}
+                <tr>
+                  <td>{{ f.NUMERO }}</td>
+                  <td>{{ f.FECHA }}</td>
+                  <td>₡{{ "%.2f"|format(f.TOTAL or 0) }}</td>
+                  <td><a class="btn btn--primary" href="/factura/{{ f.ID_FACTURA }}">Ver</a></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% endif %}
+        </div>
+      </section>
+    </main>
+  </body>
 </html>

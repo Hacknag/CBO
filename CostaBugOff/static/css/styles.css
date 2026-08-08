@@ -1,36 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap');
 
 :root {
-  --red: #dc3545;
-  --red-dark: #a71d2a;
-  --brown-dk: #2B2118;
-  --white: #FFFFFF;
-  --gold: #C08A34;
-  --line: #E7DFD2;
-  --green: #1F3D2B;
-  --status: #3F7855;
-  --ink: #231D18;
-  --ink-soft: #6B6156;
-  --moss: #3F7855;
-  --moss-dark: #2E4F37;
-  --panel: #FFFFFF;
-  --bg: #F7F3EC;
-
-  /* TO BE CHECKED */
+  --ink: #1C2420;
+  --ink-soft: #48544D;
   --paper: #F5F4EF;
-
+  --panel: #FFFFFF;
+  --line: #DAD8CE;
+  --moss: #3F6B4A;
+  --moss-dark: #2E4F37;
   --brick: #A3402C;
   --brick-dark: #82301F;
+  --red: #d24c31;
   --amber: #C88A2E;
   --slate: #2E4F37;
   --cream: #F1EEE6;
-  /* TO BE CHECKED */
-
+  --radius: 3px;
   --font-ui: 'IBM Plex Sans', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
-  --radius: 10px;
-  --shadow: 0 1px 2px rgba(43, 33, 24, .04), 0 8px 24px -12px rgba(43, 33, 24, .12);
 }
 
 * {
@@ -47,175 +33,18 @@ html, body {
   line-height: 1.45;
 }
 
-/*#########################################*/
-/*#################NAV BAR#################*/
-/*#########################################*/
-.brandbar {
-  background: var(--brown-dk);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 28px;
-  border-bottom: 3px solid var(--gold);
-}
-
-nav.mainnav a {
-  color: var(--white);
-  box-shadow: none;
-  text-decoration: none;
-  font-size: 1.075rem;
-  font-weight: 500;
-  padding: 13px 16px;
-  display: inline-block;
-  border-bottom: 3px solid transparent;
-  transition: .15s;
-}
-
-.navbar .dropdown-toggle.show,
-.navbar .dropdown-toggle[aria-expanded="true"] {
-  color: var(--gold) !important;
-}
-
-nav.mainnav .dropdown-toggle:focus {
-  color: var(--white);
-}
-
-nav.mainnav a {
-  color: var(--white);
-  box-shadow: none;
-  text-decoration: none;
-  font-size: 1.075rem;
-  font-weight: 500;
-  padding: 13px 16px;
-  display: inline-block;
-  border-bottom: 3px solid transparent;
-  transition: .15s;
-}
-
-nav.mainnav a:hover {
-  color: var(--brown-dk);
-  background: var(--white);
-}
-
-nav.mainnav .dropdown-toggle:focus {
-  color: var(--white);
-}
-
-.navbar .dropdown-toggle.show,
-.navbar .dropdown-toggle[aria-expanded="true"] {
-  color: var(--gold) !important;
-}
-
-.dropdown-menu {
-  background: var(--brown-dk);
-  border: none;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
-}
-
-
-/* LEFT PART - NAV BAR */
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 0 0 280px;
-  /* O el ancho en píxeles que mejor encaje en tu diseño */
-  min-width: 280px;
-}
-
-.brand-name {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  font-size: 19px;
-  letter-spacing: .2px;
-}
-
-.brand-tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10.5px;
-  letter-spacing: 1.5px;
-  color: var(--gold);
-  text-transform: uppercase;
-  margin-top: 1px;
-  max-width: 200px;
-  /* Limita el ancho para forzar el salto de línea */
-  white-space: normal;
-  /* Permite que el texto baje a la siguiente línea */
-  word-break: break-word;
-  /* Evita que palabras muy largas se salgan del borde */
-  line-height: 1.2;
-}
-
-/* RIGHT PART - NAV BAR */
-.avatar {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  background: var(--gold);
-  color: var(--brown-dk);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 14px;
-  font-family: 'Space Grotesk', sans-serif;
-}
-
-.dropdown-item {
-  color: var(--white);
-}
-
-/*#########################################*/
-/*#################FOOTER##################*/
-/*#########################################*/
-
-footer {
-  background-color: var(--brown-dk);
-
-}
-
-footer i {
-  color: var(--white);
-}
-
-footer p {
-  color: var(--white);
-}
-
-.nav-item a {
-  font-size: 17px;
-  font-weight: 500;
-  text-decoration: none;
-  color: var(--white);
-  margin: 0 10px;
-  transition: all 0.7s ease-in;
-}
-
-.nav-item a:hover {
-  background-color: var(--white);
-  border-radius: 5px;
-  color: var(--brown-dk);
-
-}
-
-.nav-item a:focus {
-  color: var(--white);
-}
-
 
 .delete-btn {
   background: none;
   border: none;
-  color: var(--red);
+  color: #dc3545;
   cursor: pointer;
   font-size: 1.1rem;
   transition: color 0.2s;
 }
 
 .delete-btn:hover {
-  color: var(--red-dark);
+  color: #a71d2a;
 }
 
 .logo-bug {
@@ -243,7 +72,7 @@ footer p {
   font-weight: 600;
   font-size: 25px;
   letter-spacing: 0.5px;
-  color: var(--moss);
+  color: var(--moss-dark);
 }
 
 .topbar__view-tag {
@@ -270,10 +99,40 @@ footer p {
 }
 
 
-/* ---------- NAV ---------- */
+.mainnav {
+  background: var(--ink);
+}
 
+.mainnav ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0 22px;
+  overflow-x: auto;
+}
 
+.nav-btn {
+  background: transparent;
+  border: none;
+  color: #C9D2CC;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 14.5px;
+  padding: 14px 18px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  transition: color .15s ease, border-color .15s ease;
+}
 
+.nav-btn:hover {
+  color: #FFFFFF;
+}
+
+.nav-btn.active {
+  color: #FFFFFF;
+  border-bottom-color: var(--moss);
+}
 
 .app {
   max-width: 1280px;
@@ -337,6 +196,22 @@ footer p {
    Facturas: usa todo el ancho en vez de quedar en la columna 1.4fr */
 .panel__body--full {
   display: block;
+}
+
+.aviso-vencer {
+  display: inline-block;
+  background: #FDECC8;
+  color: #8A5A00;
+  border: 1px solid #E9C077;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.aviso-ok {
+  color: var(--ink-soft, #888);
+  font-size: 12px;
 }
 
 .filtro-toolbar {

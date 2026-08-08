@@ -2,36 +2,37 @@
 <html lang="es">
 
 <head>
-  {% include 'plantillas/_default_head.html' %}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CostaBugOff</title>
+  <link rel="stylesheet" href="/static/css/styles.css" alt="foto Jeremy" />
 </head>
-<!--http://127.0.0.1:5001/puestos para correr puestos -->
-<!--correr con control + ñ y despues ingresar python app.py para que ande -->
 
 <body>
-  <header>
-    {# NAVBAR #}
-    {# NAVBAR #}
-    {% with brand_tag="Vista Puestos" %}
-    {% include 'plantillas/_navbar.html' %}
-    {% endwith %}
+  <header class="topbar">
+    <div class="topbar__brand">
+      <div class="JeremyLogo">
+
+      </div>
+
+      <img class="logo-bug" src="/static/img/Jeremy.png" alt="" />
+      <span class="topbar__logo">CostaBugOff</span>
+
+      <span class="topbar__view-tag" id="viewTag">Vista Puestos</span>
+    </div>
+    <div class="topbar__user" title="Usuario">A</div>
   </header>
 
-  <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-puestos" data-title="Puestos">
+  {% include 'plantillas/_navbar.html' %}
+
+  <main class="app">
+    <section class="panel active" id="panel-puestos" data-title="Puestos">
       <div class="panel__header">
         <h1>Puestos</h1>
       </div>
-      {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
-          <label for="filtro-busqueda">Buscar Puesto:</label>
-          <input type="text" id="filtro-busqueda" data-filter-target="puestos"
-            placeholder="Escribe el nombre o la descripcion del puesto." />
-        </form>
-      </div>
-      <div class="panel__body_inverse">
+      <div class="panel__body">
         <div style="display: flex; flex-direction: column; gap: 16px">
-          {# <form method="get" class="filtro-form">
+          <form method="get" class="filtro-form">
             <label for="filtro-estado">Filtrar por estado:</label>
             <select name="estado" s id="filtro-estado" onchange="this.form.submit()">
               <option value="" {% if not filtro %}selected{% endif %}>
@@ -44,9 +45,9 @@
                 Inactivos
               </option>
             </select>
-          </form> #}
+          </form>
 
-          <form class="entity-form" id="formPuestos" data-entity="puestos"
+          <form class="entity-form" id="formPuestos" data-entity="Puestos"
             style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px">
             <div class="field">
               <label for="p-id-puesto">ID Puesto</label>
@@ -79,26 +80,22 @@
         </div>
 
         <div class="table-wrap">
-          <table class="data-table" data-entity="puestos">
+          <table class="data-table" data-entity="Puestos">
             <thead>
               <tr>
+                <th>ID</th>
                 <th>Nombre</th>
                 <th>Descripción</th>
                 <th>Estado</th>
-                <th>Borrar</th>
               </tr>
             </thead>
             <tbody>
               {% for p in puestos %}
-              <tr data-id="{{ p[0] }}" data-entity="puestos">
+              <tr>
+                <td>{{ p[0] }}</td>
                 <td>{{ p[1] }}</td>
                 <td>{{ p[2] }}</td>
                 <td>{{ p[3] }}</td>
-                <td>
-                  <button class="delete-btn" onclick="deleteRow(this)">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </td>
               </tr>
               {% endfor %}
             </tbody>
@@ -107,13 +104,6 @@
       </div>
     </section>
   </main>
-  {# FOOTER #}
-  {# FOOTER #}
-  {% include 'plantillas/_footer.html' %}
-
-
-  {# SCRIPTS #}
-  {# SCRIPTS #}
 
   <script>
     const URL_API_PUESTOS = 'http://127.0.0.1:5001/api/puestos'
@@ -202,7 +192,6 @@
         }
       })
   </script>
-  {% include 'plantillas/_default_scripts.html' %}
 </body>
 
 </html>

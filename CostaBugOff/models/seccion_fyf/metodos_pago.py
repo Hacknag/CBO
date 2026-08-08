@@ -5,7 +5,7 @@ def insertar_metodos_pago(ID_METODO_PAGO, NOMBRE, ID_ESTADO):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_METODOSDEPAGO_INSERT_SP", [
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_METODOS_PAGO_INSERT_SP", [
             ID_METODO_PAGO, NOMBRE, ID_ESTADO
         ])
         conexion.commit()
@@ -20,7 +20,7 @@ def actualizar_metodos_pago(ID_METODO_PAGO, NOMBRE, ID_ESTADO):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_METODOSDEPAGO_UPDATE_SP", [
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_METODOS_PAGO_UPDATE_SP", [
             ID_METODO_PAGO, NOMBRE, ID_ESTADO
         ])
         conexion.commit()
@@ -31,12 +31,12 @@ def actualizar_metodos_pago(ID_METODO_PAGO, NOMBRE, ID_ESTADO):
         cursor.close()
         conexion.close()
 
-def eliminar_metodo_pago_logico(ID_METODO_PAGO):
+def eliminar_metodos_pago_logica(ID_METODO_PAGO):
 
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_METODOSDEPAGO_DELETE_SP", [
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_METODOS_PAGO_DELETE_SP", [
             ID_METODO_PAGO
         ])
         conexion.commit()

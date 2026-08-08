@@ -35,7 +35,7 @@ def eliminar_plaga_logica(id_plaga):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_PLAGAS_DELETE_SP", [
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_PLAGAS_DELETE", [
             id_plaga
         ])
         conexion.commit()

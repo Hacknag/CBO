@@ -1,39 +1,36 @@
 <!doctype html>
 <html lang="es">
-
-<head>
-  {% include 'plantillas/_default_head.html' %}
-</head>
-<!--http://127.0.0.1:5001/provincias para correr provincias -->
-<!--correr con control + ñ y despues ingresar python app.py para que ande -->
+{% include 'plantillas/_default_head.html' %}
 
 <body>
-  <header>
-    {# NAVBAR #}
-    {# NAVBAR #}
-    {% with brand_tag="Vista Provincias" %}
-    {% include 'plantillas/_navbar.html' %}
-    {% endwith %}
+  <header class="topbar">
+    <div class="topbar__brand">
+      {% include 'plantillas/_logo.html' %}
+      <span class="topbar__view-tag" id="viewTag">Vista Provincias</span>
+    </div>
+    <div class="topbar__user" title="Usuario">A</div>
   </header>
 
-  <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-provincias" data-title="provincias">
+  {% include 'plantillas/_navbar.html' %}
+
+  <main class="app">
+    <section class="panel active" id="panel-provincias" data-title="Provincias">
       <div class="panel__header">
         <h1>Provincias</h1>
       </div>
-      {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
-          <label for="filtro-busqueda">Buscar Provincia:</label>
-          <input type="text" id="filtro-busqueda" data-filter-target="provincias"
-            placeholder="Escribe el nombre de la provincia." />
-        </form>
-      </div>
       <div class="panel__body">
         <div style="display:flex; flex-direction:column; gap:16px;">
+          <form method="get" class="filtro-form">
+            <label for="filtro-estado">Filtrar por estado:</label>
+            <select name="estado" id="filtro-estado" onchange="this.form.submit()">
+              <option value="" {% if not filtro %}selected{% endif %}>Todos</option>
+              {% for e in estados %}
+              <option value="{{ e[0] }}" {% if filtro==e[0]|string %}selected{% endif %}>{{ e[1] }}</option>
+              {% endfor %}
+            </select>
+          </form>
 
-
-          <form class="entity-form" id="formProvincias" data-entity="provincias"
+          <form class="entity-form" id="formProvincias" data-entity="Provincia"
             style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
             <div class="field">
               <label for="prov-id">ID Provincia</label>
@@ -62,24 +59,20 @@
         </div>
 
         <div class="table-wrap">
-          <table class="data-table" data-entity="provincias">
+          <table class="data-table" data-entity="Provincia">
             <thead>
               <tr>
+                <th>ID</th>
                 <th>Nombre</th>
                 <th>Estado</th>
-                <th>Borrar</th>
               </tr>
             </thead>
             <tbody>
               {% for p in provincias %}
-              <tr data-id="{{ p[0] }}" data-entity="provincias">
+              <tr>
+                <td>{{ p[0] }}</td>
                 <td>{{ p[1] }}</td>
                 <td>{{ p[2] }}</td>
-                <td>
-                  <button class="delete-btn" onclick="deleteRow(this)">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </td>
               </tr>
               {% endfor %}
             </tbody>
@@ -88,13 +81,7 @@
       </div>
     </section>
   </main>
-  {# FOOTER #}
-  {# FOOTER #}
-  {% include 'plantillas/_footer.html' %}
 
-
-  {# SCRIPTS #}
-  {# SCRIPTS #}
   <script>
     const URL_API_PROVINCIAS = 'http://127.0.0.1:5001/api/provincias'
 

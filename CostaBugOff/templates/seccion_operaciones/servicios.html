@@ -1,37 +1,26 @@
 <!doctype html>
 <html lang="es">
-
-<head>
-  {% include 'plantillas/_default_head.html' %}
-</head>
-<!--http://127.0.0.1:5001/servicios para correr servicios -->
-<!--correr con control + ñ y despues ingresar python app.py para que ande -->
+{% include 'plantillas/_default_head.html' %}
 
 <body>
-  <header>
-    {# NAVBAR #}
-    {# NAVBAR #}
-    {% with brand_tag="Vista Servicios" %}
-    {% include 'plantillas/_navbar.html' %}
-    {% endwith %}
+  <header class="topbar">
+    <div class="topbar__brand">
+      {% include 'plantillas/_logo.html' %}
+      <span class="topbar__view-tag" id="viewTag">Vista Servicios</span>
+    </div>
+    <div class="topbar__user" title="Usuario">A</div>
   </header>
 
-  <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-servicios" data-title="Servicios">
+  {% include 'plantillas/_navbar.html' %}
+
+  <main class="app">
+    <section class="panel active" id="panel-servicios" data-title="Servicios">
       <div class="panel__header">
         <h1>Servicios</h1>
       </div>
-      {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
-          <label for="filtro-busqueda">Buscar Servicio:</label>
-          <input type="text" id="filtro-busqueda" data-filter-target="servicios"
-            placeholder="Escribe el nombre o la plaga asociada al servicio." />
-        </form>
-      </div>
-      <div class="panel__body_inverse">
+      <div class="panel__body">
         <div style="display:flex; flex-direction:column; gap:16px;">
-          {# <form method="get" class="filtro-form">
+          <form method="get" class="filtro-form">
             <label for="filtro-estado">Filtrar por estado:</label>
             <select name="estado" id="filtro-estado" onchange="this.form.submit()">
               <option value="" {% if not filtro %}selected{% endif %}>Todos</option>
@@ -39,9 +28,9 @@
               <option value="{{ e[0] }}" {% if filtro==e[0]|string %}selected{% endif %}>{{ e[1] }}</option>
               {% endfor %}
             </select>
-          </form> #}
+          </form>
 
-          <form class="entity-form" id="formServicios" data-entity="servicios"
+          <form class="entity-form" id="formServicios" data-entity="Servicio"
             style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
             <div class="field">
               <label for="serv-id">ID Servicio</label>
@@ -97,28 +86,22 @@
         </div>
 
         <div class="table-wrap">
-          <table class="data-table" data-entity="servicios">
+          <table class="data-table" data-entity="Servicio">
             <thead>
               <tr>
                 <th>ID</th>
                 <th>Nombre</th>
                 <th>Plaga Asociada</th>
                 <th>Estado</th>
-                <th>Borrar</th>
               </tr>
             </thead>
             <tbody>
               {% for s in servicios %}
-              <tr data-id="{{ s[0] }}" data-entity="servicios">
+              <tr>
                 <td>{{ s[0] }}</td>
                 <td>{{ s[1] }}</td>
                 <td>{{ s[2] }}</td>
                 <td>{{ s[3] }}</td>
-                <td>
-                  <button class="delete-btn" onclick="deleteRow(this)">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </td>
               </tr>
               {% endfor %}
             </tbody>
@@ -127,13 +110,6 @@
       </div>
     </section>
   </main>
-  {# FOOTER #}
-  {# FOOTER #}
-  {% include 'plantillas/_footer.html' %}
-
-
-  {# SCRIPTS #}
-  {# SCRIPTS #}
 
   <script>
     const URL_API_SERVICIOS = 'http://127.0.0.1:5001/api/servicios'

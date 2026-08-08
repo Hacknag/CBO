@@ -1,36 +1,28 @@
 <!doctype html>
 <html lang="es">
-
-<head>
-  {% include 'plantillas/_default_head.html' %}
-</head>
-<!--http://127.0.0.1:5001/transacciones para correr transacciones -->
+{% include 'plantillas/_default_head.html' %}
+<!--http://127.0.0.1:5001/productos para correr productos -->
 <!--correr con control + ñ y despues ingresar python app.py para que ande -->
 
 <body>
-  <header>
-    {# NAVBAR #}
-    {# NAVBAR #}
-    {% with brand_tag="Vista Transacciones" %}
-    {% include 'plantillas/_navbar.html' %}
-    {% endwith %}
+  <header class="topbar">
+    <div class="topbar__brand">
+      {% include 'plantillas/_logo.html' %}
+      <span class="topbar__view-tag" id="viewTag">Vista Transacciones</span>
+    </div>
+    <div class="topbar__user" title="Usuario">A</div>
   </header>
 
-  <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-transacciones" data-title="transacciones">
+  {% include 'plantillas/_navbar.html' %}
+
+  <main class="app">
+    <section class="panel active" id="panel-transacciones" data-title="Transacciones">
       <div class="panel__header">
         <h1>Transacciones</h1>
       </div>
-      {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
-          <label for="filtro-busqueda">Buscar Transacción:</label>
-          <input type="text" id="filtro-busqueda" data-filter-target="transacciones" placeholder="PENDIENTE." />
-        </form>
-      </div>
       <div class="panel__body">
         <div class="table-wrap">
-          <table class="data-table" data-entity="transacciones">
+          <table class="data-table" data-entity="Transaccion">
             <thead>
               <tr>
                 <th>ID Pago</th>
@@ -54,7 +46,7 @@
           </table>
         </div>
 
-        <form class="entity-form" id="formTransacciones" data-entity="transacciones">
+        <form class="entity-form" id="formTransacciones" data-entity="Transaccion">
           <div class="field">
             <label for="trans-id">ID Transaccion</label>
             <input type="number" id="trans-id" name="id_transaccion" placeholder="1" required />
@@ -107,13 +99,7 @@
       </div>
     </section>
   </main>
-  {# FOOTER #}
-  {# FOOTER #}
-  {% include 'plantillas/_footer.html' %}
 
-
-  {# SCRIPTS #}
-  {# SCRIPTS #}
   <script>
     const URL_API = 'http://127.0.0.1:5001/api/transacciones'
 

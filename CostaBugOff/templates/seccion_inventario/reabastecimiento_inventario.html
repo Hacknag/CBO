@@ -1,175 +1,199 @@
 <!doctype html>
 <html lang="es">
-
-<head>
-  {% include 'plantillas/_default_head.html' %}
-</head>
-<!--http://127.0.0.1:5001/reabastecimiento_inventario para correr reabastecimiento de inventario -->
-<!--correr con control + ñ y despues ingresar python app.py para que ande -->
-
-
-<body>
-  <header>
-    {# NAVBAR #}
-    {# NAVBAR #}
-    {% with brand_tag="Vista Reabastecimiento de Inventario" %}
-    {% include 'plantillas/_navbar.html' %}
-    {% endwith %}
-  </header>
-
-  <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-reabastecimiento" data-title="Reabastecimiento de Inventario">
-      <div class="panel__header">
-        <h1>Reabastecimiento de Inventario</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CostaBugOff</title>
+    <link rel="stylesheet" href="/static/css/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__brand">
+        <div class="JeremyLogo"></div>
+        <img class="logo-bug" src="/static/img/Jeremy.png" alt="" />
+        <span class="topbar__logo">CostaBugOff</span>
+        <span class="topbar__view-tag" id="viewTag">Vista Reabastecimiento de Inventario</span>
       </div>
-      <div class="panel__body">
-        <div style="display:flex; flex-direction:column; gap:16px;">
-          <form method="get" class="filtro-form">
-            <label for="filtro-estado">Filtrar por estado:</label>
-            <select name="estado" id="filtro-estado" onchange="this.form.submit()">
-              <option value="" {% if not filtro %}selected{% endif %}>Todos</option>
-              {% for e in estados %}
-              <option value="{{ e[0] }}" {% if filtro==e[0]|string %}selected{% endif %}>{{ e[1] }}</option>
-              {% endfor %}
-            </select>
-          </form>
+      <div class="topbar__user" title="Usuario">A</div>
+    </header>
 
-          <form class="entity-form" id="formReabastecimiento" data-entity="Reabastecimiento"
-            style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
-            <div class="field">
-              <label for="reab-id">ID Reabastecimiento</label>
-              <input type="number" id="reab-id" name="id_reabastecimiento" placeholder="1" required />
-            </div>
-            <div class="field">
-              <label for="reab-cantidad">Cantidad</label>
-              <input type="number" id="reab-cantidad" name="cantidad" placeholder="100" required />
-            </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="reab-estado">Estado</label>
-              <select id="reab-estado" name="id_estado" required>
-                <option value="">Selecciona un estado</option>
+    <nav class="mainnav">
+      <ul>
+        <li class="dropdown">
+          <a class="nav-btn" href="#" data-section="clientes"> Clientes ▾ </a>
+          <div class="dropdown-content">
+            <a href="http://127.0.0.1:5001/">Lista de Clientes</a>
+            <a href="http://127.0.0.1:5001/telefonos_clientes">Teléfonos de Clientes</a>
+            <a href="http://127.0.0.1:5001/correos_clientes">Correos de Clientes</a>
+            <a href="http://127.0.0.1:5001/direcciones">Direcciones de Clientes</a>
+          </div>
+        </li>
+        <li class="dropdown">
+          <a class="nav-btn" href="#" data-section="ubicaciones"> Ubicaciones ▾ </a>
+          <div class="dropdown-content">
+            <a href="http://127.0.0.1:5001/provincias">Provincias</a>
+            <a href="http://127.0.0.1:5001/cantones">Cantones</a>
+            <a href="http://127.0.0.1:5001/distritos">Distritos</a>
+          </div>
+        </li>
+        <li><a class="nav-btn" href="http://127.0.0.1:5001/productos" data-section="productos">Productos</a></li>
+        <li><a class="nav-btn" href="http://127.0.0.1:5001/plagas" data-section="plagas">Plagas</a></li>
+        <li><a class="nav-btn" href="http://127.0.0.1:5001/productos_x_plaga" data-section="productosxplaga">Productos x Plaga</a></li>
+        <li><a class="nav-btn" href="http://127.0.0.1:5001/puestos" data-section="puestos">Puestos</a></li>
+        <li><a class="nav-btn" href="http://127.0.0.1:5001/Serviciosr" data-section="serviciosR">Servicios Realizados</a></li>
+        <li><a class="nav-btn" href="http://127.0.0.1:5001/servicios" data-section="servicios">Servicios</a></li>
+        <li><a class="nav-btn" href="http://127.0.0.1:5001/clientes_x_servicio" data-section="clientesxservicio">Clientes x Servicio</a></li>
+        <li><a class="nav-btn" href="http://127.0.0.1:5001/empleados" data-section="empleados">Empleados</a></li>
+        <li><a class="nav-btn" href="http://127.0.0.1:5001/correos_empleados" data-section="correosempleados">Correos de Empleados</a></li>
+        <li><a class="nav-btn" href="http://127.0.0.1:5001/visitas" data-section="visitas">Visitas</a></li>
+        <li><a class="nav-btn" href="http://127.0.0.1:5001/proveedores" data-section="proveedores">Proveedores</a></li>
+        <li><a class="nav-btn" href="http://127.0.0.1:5001/correos_proveedores" data-section="correosproveedores">Correos de Proveedores</a></li>
+        <li><a class="nav-btn" href="http://127.0.0.1:5001/reabastecimiento_inventario" data-section="reabastecimiento">Reabastecimiento de Inventario</a></li>
+        <li><a class="nav-btn" href="http://127.0.0.1:5001/usuarios" data-section="usuarios">Usuarios</a></li>
+        <li><a class="nav-btn" href="/logout">Cerrar sesión</a></li>
+      </ul>
+    </nav>
+
+    <main class="app">
+      <section class="panel active" id="panel-reabastecimiento" data-title="Reabastecimiento de Inventario">
+        <div class="panel__header">
+          <h1>Reabastecimiento de Inventario</h1>
+        </div>
+        <div class="panel__body">
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <form method="get" class="filtro-form">
+              <label for="filtro-estado">Filtrar por estado:</label>
+              <select name="estado" id="filtro-estado" onchange="this.form.submit()">
+                <option value="" {% if not filtro %}selected{% endif %}>Todos</option>
                 {% for e in estados %}
-                <option value="{{ e[0] }}">{{ e[1] }}</option>
+                <option value="{{ e[0] }}" {% if filtro == e[0]|string %}selected{% endif %}>{{ e[1] }}</option>
                 {% endfor %}
               </select>
-            </div>
-            <div class="form-actions" style="grid-column: 1 / -1;">
-              <button type="button" id="btnAgregarReabastecimiento"
-                class="btn btn--primary btn-agregar">Agregar</button>
-              <button type="button" id="btnActualizarReabastecimiento"
-                class="btn btn--secondary btn-actualizar">Actualizar</button>
-              <button type="button" id="btnDesactivarReabastecimiento" class="btn-icon btn-delete">Desactivar</button>
-            </div>
-          </form>
+            </form>
+
+            <form class="entity-form" id="formReabastecimiento" data-entity="Reabastecimiento" style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
+              <div class="field">
+                <label for="reab-id">ID Reabastecimiento</label>
+                <input type="number" id="reab-id" name="id_reabastecimiento" placeholder="1" required />
+              </div>
+              <div class="field">
+                <label for="reab-cantidad">Cantidad</label>
+                <input type="number" id="reab-cantidad" name="cantidad" placeholder="100" required />
+              </div>
+              <div class="field" style="grid-column: 1 / -1;">
+                <label for="reab-estado">Estado</label>
+                <select id="reab-estado" name="id_estado" required>
+                  <option value="">Selecciona un estado</option>
+                  {% for e in estados %}
+                  <option value="{{ e[0] }}">{{ e[1] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-actions" style="grid-column: 1 / -1;">
+                <button type="button" id="btnAgregarReabastecimiento" class="btn btn--primary btn-agregar">Agregar</button>
+                <button type="button" id="btnActualizarReabastecimiento" class="btn btn--secondary btn-actualizar">Actualizar</button>
+                <button type="button" id="btnDesactivarReabastecimiento" class="btn-icon btn-delete">Desactivar</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="table-wrap">
+            <table class="data-table" data-entity="Reabastecimiento">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Cantidad</th>
+                  <th>Fecha de Llegada</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in reabastecimientos %}
+                <tr>
+                  <td>{{ r[0] }}</td>
+                  <td>{{ r[1] }}</td>
+                  <td>{{ r[2] }}</td>
+                  <td>{{ r[3] }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
+      </section>
+    </main>
 
-        <div class="table-wrap">
-          <table class="data-table" data-entity="Reabastecimiento">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Cantidad</th>
-                <th>Fecha de Llegada</th>
-                <th>Estado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for r in reabastecimientos %}
-              <tr>
-                <td>{{ r[0] }}</td>
-                <td>{{ r[1] }}</td>
-                <td>{{ r[2] }}</td>
-                <td>{{ r[3] }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  </main>
+    <script>
+      const URL_API_REABASTECIMIENTO = 'http://127.0.0.1:5001/api/reabastecimiento_inventario'
 
-  {# FOOTER #}
-  {# FOOTER #}
-  {% include 'plantillas/_footer.html' %}
-
-
-  {# SCRIPTS #}
-  {# SCRIPTS #}
-
-  <script>
-    const URL_API_REABASTECIMIENTO = 'http://127.0.0.1:5001/api/reabastecimiento_inventario'
-
-    function obtenerDatosReabastecimiento() {
-      return {
-        id_reabastecimiento: parseInt(document.getElementById('reab-id').value),
-        cantidad: parseInt(document.getElementById('reab-cantidad').value),
-        id_estado: parseInt(document.getElementById('reab-estado').value),
-      }
-    }
-
-    document.getElementById('btnAgregarReabastecimiento').addEventListener('click', async () => {
-      const datos = obtenerDatosReabastecimiento()
-      if (!datos.id_reabastecimiento || !datos.cantidad || !datos.id_estado)
-        return alert('Llena ID, Cantidad y Estado.')
-      try {
-        const respuesta = await fetch(`${URL_API_REABASTECIMIENTO}/guardar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formReabastecimiento').reset()
-          location.reload()
+      function obtenerDatosReabastecimiento() {
+        return {
+          id_reabastecimiento: parseInt(document.getElementById('reab-id').value),
+          cantidad: parseInt(document.getElementById('reab-cantidad').value),
+          id_estado: parseInt(document.getElementById('reab-estado').value),
         }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
       }
-    })
 
-    document.getElementById('btnActualizarReabastecimiento').addEventListener('click', async () => {
-      const datos = obtenerDatosReabastecimiento()
-      if (!datos.id_reabastecimiento || !datos.cantidad || !datos.id_estado)
-        return alert('Llena ID, Cantidad y Estado antes de actualizar.')
-      try {
-        const respuesta = await fetch(`${URL_API_REABASTECIMIENTO}/actualizar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formReabastecimiento').reset()
-          location.reload()
+      document.getElementById('btnAgregarReabastecimiento').addEventListener('click', async () => {
+        const datos = obtenerDatosReabastecimiento()
+        if (!datos.id_reabastecimiento || !datos.cantidad || !datos.id_estado)
+          return alert('Llena ID, Cantidad y Estado.')
+        try {
+          const respuesta = await fetch(`${URL_API_REABASTECIMIENTO}/guardar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos),
+          })
+          const resultado = await respuesta.json()
+          alert(resultado.message)
+          if (respuesta.ok) {
+            document.getElementById('formReabastecimiento').reset()
+            location.reload()
+          }
+        } catch (error) {
+          alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
         }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
+      })
 
-    document.getElementById('btnDesactivarReabastecimiento').addEventListener('click', async () => {
-      const datos = obtenerDatosReabastecimiento()
-      if (!datos.id_reabastecimiento)
-        return alert('Especifica el ID del reabastecimiento a desactivar.')
-      try {
-        const respuesta = await fetch(`${URL_API_REABASTECIMIENTO}/eliminar/${datos.id_reabastecimiento}`, {
-          method: 'POST',
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formReabastecimiento').reset()
-          location.reload()
+      document.getElementById('btnActualizarReabastecimiento').addEventListener('click', async () => {
+        const datos = obtenerDatosReabastecimiento()
+        if (!datos.id_reabastecimiento || !datos.cantidad || !datos.id_estado)
+          return alert('Llena ID, Cantidad y Estado antes de actualizar.')
+        try {
+          const respuesta = await fetch(`${URL_API_REABASTECIMIENTO}/actualizar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos),
+          })
+          const resultado = await respuesta.json()
+          alert(resultado.message)
+          if (respuesta.ok) {
+            document.getElementById('formReabastecimiento').reset()
+            location.reload()
+          }
+        } catch (error) {
+          alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
         }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
-  </script>
-  {% include 'plantillas/_default_scripts.html' %}
-</body>
+      })
 
+      document.getElementById('btnDesactivarReabastecimiento').addEventListener('click', async () => {
+        const datos = obtenerDatosReabastecimiento()
+        if (!datos.id_reabastecimiento)
+          return alert('Especifica el ID del reabastecimiento a desactivar.')
+        try {
+          const respuesta = await fetch(`${URL_API_REABASTECIMIENTO}/eliminar/${datos.id_reabastecimiento}`, {
+            method: 'POST',
+          })
+          const resultado = await respuesta.json()
+          alert(resultado.message)
+          if (respuesta.ok) {
+            document.getElementById('formReabastecimiento').reset()
+            location.reload()
+          }
+        } catch (error) {
+          alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
+        }
+      })
+    </script>
+  </body>
 </html>

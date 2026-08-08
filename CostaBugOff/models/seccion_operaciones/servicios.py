@@ -38,7 +38,7 @@ def eliminar_servicio_logico(id_servicio):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_SERVICIOS_DELETE_SP", [
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_SERVICIOS_DELETE", [
             id_servicio
         ])
         conexion.commit()
@@ -52,11 +52,15 @@ def eliminar_servicio_logico(id_servicio):
 
 def obtener_servicios(id_estado=None):
     conn = get_connection()
-    try:
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM FIDE_SERVICIOS_DISPONIBLES_V')
-        datos = cursor.fetchall()
-    finally:
-        cursor.close()
-        conn.close()
+    cursor = conn.cursor()
+    if id_estado:
+        cursor.execute(
+            'SELECT * FROM FIDE_SERVICIOS_DISPONIBLES_V WHERE "ID ESTADO" = :id_estado ORDER BY "ID_SERVICIO"',
+            {"id_estado": id_estado}
+        )
+    else:
+        cursor.execute('SELECT * FROM FIDE_SERVICIOS_DISPONIBLES_V ORDER BY "ID_SERVICIO"')
+    datos = cursor.fetchall()
+    cursor.close()
+    conn.close()
     return datos

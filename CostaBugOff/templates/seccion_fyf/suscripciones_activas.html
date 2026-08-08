@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+
+{% include 'plantillas/_default_head.html' %}
+
+<body>
+  <header class="topbar">
+    <div class="topbar__brand">
+      {% include 'plantillas/_logo.html' %}
+      <span class="topbar__view-tag" id="viewTag">Suscripciones Activas</span>
+    </div>
+    <div class="topbar__user" title="Usuario">A</div>
+  </header>
+
+  {% include 'plantillas/_navbar.html' %}
+
+  <main class="app">
+    <section class="panel active" id="panel-suscripciones_activas" data-title="suscripciones_activas">
+      <div class="panel__header">
+        <h1>Suscripciones Activas</h1>
+      </div>
+      <div class="panel__body panel__body--full">
+        {% if not suscripciones %}
+        <p>No hay suscripciones activas registradas.</p>
+        {% else %}
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Plan</th>
+                <th>Fecha inicio</th>
+                <th>Próxima renovación</th>
+                <th>Método de pago</th>
+                <th>Estado</th>
+                <th>Aviso</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in suscripciones %}
+              <tr>
+                <td>{{ s.NOMBRE_CLIENTE }}</td>
+                <td>{{ s.PLAN }}</td>
+                <td>{{ s.FECHA_INICIO }}</td>
+                <td>{{ s.FECHA_PROXIMA_RENOVACION }}</td>
+                <td>{{ s.METODO_PAGO or '-' }}</td>
+                <td>{{ s.ESTADO }}</td>
+                <td>
+                  {% if s.por_vencer %}
+                  <span class="aviso-vencer">Por vencer ({{ s.dias_restantes }}d)</span>
+                  {% else %}
+                  <span class="aviso-ok">—</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+  </main>
+
+  {% include 'plantillas/_default_scripts.html' %}
+</body>
+
+</html>

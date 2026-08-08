@@ -1,21 +1,3 @@
-{# LISTENER DE BUSCADOR #}
-<script>
-    document.addEventListener('input', (event) => {
-        // Escucha eventos en inputs que tengan el atributo 'data-filter-target'
-        if (event.target.matches('[data-filter-target]')) {
-            const targetEntity = event.target.getAttribute('data-filter-target');
-            const texto = event.target.value.toLowerCase();
-            const filas = document.querySelectorAll(`table[data-entity="${targetEntity}"] tbody tr`);
-
-            filas.forEach((fila) => {
-                const coincide = fila.textContent.toLowerCase().includes(texto);
-                fila.style.display = coincide ? '' : 'none';
-            });
-        }
-    });
-</script>
-
-{# FUNCION DE ELIMINAR FILA #}
 <script>
     function deleteRow(button) {
         const row = button.closest('tr');

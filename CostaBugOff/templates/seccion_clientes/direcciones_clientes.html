@@ -1,32 +1,34 @@
 <!doctype html>
 <html lang="es">
 
-{% include 'plantillas/_default_head.html' %}
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CostaBugOff</title>
+    <link rel="stylesheet" href="/static/css/styles.css" />
+</head>
 <!--http://127.0.0.1:5001/productos para correr productos -->
 <!--correr con control + ñ y despues ingresar python app.py para que ande -->
 
 <body>
-    <header>
-        {# NAVBAR #}
-        {# NAVBAR #}
-        {% with brand_tag="Vista Direcciones de Clientes" %}
-        {% include 'plantillas/_navbar.html' %}
-        {% endwith %}
+    <header class="topbar">
+        <div class="topbar__brand">
+            <div class="JeremyLogo"></div>
+            {% include 'plantillas/_logo.html' %}
+            <span class="topbar__logo">CostaBugOff</span>
+            <span class="topbar__view-tag" id="viewTag">Vista Direcciones de Clientes</span>
+        </div>
+        <div class="topbar__user" title="Usuario">A</div>
     </header>
+
+    {% include 'plantillas/_navbar.html' %}
 
     <main class="app">
         <section class="panel active" id="panel-Direcciones" data-title="Direcciones de Clientes">
             <div class="panel__header">
                 <h1>Direcciones de Clientes</h1>
             </div>
-            {# Filtro de búsqueda #}
-            <div style="display:flex; flex-direction:column; gap:16px;">
-                <form class="filtro-form" onsubmit="return false;">
-                    <label for="filtro-busqueda">Buscar Direccion:</label>
-                    <input type="text" id="filtro-busqueda" data-filter-target="DireccionCliente"
-                        placeholder="Escribe el nombre o la direccion del cliente." />
-                </form>
-            </div>
+
             <!-- TABLA DE DIRECCIONES -->
             <!-- TABLA DE DIRECCIONES -->
             <div class="panel__body">
@@ -96,13 +98,7 @@
             </div>
         </section>
     </main>
-    {# FOOTER #}
-    {# FOOTER #}
-    {% include 'plantillas/_footer.html' %}
 
-
-    {# SCRIPTS #}
-    {# SCRIPTS #}
     <script>
         const URL_API = 'http://127.0.0.1:5001/api/telefonos_clientes'
 
@@ -171,7 +167,6 @@
                 }
             })
     </script>
-    {% include 'plantillas/_default_scripts.html' %}
 </body>
 
 </html>

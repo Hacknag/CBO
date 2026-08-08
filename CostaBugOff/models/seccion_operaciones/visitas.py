@@ -31,7 +31,7 @@ def actualizar_visita(id_visita, nombre, fecha_programada, fecha_realizada, id_s
         cursor.close()
         conexion.close()
 
-def eliminar_visita_logica(id_visita):
+def eliminar_visita(id_visita):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()

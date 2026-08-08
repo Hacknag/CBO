@@ -1,117 +1,125 @@
 <!doctype html>
 <html lang="es">
-
-<head>
-  {% include 'plantillas/_default_head.html' %}
-</head>
-
-<body>
-  <header>
-    {# NAVBAR #}
-    {# NAVBAR #}
-    {% with brand_tag="Vista Factura" %}
-    {% include 'plantillas/_navbar_factura.html' %}
-    {% endwith %}
-  </header>
-
-  <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" data-title="Carrito">
-      <div class="panel__header">
-        <h1>Tu carrito</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CostaBugOff - Carrito</title>
+    <link rel="stylesheet" href="/static/css/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__brand">
+        <img class="logo-bug" src="/static/img/Jeremy.png" alt="CostaBugOff" />
+        <span class="topbar__logo">CostaBugOff</span>
+        <span class="topbar__view-tag">Carrito</span>
       </div>
-      <div class="panel__body">
-        {% if error %}
-        <p style="color: #b00020">{{ error }}</p>
-        {% endif %}
+    </header>
 
-        {% if not carrito %}
-        <p>Tu carrito está vacío. <a href="/planes">Ver planes y productos</a></p>
-        {% else %}
-        <div class="table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Tipo</th>
-                <th>Cantidad</th>
-                <th>Precio Unitario</th>
-                <th>Subtotal</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for item in carrito %}
-              <tr>
-                <td>{{ item.nombre }}</td>
-                <td>{{ "Producto" if item.tipo == "producto" else "Suscripción" }}</td>
-                <td>{{ item.cantidad }}</td>
-                <td>₡{{ "%.2f"|format(item.precio_unitario) }}</td>
-                <td>₡{{ "%.2f"|format(item.cantidad * item.precio_unitario) }}</td>
-                <td>
-                  <button type="button" class="btn-icon btn-delete btn-quitar-carrito" data-tipo="{{ item.tipo }}"
-                    data-id="{{ item.id }}">Quitar</button>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+    <nav class="mainnav">
+      <ul>
+        <li><a class="nav-btn" href="/inicio-cliente">Inicio</a></li>
+        <li><a class="nav-btn" href="/planes">Planes</a></li>
+        <li><a class="nav-btn" href="/carrito">Carrito</a></li>
+        <li><a class="nav-btn" href="/mis-facturas">Mis facturas</a></li>
+        <li><a class="nav-btn" href="/programar-visita">Programar Visita</a></li>
+        <li><a class="nav-btn" href="/informacion">Información</a></li>
+        <li><a class="nav-btn" href="/logout">Cerrar sesión</a></li>
+      </ul>
+    </nav>
+
+    <main class="app">
+      <section class="panel active" data-title="Carrito">
+        <div class="panel__header">
+          <h1>Tu carrito</h1>
         </div>
+        <div class="panel__body">
+          {% if error %}
+          <p style="color: #b00020">{{ error }}</p>
+          {% endif %}
 
-        <h2 style="margin-top: 20px">Total: ₡{{ "%.2f"|format(total) }}</h2>
-
-        <form class="entity-form" method="POST" action="/checkout">
-          <div class="field">
-            <label for="direccion">Dirección</label>
-            <input type="text" id="direccion" name="direccion" placeholder="Dirección de entrega/facturación"
-              required />
+          {% if not carrito %}
+          <p>Tu carrito está vacío. <a href="/planes">Ver planes y productos</a></p>
+          {% else %}
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Tipo</th>
+                  <th>Cantidad</th>
+                  <th>Precio Unitario</th>
+                  <th>Subtotal</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in carrito %}
+                <tr>
+                  <td>{{ item.nombre }}</td>
+                  <td>{{ "Producto" if item.tipo == "producto" else "Suscripción" }}</td>
+                  <td>{{ item.cantidad }}</td>
+                  <td>₡{{ "%.2f"|format(item.precio_unitario) }}</td>
+                  <td>₡{{ "%.2f"|format(item.cantidad * item.precio_unitario) }}</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn-icon btn-delete btn-quitar-carrito"
+                      data-tipo="{{ item.tipo }}"
+                      data-id="{{ item.id }}"
+                    >Quitar</button>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
           </div>
-          <div class="field">
-            <label for="telefono">Teléfono</label>
-            <input type="text" id="telefono" name="telefono" placeholder="Teléfono de contacto" required />
-          </div>
-          <div class="field">
-            <label for="id_metodo_pago">Método de pago</label>
-            <select id="id_metodo_pago" name="id_metodo_pago" required>
-              <option value="">Selecciona un método de pago</option>
-              {% for m in metodos_pago %}
-              <option value="{{ m[0] }}">{{ m[1] }}</option>
-              {% endfor %}
-            </select>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn btn--primary">Confirmar compra</button>
-          </div>
-        </form>
-        {% endif %}
-      </div>
-    </section>
-  </main>
 
-  {# FOOTER #}
-  {# FOOTER #}
-  {% include 'plantillas/_footer.html' %}
+          <h2 style="margin-top: 20px">Total: ₡{{ "%.2f"|format(total) }}</h2>
 
+          <form class="entity-form" method="POST" action="/checkout">
+            <div class="field">
+              <label for="direccion">Dirección</label>
+              <input type="text" id="direccion" name="direccion" placeholder="Dirección de entrega/facturación" required />
+            </div>
+            <div class="field">
+              <label for="telefono">Teléfono</label>
+              <input type="text" id="telefono" name="telefono" placeholder="Teléfono de contacto" required />
+            </div>
+            <div class="field">
+              <label for="id_metodo_pago">Método de pago</label>
+              <select id="id_metodo_pago" name="id_metodo_pago" required>
+                <option value="">Selecciona un método de pago</option>
+                {% for m in metodos_pago %}
+                <option value="{{ m[0] }}">{{ m[1] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn--primary">Confirmar compra</button>
+            </div>
+          </form>
+          {% endif %}
+        </div>
+      </section>
+    </main>
 
-  {# SCRIPTS #}
-  {# SCRIPTS #}
-  {% include 'plantillas/_default_scripts.html' %}
-  <script>
-    document.querySelectorAll('.btn-quitar-carrito').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        const datos = { tipo: btn.dataset.tipo, id: btn.dataset.id }
-        try {
-          await fetch('/carrito/quitar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datos),
-          })
-          location.reload()
-        } catch (error) {
-          alert('No se pudo quitar el item.')
-        }
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+      document.querySelectorAll('.btn-quitar-carrito').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const datos = { tipo: btn.dataset.tipo, id: btn.dataset.id }
+          try {
+            await fetch('/carrito/quitar', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(datos),
+            })
+            location.reload()
+          } catch (error) {
+            Swal.fire('Error', 'No se pudo quitar el item.', 'error')
+          }
+        })
       })
-    })
-  </script>
-</body>
-
+    </script>
+  </body>
 </html>

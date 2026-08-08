@@ -38,7 +38,7 @@ def eliminar_provincia_logico(id_provincia):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_PROVINCIAS_DELETE_SP", [
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_PROVINCIAS_DELETE", [
             id_provincia
         ])
         conexion.commit()

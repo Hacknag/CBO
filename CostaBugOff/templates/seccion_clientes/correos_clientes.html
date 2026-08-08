@@ -2,31 +2,31 @@
 <html lang="es">
 
 <head>
-    {% include 'plantillas/_default_head.html' %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CostaBugOff</title>
+    <link rel="stylesheet" href="/static/css/styles.css" />
 </head>
-<!--http://127.0.0.1:5001/correos_clientes para correr correos de clientes -->
+<!--http://127.0.0.1:5001/productos para correr productos -->
 <!--correr con control + ñ y despues ingresar python app.py para que ande -->
 
 <body>
-    <header>
-        {# NAVBAR #}
-        {# NAVBAR #}
-        {% with brand_tag="Vista Correos de Clientes" %}
-        {% include 'plantillas/_navbar.html' %}
-        {% endwith %}
+    <header class="topbar">
+        <div class="topbar__brand">
+            <div class="JeremyLogo"></div>
+            {% include 'plantillas/_logo.html' %}
+            <span class="topbar__logo">CostaBugOff</span>
+            <span class="topbar__view-tag" id="viewTag">Vista Correos de Clientes</span>
+        </div>
+        <div class="topbar__user" title="Usuario">A</div>
     </header>
-    <main class="app mt-5 pt-4">
-        <section class="panel active mt-5 pt-4" id="panel-correos" data-title="Correos de Clientes">
+
+    {% include 'plantillas/_navbar.html' %}
+
+    <main class="app">
+        <section class="panel active" id="panel-correos" data-title="Correos de Clientes">
             <div class="panel__header">
                 <h1>Correos de Clientes</h1>
-            </div>
-            {# Filtro de búsqueda #}
-            <div style="display:flex; flex-direction:column; gap:16px;">
-                <form class="filtro-form" onsubmit="return false;">
-                    <label for="filtro-busqueda">Buscar Correo:</label>
-                    <input type="text" id="filtro-busqueda" data-filter-target="CorreoCliente"
-                        placeholder="Escribe el nombre o el correo del cliente." />
-                </form>
             </div>
 
             <!-- TABLA DE CORREOS -->
@@ -96,13 +96,7 @@
             </div>
         </section>
     </main>
-    {# FOOTER #}
-    {# FOOTER #}
-    {% include 'plantillas/_footer.html' %}
 
-
-    {# SCRIPTS #}
-    {# SCRIPTS #}
     <script>
         const URL_API = 'http://127.0.0.1:5001/api/correos_clientes'
 
@@ -171,7 +165,6 @@
                 }
             })
     </script>
-    {% include 'plantillas/_default_scripts.html' %}
 </body>
 
 </html>

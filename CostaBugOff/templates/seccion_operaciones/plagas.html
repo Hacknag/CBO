@@ -2,63 +2,58 @@
 <html lang="es">
 
 <head>
-  {% include 'plantillas/_default_head.html' %}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CostaBugOff</title>
 </head>
-<!--http://127.0.0.1:5001/plagas para correr plagas -->
-<!--correr con control + ñ y despues ingresar python app.py para que ande -->
 
 <body>
-  <header>
-    {# NAVBAR #}
-    {# NAVBAR #}
-    {% with brand_tag="Vista Plagas" %}
-    {% include 'plantillas/_navbar.html' %}
-    {% endwith %}
+  <header class="topbar">
+    <div class="topbar__brand">
+      <div class="JeremyLogo">
+        <link rel="stylesheet" href="/static/css/styles.css" alt="foto Jeremy" />
+      </div>
+
+      <img class="logo-bug" src="/static/img/Jeremy.png" alt="" />
+      <span class="topbar__logo">CostaBugOff</span>
+
+      <span class="topbar__view-tag" id="viewTag">Vista Clientes</span>
+    </div>
+    <div class="topbar__user" title="Usuario">A</div>
   </header>
 
-  <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-plagas" data-title="Plaga">
+  {% include 'plantillas/_navbar.html' %}
+
+  <main class="app">
+    <section class="panel active" id="panel-plagas" data-title="Plaga">
       <div class="panel__header">
         <h1>Plagas</h1>
-
         <button class="btn btn--ghost btn-update-lookup">
           Actualizar por ID
         </button>
       </div>
-      {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
-          <label for="filtro-busqueda">Buscar Plaga:</label>
-          <input type="text" id="filtro-busqueda" data-filter-target="plagas"
-            placeholder="Escribe el nombre o la descripcion de la plaga." />
-        </form>
-      </div>
       <div class="panel__body">
         <div class="table-wrap">
-          <table class="data-table" data-entity="plagas">
+          <table class="data-table" data-entity="Plaga">
             <thead>
               <tr>
+                <th>ID</th>
                 <th>Tipo</th>
                 <th>Nombre</th>
                 <th>Descripción</th>
                 <th>Unidades_necesarias</th>
-                <th>Estado</th>
-                <th>Borrar</th>
+                <th>ID_Estado</th>
               </tr>
             </thead>
             <tbody>
               {% for p in plagas %}
-              <tr data-id="{{ p[0] }}" data-entity="plagas">
+              <tr>
+                <td>{{ p[0] }}</td>
                 <td>{{ p[1] }}</td>
                 <td>{{ p[2] }}</td>
                 <td>{{ p[3] }}</td>
                 <td>{{ p[4] }}</td>
                 <td>{{ p[5] }}</td>
-                <td>
-                  <button class="delete-btn" onclick="deleteRow(this)">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </td>
               </tr>
               {% endfor %}
             </tbody>
@@ -102,14 +97,6 @@
       </div>
     </section>
   </main>
-  {# FOOTER #}
-  {# FOOTER #}
-  {% include 'plantillas/_footer.html' %}
-
-
-  {# SCRIPTS #}
-  {# SCRIPTS #}
-  {% include 'plantillas/_default_scripts.html' %}
 </body>
 
 </html>
