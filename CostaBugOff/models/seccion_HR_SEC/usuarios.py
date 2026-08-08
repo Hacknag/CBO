@@ -2,12 +2,12 @@ import oracledb
 from db import get_connection
 
 
-def insertar_permiso(id_permiso, nombre, descripcion, id_estado):
+def insertar_usuario(id_usuario, usuario, contrasena, id_empleado, id_rol, id_estado, id_cliente):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_PERMISOS_INSERT", [
-            id_permiso, nombre, descripcion, id_estado
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_USUARIOS_INSERT", [
+            id_usuario, usuario, contrasena, id_empleado, id_rol, id_estado, id_cliente
         ])
         conexion.commit()
     except Exception as e:
@@ -18,12 +18,12 @@ def insertar_permiso(id_permiso, nombre, descripcion, id_estado):
         conexion.close()
 
 
-def actualizar_permiso(id_permiso, nombre, descripcion, id_estado):
+def actualizar_usuario(id_usuario, usuario, contrasena, id_empleado, id_rol, id_estado, id_cliente):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_PERMISOS_UPDATE", [
-            id_permiso, nombre, descripcion, id_estado
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_USUARIOS_UPDATE", [
+            id_usuario, usuario, contrasena, id_empleado, id_rol, id_estado, id_cliente
         ])
         conexion.commit()
     except Exception as e:
@@ -34,12 +34,12 @@ def actualizar_permiso(id_permiso, nombre, descripcion, id_estado):
         conexion.close()
 
 
-def eliminar_permiso(id_permiso):
+def eliminar_usuario(id_usuario):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_PERMISOS_DELETE", [
-            id_permiso
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_USUARIOS_DELETE", [
+            id_usuario
         ])
         conexion.commit()
     except Exception as e:
@@ -50,16 +50,16 @@ def eliminar_permiso(id_permiso):
         conexion.close()
 
 
-def obtener_permisos(id_estado=None):
+def obtener_usuarios(id_estado=None):
     conn = get_connection()
     cursor = conn.cursor()
     if id_estado:
         cursor.execute(
-            'SELECT * FROM FIDE_PERMISOS_V WHERE "ID ESTADO" = :id_estado ORDER BY "ID PERMISO"',
+            'SELECT * FROM FIDE_USUARIOS_V WHERE "ID ESTADO" = :id_estado ORDER BY "ID USUARIO"',
             {"id_estado": id_estado}
         )
     else:
-        cursor.execute('SELECT * FROM FIDE_PERMISOS_V ORDER BY "PERMISO ID"')
+        cursor.execute('SELECT * FROM FIDE_USUARIOS_V ORDER BY "USUARIO ID"')
     datos = cursor.fetchall()
     cursor.close()
     conn.close()

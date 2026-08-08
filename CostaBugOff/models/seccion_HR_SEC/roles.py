@@ -59,7 +59,7 @@ def obtener_rols(id_estado=None):
             {"id_estado": id_estado}
         )
     else:
-        cursor.execute('SELECT * FROM FIDE_ROLES_V ORDER BY "ID ROL"')
+        cursor.execute('SELECT * FROM FIDE_ROLES_V ORDER BY "ROL ID"')
     datos = cursor.fetchall()
     cursor.close()
     conn.close()

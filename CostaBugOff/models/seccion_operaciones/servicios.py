@@ -59,7 +59,7 @@ def obtener_servicios(id_estado=None):
             {"id_estado": id_estado}
         )
     else:
-        cursor.execute('SELECT * FROM FIDE_SERVICIOS_DISPONIBLES_V ORDER BY "ID_SERVICIO"')
+        cursor.execute('SELECT * FROM FIDE_SERVICIOS_DISPONIBLES_V ORDER BY "ID SERVICIO"')
     datos = cursor.fetchall()
     cursor.close()
     conn.close()

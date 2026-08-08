@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+
+{% include 'plantillas/_default_head.html' %}
+
+<body>
+  <header class="topbar">
+    <div class="topbar__brand">
+      {% include 'plantillas/_logo.html' %}
+      <span class="topbar__view-tag" id="viewTag">Vista Usuarios</span>
+    </div>
+    <div class="topbar__user" title="Usuario">A</div>
+  </header>
+  {% include 'plantillas/_navbar.html' %}
+
+  <main class="app">
+    <section class="panel active" id="panel-usuarios" data-title="Usuarios">
+      <div class="panel__header">
+        <h1>Usuarios</h1>
+
+      </div>
+      <div class="panel__body">
+        <div class="table-wrap">
+          <table class="data-table" data-entity="cliente">
+            <thead>
+              <tr>
+                <th>Rol</th>
+                <th>Usuario</th>
+                <th>Estado</th>
+                <th>Borrar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in usuarios %}
+              <tr data-id="{{ u[0] }}" data-entity="usuario">
+                <td>{{ u[1] }}</td>
+                <td>{{ u[2] }}</td>
+                <td>{{ u[3] }}</td>
+                <td>{{ u[4] }}</td>
+                <td>
+                  <button class="delete-btn" onclick="deleteRow(this)">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <form class="entity-form" data-entity="Usuario">
+          <div class="field">
+            <label for="usr-nombre">Nombre</label>
+            <input type="text" id="usr-nombre" name="nombre" placeholder="Nombre de usuario" />
+          </div>
+          <div class="field">
+            <label for="usr-contrasena">Contraseña</label>
+            <input type="password" id="usr-contrasena" name="contrasena" placeholder="Contraseña" />
+          </div>
+          <div class="field">
+            <label for="usr-idEmpleado">ID Empleado</label>
+            <input type="number" id="usr-idEmpleado" name="id_empleado" placeholder="ID del empleado" />
+          </div>
+          <div class="field">
+            <label for="usr-idRol">ID Rol</label>
+            <input type="number" id="usr-idRol" name="id_rol" placeholder="ID del rol" />
+          </div>
+          <div class="field">
+            <label for="usr-idEstado">ID Estado</label>
+            <input type="number" id="usr-idEstado" name="id_estado" placeholder="ID del estado" />
+          </div>
+          <div class="field">
+            <label for="usr-idCliente">ID Cliente</label>
+            <input type="number" id="usr-idCliente" name="id_cliente" placeholder="ID del cliente" />
+          </div>
+
+          <div class="form-actions">
+            <a class="btn btn--primary" href="{{ url_for('agregar_cliente') }}">Agregar Cliente</a>
+            <button type="button" class="btn btn--secondary btn-actualizar">
+              Actualizar
+            </button>
+            <button class="btn btn--ghost btn-update-lookup">
+              Actualizar por ID
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const URL_API_USUARIOS = 'http://127.0.0.1:5001/api/usuarios'
+
+    function obtenerDatosUsuario() {
+      return {
+        id_empleado: parseInt(document.getElementById('usr-idEmpleado').value),
+        nombre: document.getElementById('usr-nombre').value,
+        contrasena: document.getElementById('usr-contrasena').value,
+        id_empleado: parseInt(document.getElementById('usr-idEmpleado').value),
+        id_rol: parseInt(document.getElementById('usr-idRol').value),
+        id_estado: parseInt(document.getElementById('usr-idEstado').value),
+        id_cliente: parseInt(document.getElementById('usr-idCliente').value),
+      }
+    }
+
+    document.getElementById('btnAgregarUsuario').addEventListener('click', async () => {
+      const datos = obtenerDatosUsuario()
+      if (!datos.id_empleado || !datos.nombre || !datos.contrasena || !datos.id_rol || !datos.id_estado || !datos.id_cliente)
+        return alert('Llena todos los campos: Agregar crea el registro completo (queda activo por defecto).')
+      try {
+        const respuesta = await fetch(`${URL_API_USUARIOS}/guardar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(datos),
+        })
+        const resultado = await respuesta.json()
+        alert(resultado.message)
+        if (respuesta.ok) {
+          document.getElementById('formUsuarios').reset()
+          location.reload()
+        }
+      } catch (error) {
+        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
+      }
+    })
+
+    document.getElementById('btnActualizarUsuario').addEventListener('click', async () => {
+      const datos = obtenerDatosUsuario()
+      if (!datos.id_empleado || !datos.nombre || !datos.contrasena || !datos.id_rol || !datos.id_estado || !datos.id_cliente)
+        return alert('Llena todos los campos antes de actualizar (el empleado queda activo).')
+      try {
+        const respuesta = await fetch(`${URL_API_USUARIOS}/actualizar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(datos),
+        })
+        const resultado = await respuesta.json()
+        alert(resultado.message)
+        if (respuesta.ok) {
+          document.getElementById('formUsuarios').reset()
+          location.reload()
+        }
+      } catch (error) {
+        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
+      }
+    })
+
+    document.getElementById('btnDesactivarUsuario').addEventListener('click', async () => {
+      const datos = obtenerDatosUsuario()
+      if (!datos.id_empleado)
+        return alert('Especifica el ID del usuario a desactivar.')
+      try {
+        const respuesta = await fetch(`${URL_API_USUARIOS}/desactivar/${datos.id_empleado}`, {
+          method: 'POST',
+        })
+        const resultado = await respuesta.json()
+        alert(resultado.message)
+        if (respuesta.ok) {
+          document.getElementById('formUsuarios').reset()
+          location.reload()
+        }
+      } catch (error) {
+        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
+      }
+    })
+  </script>
+  {% include 'plantillas/_default_scripts.html' %}
+</body>
+
+</html>

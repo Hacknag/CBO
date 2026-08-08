@@ -703,6 +703,13 @@ html, body {
   transform: scale(1.25);
 }
 
+.carousel__image {
+  max-width: 30%;
+  height: auto;
+  border-radius: var(--radius);
+  object-fit: cover;
+}
+
 @media (max-width: 700px) {
   .carousel__slide {
     flex-direction: column;
@@ -847,5 +854,74 @@ html, body {
     grid-template-columns: 1fr;
     gap: 26px;
     padding: 32px 20px 24px;
+  }
+}
+
+/* ============ RECUADROS DE PREVENCIÓN ============ */
+.tip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+.tip-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.tip-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.tip-card h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: var(--moss-dark);
+}
+
+.tip-card p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+/* Ajuste para pantallas pequeñas */
+@media (max-width: 560px) {
+  .tip-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* Estilo para el texto adicional dentro de cada tarjeta */
+.tip-card .tip-extra {
+  margin: 10px 0 0 0;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  background: var(--paper);
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  border-left: 3px solid var(--amber);
+}
+
+/* Mejora el espaciado interno de las tarjetas para textos más largos */
+.tip-card p {
+  margin: 0 0 4px 0;
+}
+
+/* Ajuste para el recuadro destacado en móviles */
+@media (max-width: 560px) {
+  .tip-highlight {
+    padding: 16px 18px !important;
+  }
+  .tip-highlight h3 {
+    font-size: 16px;
   }
 }

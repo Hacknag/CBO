@@ -25,6 +25,9 @@ from models.seccion_HR_SEC.puestos import insertar_puesto, actualizar_puesto, el
 from models.seccion_HR_SEC.empleados import obtener_empleados, insertar_empleados, actualizar_empleados, obtener_puestos, eliminar_empleados_logica
 from models.seccion_HR_SEC.correos_empleados import insertar_correo_empleado, actualizar_correo_empleado, eliminar_correo_empleado_logico, obtener_correos_empleados
 from models.seccion_HR_SEC.telefonos_empleados import insertar_telefono_empleado, actualizar_telefono_empleado, eliminar_telefono_empleado_logico, obtener_telefonos_empleados
+from models.seccion_HR_SEC.roles import insertar_rol, actualizar_rol, eliminar_rol, obtener_rols
+from models.seccion_HR_SEC.permisos import insertar_permiso, actualizar_permiso, eliminar_permiso, obtener_permisos
+from models.seccion_HR_SEC.usuarios import insertar_usuario, actualizar_usuario, eliminar_usuario, obtener_usuarios
 
 #################### Imports Seccion Inventario y Proveedores ####################
 #################### Imports Seccion Inventario y Proveedores ####################
@@ -33,6 +36,8 @@ from models.seccion_inventario.productos_x_proveedor import insertar_producto_x_
 from models.seccion_inventario.proveedores import insertar_proveedor, actualizar_proveedor, eliminar_proveedor_logico, obtener_proveedores
 from models.seccion_inventario.telefonos_proveedores import insertar_telefonos_proveedores, actualizar_telefonos_proveedores, eliminar_telefonos_proveedores_logica, obtener_telefonos_proveedores
 from models.seccion_inventario.correos_proveedores import insertar_correo_proveedor, actualizar_correo_proveedor, eliminar_correo_proveedor_logico, obtener_correos_proveedores
+from models.seccion_inventario.reabastecimiento_inventario import insertar_reabastecimiento, actualizar_reabastecimiento, eliminar_reabastecimiento_logico, obtener_reabastecimientos
+
 #################### Imports Seccion Operaciones ####################
 #################### Imports Seccion Operaciones ####################
 from models.seccion_operaciones.plagas import obtener_plagas
@@ -433,6 +438,154 @@ def api_actualizar_telefono_empleado():
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
+# ---------------- Roles (vista para Admin/HHRR) ----------------
+
+@app.route("/roles_permisos")
+def roles_permisos():
+    lista_roles = obtener_rols()
+    lista_permisos = obtener_permisos()
+    return render_template(
+        "seccion_HR-SEC/roles_permisos.html",
+        roles=lista_roles,
+        permisos=lista_permisos
+    )
+
+@app.route("/delete/rol/<int:id_rol>", methods=["POST"])
+def eliminar_rol(id_rol):
+    try:
+        eliminar_rol(id_rol)
+        return jsonify({'success': True, 'message': 'Rol eliminado correctamente'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': f"Error al eliminar en Base de Datos: {str(e)}"}), 500
+
+@app.route("/api/rol/guardar", methods=["POST"])
+def api_guardar_rol():
+    datos = request.get_json()
+    try:
+        insertar_rol(
+            id_rol=datos["id_rol"],
+            nombre=datos["nombre"],
+            descripcion=datos["descripcion"],
+            id_estado=datos["id_estado"]
+        )
+        return jsonify({"message": "¡Rol agregado con éxito en Oracle!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+
+
+@app.route("/api/rol/actualizar", methods=["POST"])
+def api_actualizar_rol():
+    datos = request.get_json()
+    try:
+        actualizar_rol(
+            id_rol=datos["id_rol"],
+            nombre=datos["nombre"],
+            descripcion=datos["descripcion"],
+            id_estado=datos["id_estado"]
+        )
+        return jsonify({"message": "¡Rol actualizado con éxito en Oracle!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+
+# ---------------- Permisos(vista para Admin/Empleado) ----------------
+
+@app.route("/permisos")
+def permisos():
+    lista_permisos = obtener_permisos()
+    return render_template(
+        "seccion_HR-SEC/permisos.html",
+        permisos=lista_permisos
+    )
+
+@app.route("/delete/permisos/<int:id_permiso>", methods=["POST"])
+def eliminar_permiso(id_permiso):
+    try:
+        eliminar_permiso(id_permiso)
+        return jsonify({'success': True, 'message': 'Permiso eliminado correctamente'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': f"Error al eliminar en Base de Datos: {str(e)}"}), 500
+
+@app.route("/api/permisos/guardar", methods=["POST"])
+def api_guardar_permiso():
+    datos = request.get_json()
+    try:
+        insertar_permiso(
+            id_permiso=datos["id_permiso"],
+            nombre=datos["nombre"],
+            descripcion=datos["descripcion"],
+            id_estado=datos["id_estado"]
+        )
+        return jsonify({"message": "¡Permiso agregado con éxito en Oracle!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+
+
+@app.route("/api/permisos/actualizar", methods=["POST"])
+def api_actualizar_permiso():
+    datos = request.get_json()
+    try:
+        actualizar_permiso(
+            id_permiso=datos["id_permiso"],
+            nombre=datos["nombre"],
+            descripcion=datos["descripcion"],
+            id_estado=datos["id_estado"]
+        )
+        return jsonify({"message": "¡Permiso actualizado con éxito en Oracle!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+
+# ---------------- Usuarios (vista para Admin/HHRR) ----------------
+
+@app.route("/usuarios")
+def usuarios():
+    lista_usuarios = obtener_usuarios()
+    return render_template(
+        "seccion_HR-SEC/usuarios.html",
+        usuarios=lista_usuarios
+    )
+
+@app.route("/delete/usuarios/<int:id_usuario>", methods=["POST"])
+def eliminar_usuario(id_usuario):
+    try:
+        eliminar_usuario(id_usuario)
+        return jsonify({'success': True, 'message': 'Usuario eliminado correctamente'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': f"Error al eliminar en Base de Datos: {str(e)}"}), 500
+
+@app.route("/api/usuarios/guardar", methods=["POST"])
+def api_guardar_usuario():
+    datos = request.get_json()
+    try:
+        insertar_usuario(
+            id_usuario=datos["id_usuario"],
+            usuario=datos["usuario"],
+            contrasena=datos["contrasena"],
+            id_empleado=datos["id_empleado"],
+            id_rol=datos["id_rol"],
+            id_estado=datos["id_estado"],
+            id_cliente=datos["id_cliente"]
+        )
+        return jsonify({"message": "¡Usuario agregado con éxito en Oracle!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+
+
+@app.route("/api/usuarios/actualizar", methods=["POST"])
+def api_actualizar_usuario():
+    datos = request.get_json()
+    try:
+        actualizar_usuario(
+            id_usuario=datos["id_usuario"],
+            usuario=datos["usuario"],
+            contrasena=datos["contrasena"],
+            id_empleado=datos["id_empleado"],
+            id_rol=datos["id_rol"],
+            id_estado=datos["id_estado"],
+            id_cliente=datos["id_cliente"]
+        )
+        return jsonify({"message": "¡Usuario actualizado con éxito en Oracle!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
 
 ###########################################################################################
@@ -638,6 +791,52 @@ def api_actualizar_correo_proveedor():
             ID_ESTADO=datos["id_estado"]
         )
         return jsonify({"message": "¡Correo actualizado con éxito en Oracle!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+
+
+@app.route("/reabastecimiento_inventario")
+def reabastecimiento_inventario():
+    lista_reabastecimientos = obtener_reabastecimientos()
+    return render_template(
+        "seccion_inventario/reabastecimiento_inventario.html",
+        reabastecimientos=lista_reabastecimientos
+    )
+
+@app.route("/delete/reabastecimientos/<int:id_reabastecimiento>", methods=["POST"])
+def eliminar_reabastecimiento(id_reabastecimiento):
+    try:
+        eliminar_reabastecimiento_logico(id_reabastecimiento)
+        return jsonify({'success': True, 'message': 'Reabastecimiento eliminado correctamente'}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': f"Error al eliminar en Base de Datos: {str(e)}"}), 500
+
+@app.route("/api/reabastecimientos/guardar", methods=["POST"])
+def api_guardar_reabastecimiento():
+    datos = request.get_json()
+    try:
+        insertar_reabastecimiento(
+            id_reabastecimiento=datos["id_reabastecimiento"],
+            cantidad=datos["cantidad"],
+            fecha_llegada=datos["fecha_llegada"],
+            id_estado=datos["id_estado"]
+        )
+        return jsonify({"message": "¡Reabastecimiento agregado con éxito en Oracle!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+
+
+@app.route("/api/reabastecimientos/actualizar", methods=["POST"])
+def api_actualizar_reabastecimiento():
+    datos = request.get_json()
+    try:
+        actualizar_reabastecimiento(
+            id_reabastecimiento=datos["id_reabastecimiento"],
+            cantidad=datos["cantidad"],
+            fecha_llegada=datos["fecha_llegada"],
+            id_estado=datos["id_estado"]
+        )
+        return jsonify({"message": "¡Reabastecimiento actualizado con éxito en Oracle!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
@@ -1246,10 +1445,6 @@ def registro():
             return redirect(url_for("inicio_cliente"))
         return render_template("registro.html", error=mensaje)
     return render_template("registro.html")
-
-@app.route("/reabastecimiento-inventario")
-def reabastecimiento_inventario():
-    return render_template("reabastecimiento_inventario.html")
 
 ####################################################################################################
 ####################################################################################################
