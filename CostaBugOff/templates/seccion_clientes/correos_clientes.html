@@ -16,17 +16,17 @@
         {% endwith %}
     </header>
     <main class="app mt-5 pt-4">
-        <section class="panel active mt-5 pt-4" id="panel-correos" data-title="Correos de Clientes">
+        <section class="panel active mt-5" id="panel-correos" data-title="Correos de Clientes">
             <div class="panel__header">
                 <h1>Correos de Clientes</h1>
             </div>
             {# Filtro de búsqueda #}
-            <div style="display:flex; flex-direction:column; gap:16px;">
-                <form class="filtro-form" onsubmit="return false;">
+            <div style="display:flex; flex-direction:column;">
+                <div class="search-row">
                     <label for="filtro-busqueda">Buscar Correo:</label>
                     <input type="text" id="filtro-busqueda" data-filter-target="CorreoCliente"
                         placeholder="Escribe el nombre o el correo del cliente." />
-                </form>
+                </div>
             </div>
 
             <!-- TABLA DE CORREOS -->
@@ -60,39 +60,38 @@
                 </div>
                 <!-- FORMULARIO DE CORREOS -->
                 <!-- FORMULARIO DE CORREOS -->
-                <form class="entity-form" id="form_correos_clientes" data-entity="CorreoCliente">
+                <div class="form-card">
+                    <h2>Agregar Correo</h2>
+                    <p class="sub">Completa los campos para agregar un cliente nuevo.</p>
+
                     <div class="field">
-                        <label for="cliente-id">ID del Cliente</label>
-                        <input type="number" id="cliente-id" name="ID_CLIENTE" placeholder="1" required />
+                        <label>Nombre</label>
+                        <input type="text" id="nombre" placeholder="Nombre del cliente">
                     </div>
                     <div class="field">
-                        <label for="correo">Correo</label>
-                        <input type="email" id="correo" name="correo" placeholder="Ingresa el correo electrónico"
-                            required />
+                        <label>Correo</label>
+                        <input type="text" id="correo_cliente" placeholder="Correo del cliente">
                     </div>
-                    <div class="field">
-                        <label for="correo-tipo">Tipo</label>
-                        <input type="text" id="correo-tipo" name="tipo" placeholder="Ingresa el tipo de correo"
-                            required />
+                    <div class="field id-field">
+                        <label>Tipo de correo</label>
+                        <select name="tipo_correo" id="tipo_correo">
+                            <option value="Personal">Personal</option>
+                            <option value="Empresarial">Empresarial</option>
+                        </select>
                     </div>
-                    <div class="field">
-                        <label for="correo-estado">ID Estado</label>
-                        <input type="number" id="correo-estado" name="id_estado" placeholder="1 = Activo, 2 = Inactivo"
-                            required />
+                    <div class="field id-field">
+                        <label>Estado del Cliente</label>
+                        <select name="estados" id="estado">
+                            <option value="1">Activo</option>
+                            <option value="2">Inactivo</option>
+                        </select>
                     </div>
 
-                    <div class="form-actions">
-                        <button type="button" id="btnAgregar" class="btn btn--primary">
-                            Agregar
-                        </button>
-                        <button type="button" id="btnActualizar" class="btn btn--secondary">
-                            Actualizar
-                        </button>
-                        <button type="button" id="btnEliminar" class="btn-icon btn-delete">
-                            Eliminar
-                        </button>
+                    <div class="btn-row">
+                        <button class="btn btn-primary" id="AgregarCliente">Agregar cliente</button>
                     </div>
-                </form>
+                </div>
+
             </div>
         </section>
     </main>

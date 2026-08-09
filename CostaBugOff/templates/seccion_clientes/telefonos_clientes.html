@@ -67,37 +67,38 @@
         </div>
         <!-- FORMULARIO DE TELEFONOS -->
         <!-- FORMULARIO DE TELEFONOS -->
-        <form class="entity-form" id="form_telefonos_clientes" data-entity="TelefonoCliente">
+        <div class="form-card">
+          <h2>Agregar Telefonos</h2>
+          <p class="sub">Completa los campos para agregar un telefono nuevo.</p>
+
           <div class="field">
-            <label for="cliente-id">ID del Cliente</label>
-            <input type="number" id="cliente-id" name="ID_CLIENTE" placeholder="1" required />
+            <label>Nombre del Cliente</label>
+            <input type="text" id="cliente_nombre" placeholder="Nombre del cliente">
           </div>
           <div class="field">
-            <label for="telefono">Telefono</label>
-            <input type="text" id="telefono" name="telefono" placeholder="Ingresa el telefono en el formato XXXX-XXXX"
-              required />
+            <label>Telefono</label>
+            <input type="text" id="telefono" placeholder="Numero de telefono">
           </div>
-          <div class="field">
-            <label for="tel-tipo">Tipo</label>
-            <input type="text" id="tel-tipo" name="tipo" placeholder="Ingresa el tipo de telefono" required />
+          <div class="field id-field">
+            <label>Tipo</label>
+            <select name="tipo_telefono" id="tipo_telefono">
+              <option value="Residencial">Residencial</option>
+              <option value="Celular">Celular</option>
+              <option value="Trabajo">Trabajo</option>
+            </select>
           </div>
-          <div class="field">
-            <label for="tel-estado">ID Estado</label>
-            <input type="number" id="tel-estado" name="id_estado" placeholder="1 = Activo, 2 = Inactivo" required />
+          <div class="field id-field">
+            <label>Estado del Cliente</label>
+            <select name="estados" id="estado">
+              <option value="1">Activo</option>
+              <option value="2">Inactivo</option>
+            </select>
           </div>
 
-          <div class="form-actions">
-            <button type="button" id="btnAgregar" class="btn btn--primary">
-              Agregar
-            </button>
-            <button type="button" id="btnActualizar" class="btn btn--secondary">
-              Actualizar
-            </button>
-            <button type="button" id="btnEliminar" class="btn-icon btn-delete">
-              Eliminar
-            </button>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="AgregarCliente">Agregar cliente</button>
           </div>
-        </form>
+        </div>
       </div>
     </section>
   </main>
