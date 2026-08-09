@@ -15,17 +15,17 @@
     </header>
 
     <main class="app mt-5 pt-4">
-        <section class="panel active mt-5 pt-4" id="panel-Direcciones" data-title="Direcciones de Clientes">
+        <section class="panel active mt-5" id="panel-Direcciones" data-title="Direcciones de Clientes">
             <div class="panel__header">
                 <h1>Direcciones de Clientes</h1>
             </div>
             {# Filtro de búsqueda #}
-            <div style="display:flex; flex-direction:column; gap:16px;">
-                <form class="filtro-form" onsubmit="return false;">
-                    <label for="filtro-busqueda">Buscar Direccion:</label>
+            <div style="display:flex; flex-direction:column;">
+                <div class="search-row">
+                    <label for="filtro-busqueda">Direcciones de cliente:</label>
                     <input type="text" id="filtro-busqueda" data-filter-target="DireccionCliente"
                         placeholder="Escribe el nombre o la direccion del cliente." />
-                </form>
+                </div>
             </div>
             <!-- TABLA DE DIRECCIONES -->
             <!-- TABLA DE DIRECCIONES -->

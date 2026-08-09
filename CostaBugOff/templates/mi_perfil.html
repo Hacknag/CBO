@@ -1,40 +1,19 @@
 <!doctype html>
 <html lang="es">
-{% if session.get('rol') == 'Cliente' %}
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CostaBugOff - Mi Perfil</title>
-  <link rel="stylesheet" href="/static/css/styles.css" />
+  {% include 'plantillas/_default_head.html' %}
 </head>
-{% else %}
-{% include 'plantillas/_default_head.html' %}
-{% endif %}
 
 <body>
   {% if session.get('rol') == 'Cliente' %}
   <header class="topbar">
-    <div class="topbar__brand">
-      <img class="logo-bug" src="/static/img/Jeremy.png" alt="CostaBugOff" />
-      <span class="topbar__logo">CostaBugOff</span>
-      <span class="topbar__view-tag">Mi Perfil</span>
-    </div>
+    {# NAVBAR #}
+    {# NAVBAR #}
+    {% with brand_tag="Mi Perfil" %}
+    {% include 'plantillas/_navbar.html' %}
+    {% endwith %}
   </header>
-
-  <nav class="mainnav">
-    <ul>
-      <li><a class="nav-btn" href="/inicio-cliente">Inicio</a></li>
-      <li><a class="nav-btn" href="/planes">Planes</a></li>
-      <li><a class="nav-btn" href="/carrito">Carrito</a></li>
-      <li><a class="nav-btn" href="/mis-facturas">Mis facturas</a></li>
-      <li><a class="nav-btn" href="/programar-visita">Programar Visita</a></li>
-      <li><a class="nav-btn" href="/informacion">Información</a></li>
-      <li><a class="nav-btn" href="/mi-perfil">Mi Perfil</a></li>
-      <li><a class="nav-btn" href="/contacto">Contacto</a></li>
-      <li><a class="nav-btn" href="/logout">Cerrar sesión</a></li>
-    </ul>
-  </nav>
   {% else %}
   <header class="topbar">
     <div class="topbar__brand">

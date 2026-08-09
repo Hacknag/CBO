@@ -1,41 +1,37 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CostaBugOff - Información</title>
-    <link rel="stylesheet" href="/static/css/styles.css" />
-  </head>
-  <body>
-    <header class="topbar">
-      <div class="topbar__brand">
-        <img class="logo-bug" src="/static/img/Jeremy.png" alt="CostaBugOff" />
-        <span class="topbar__logo">CostaBugOff</span>
-        <span class="topbar__view-tag">Información</span>
+
+<head>
+  {% include 'plantillas/_default_head.html' %}
+</head>
+
+<body>
+  <header>
+    {# NAVBAR #}
+    {# NAVBAR #}
+    {% with brand_tag="Vista Planes" %}
+    {% include 'plantillas/_navbar_factura.html' %}
+    {% endwith %}
+  </header>
+
+  <main class="app mt-5 pt-4">
+    <section class="panel active mt-5" data-title="Información">
+      <div class="panel__header">
+        <h1>Sobre CostaBugOff</h1>
       </div>
-    </header>
+      <div class="panel__body">
+        <p>CostaBugOff es una empresa de control de plagas. Próximamente más información aquí.</p>
+      </div>
+    </section>
+  </main>
+  {# FOOTER #}
+  {# FOOTER #}
+  {% include 'plantillas/_footer.html' %}
 
-    <nav class="mainnav">
-      <ul>
-        <li><a class="nav-btn" href="/inicio-cliente">Inicio</a></li>
-        <li><a class="nav-btn" href="/planes">Planes</a></li>
-        <li><a class="nav-btn" href="/carrito">Carrito</a></li>
-        <li><a class="nav-btn" href="/mis-facturas">Mis facturas</a></li>
-        <li><a class="nav-btn" href="/programar-visita">Programar Visita</a></li>
-        <li><a class="nav-btn" href="/informacion">Información</a></li>
-        <li><a class="nav-btn" href="/logout">Cerrar sesión</a></li>
-      </ul>
-    </nav>
 
-    <main class="app">
-      <section class="panel active" data-title="Información">
-        <div class="panel__header">
-          <h1>Sobre CostaBugOff</h1>
-        </div>
-        <div class="panel__body">
-          <p>CostaBugOff es una empresa de control de plagas. Próximamente más información aquí.</p>
-        </div>
-      </section>
-    </main>
-  </body>
+  {# SCRIPTS #}
+  {# SCRIPTS #}
+  {% include 'plantillas/_default_scripts.html' %}
+</body>
+
 </html>
