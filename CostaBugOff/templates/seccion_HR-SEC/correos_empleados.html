@@ -21,53 +21,58 @@
       <div class="panel__header">
         <h1>Correos de Empleados</h1>
       </div>
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
           <label for="filtro-busqueda">Buscar Correo:</label>
-          <input type="text" id="filtro-busqueda" data-filter-target="correoempleado"
+          <input type="text" id="filtro-busqueda" data-filter-target="correo_empleado"
             placeholder="Escribe el nombre o el correo del empleado." />
-        </form>
+        </div>
       </div>
       <div class="panel__body_inverse">
-        <div style="display:flex; flex-direction:column; gap:16px;">
+        <!-- FORMULARIO DE CORREOS DE EMPLEADOS -->
+        <!-- FORMULARIO DE CORREOS DE EMPLEADOS -->
+        <div class="form-card">
+          <h2>Agregar Correo</h2>
+          <p class="sub">Completa los campos para agregar un correo nuevo.</p>
 
-          <form class="entity-form" id="formCorreosEmpleados" data-entity="correoempleado"
-            style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
-            <div class="field">
-              <label for="ce-empleado">Empleado</label>
-              <select id="ce-empleado" name="id_empleado" required>
-                <option value="">Selecciona un empleado</option>
-                {% for p in empleados %}
-                <option value="{{ p[0] }}">{{ p[1] }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="field">
-              <label for="ce-correo">Correo</label>
-              <input type="email" id="ce-correo" name="correo" placeholder="correo@empresa.com" required />
-            </div>
-            <div class="field">
-              <label for="ce-tipo">Tipo</label>
-              <input type="text" id="ce-tipo" name="tipo" placeholder="Personal / Trabajo / Facturación" required />
-            </div>
-            <div class="field">
-              <label for="ce-estado">Estado</label>
-              <select id="ce-estado" name="id_estado" required>
-                <option value="">Selecciona un estado</option>
-                {% for e in estados %}
-                <option value="{{ e[0] }}">{{ e[1] }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="form-actions" style="grid-column: 1 / -1;">
-              <button type="button" id="btnAgregarCorreoEmpleado" class="btn btn--primary btn-agregar">Agregar</button>
-              <button type="button" id="btnActualizarCorreoEmpleado"
-                class="btn btn--secondary btn-actualizar">Actualizar</button>
-              <button type="button" id="btnDesactivarCorreoEmpleado" class="btn-icon btn-delete">Desactivar</button>
-            </div>
-          </form>
+          <div class="field">
+            <label for="buscar_cliente">Nombre del Cliente</label>
+            <input type="text" id="buscar_cliente" list="lista_clientes" placeholder="Escribe el nombre del cliente"
+              autocomplete="off" />
+            <!-- Datalist dinámico -->
+            <datalist id="lista_clientes"></datalist>
+
+            <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
+            <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" />
+          </div>
+          <div class="field">
+            <label>Correo</label>
+            <input type="text" id="correo" placeholder="Ingresa el correo del empleado">
+          </div>
+          <div class="field id-field">
+            <label>Tipo de correo</label>
+            <select name="tipo_correo" id="tipo_correo">
+              <option value="">-- Selecciona una opcion --</option>
+              <option value="Personal">Personal</option>
+              <option value="Empresarial">Empresarial</option>
+            </select>
+          </div>
+          <div class="field id-field">
+            <label>Estado del Cliente</label>
+            <select id="estado">
+              <option value="">-- Selecciona una opcion --</option>
+              <option value="1">Activo</option>
+              <option value="2">Inactivo</option>
+            </select>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="AgregarTelefono">Agregar correo</button>
+          </div>
         </div>
 
+        <!-- TABLA DE CORREOS DE EMPLEADOS -->
+        <!-- TABLA DE CORREOS DE EMPLEADOS -->
         <div class="table-wrap">
           <table class="data-table" data-entity="correoempleado">
             <thead>

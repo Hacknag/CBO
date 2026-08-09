@@ -31,7 +31,7 @@ def actualizar_telefonos_clientes(ID_CLIENTE, TELEFONO, TIPO, ID_ESTADO):
         cursor.close()
         conexion.close()
 
-def eliminar_telefonos_clientes_logica(ID_CLIENTE, TELEFONO):
+def eliminar_telefono_cliente_logico(ID_CLIENTE, TELEFONO):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
@@ -55,5 +55,3 @@ def obtener_telefonos_clientes():
     cursor.close()
     conn.close()
     return datos
-
-

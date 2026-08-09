@@ -1,12 +1,12 @@
 import oracledb
 from db import get_connection
 #tener cuidado con esto que con quitar una linea se pudre toda la pagina xddddddd
-def insertar_empleados(id_empleado, nombre, apellido_paterno, apellido_materno, id_puesto, id_estado):
+def insertar_empleado(nombre, apellido_paterno, apellido_materno, id_puesto, id_estado):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
         cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_EMPLEADOS_INSERT_SP", [
-            id_empleado, nombre, apellido_paterno, apellido_materno, id_puesto, id_estado
+            nombre, apellido_paterno, apellido_materno, id_puesto, id_estado
         ])
         conexion.commit()
     except Exception as e:

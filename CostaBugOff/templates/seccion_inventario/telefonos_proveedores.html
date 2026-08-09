@@ -17,17 +17,19 @@
   </header>
 
   <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-telefonos_proveedores" data-title="telefonos_proveedores">
+    <section class="panel active mt-5" id="panel-telefonos_proveedores" data-title="telefonos_proveedores">
       <div class="panel__header">
         <h1>Teléfonos de Proveedores</h1>
       </div>
       {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
+
+      {# Filtro de búsqueda #}
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
           <label for="filtro-busqueda">Buscar Telefono:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="telefonoProveedor"
             placeholder="Escribe el nombre o el numero de telefono del proveedor." />
-        </form>
+        </div>
       </div>
       <!-- TABLA DE TELEFONOS DE PROVEEDORES -->
       <!-- TABLA DE TELEFONOS DE PROVEEDORES -->
@@ -55,36 +57,41 @@
           </table>
         </div>
 
-        <form class="entity-form" id="formTelProveedores" data-entity="Telefono_Proveedor">
+        <div class="form-card">
+          <h2>Agregar Telefono</h2>
+          <p class="sub">Completa los campos para agregar un telefono nuevo.</p>
+
           <div class="field">
-            <label for="tp-id">ID Proveedor</label>
-            <input type="number" id="tp-id" name="id_proveedor" placeholder="1" required />
+            <label for="buscar_cliente">Nombre del proveedor</label>
+            <input type="text" id="buscar_cliente" list="lista_clientes" placeholder="Escribe el nombre del proveedor"
+              autocomplete="off" />
+            <!-- Datalist dinámico -->
+            <datalist id="lista_clientes"></datalist>
+
+            <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
+            <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" />
           </div>
           <div class="field">
-            <label for="tp-telefono">Telefono</label>
-            <input type="number" id="tp-telefono" name="telefono" placeholder="Numero de Telefono" required />
+            <label>Telefono</label>
+            <input type="text" id="telefono" placeholder="Ingresalo con el formato XXXX-XXXX">
           </div>
           <div class="field">
-            <label for="tp-tipo">Tipo</label>
-            <input type="text" id="tp-tipo" name="tipo" placeholder="Tipo" required />
+            <label>Tipo</label>
+            <input type="text" id="telefono" placeholder="Ingresa la descripcion de este numero">
           </div>
-          <div class="field">
-            <label for="tp-estado">Estado</label>
-            <input type="number" id="tp-estado" name="id_estado" placeholder="1 = Activo, 2 = Inactivo" required />
+          <div class="field id-field">
+            <label>Estado del telefono</label>
+            <select id="estado">
+              <option value="">-- Selecciona una opcion --</option>
+              <option value="1">Activo</option>
+              <option value="2">Inactivo</option>
+            </select>
           </div>
 
-          <div class="form-actions">
-            <button type="button" id="btnAgregar" class="btn btn--primary">
-              Agregar
-            </button>
-            <button type="button" id="btnActualizar" class="btn btn--secondary">
-              Actualizar
-            </button>
-            <button type="button" id="btnEliminar" class="btn-icon btn-delete">
-              Eliminar
-            </button>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="AgregarTelefono">Agregar telefono</button>
           </div>
-        </form>
+        </div>
 
 
       </div>

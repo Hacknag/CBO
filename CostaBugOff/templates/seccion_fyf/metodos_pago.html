@@ -17,18 +17,19 @@
   </header>
 
   <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-metodos_pago" data-title="metodosPago">
+    <section class="panel active mt-5" id="panel-metodos_pago" data-title="metodosPago">
       <div class="panel__header">
         <h1>Métodos de Pago</h1>
       </div>
 
       {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
-          <label for="filtro-busqueda">Buscar Metodo de Pago:</label>
+      {# Filtro de búsqueda #}
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
+          <label for="filtro-busqueda">Buscar Metodo de pago:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="metodosPago"
-            placeholder="Escribe el nombre del método de pago." />
-        </form>
+            placeholder="Escribe el nombre del metodo de pago." />
+        </div>
       </div>
       <div class="panel__body">
         <div class="table-wrap">
@@ -56,32 +57,26 @@
           </table>
         </div>
 
-        <form class="entity-form" id="formMetodosPago" data-entity="metodosPago">
+        <div class="form-card">
+          <h2>Agregar Metodo de pago</h2>
+          <p class="sub">Completa los campos para agregar un metodo de pago nuevo.</p>
           <div class="field">
-            <label for="mp-id">ID Método de Pago</label>
-            <input type="number" id="mp-id" name="id_metodo_pago" placeholder="1" required />
+            <label>Nombre del metodo de pago</label>
+            <input type="text" id="nombre" placeholder="Ingresa el nombre del metodo de pago">
           </div>
-          <div class="field">
-            <label for="mp-nombre">Nombre</label>
-            <input type="text" id="mp-nombre" name="nombre" placeholder="Nombre del método de pago" required />
-          </div>
-          <div class="field">
-            <label for="mp-estado">Estado</label>
-            <input type="number" id="mp-estado" name="id_estado" placeholder="1 = Activo, 2 = Inactivo" required />
+          <div class="field id-field">
+            <label>Estado del metodo de pago</label>
+            <select id="estado">
+              <option value="">-- Selecciona una opcion --</option>
+              <option value="1">Activo</option>
+              <option value="2">Inactivo</option>
+            </select>
           </div>
 
-          <div class="form-actions">
-            <button type="button" id="btnAgregar" class="btn btn--primary">
-              Agregar
-            </button>
-            <button type="button" id="btnActualizar" class="btn btn--secondary">
-              Actualizar
-            </button>
-            <button type="button" id="btnEliminar" class="btn-icon btn-delete">
-              Eliminar
-            </button>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="AgregarTelefono">Agregar metodo de pago</button>
           </div>
-        </form>
+        </div>
 
 
       </div>

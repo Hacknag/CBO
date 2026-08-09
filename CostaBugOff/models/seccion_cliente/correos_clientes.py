@@ -31,7 +31,7 @@ def actualizar_correos_clientes(ID_CLIENTE, CORREO, TIPO, ID_ESTADO):
         cursor.close()
         conexion.close()
 
-def eliminar_correos_clientes_logica(ID_CLIENTE, CORREO):
+def eliminar_correo_cliente_logica(ID_CLIENTE, CORREO):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()

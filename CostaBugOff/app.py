@@ -1,3 +1,4 @@
+
 import sys
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_cors import CORS
@@ -20,15 +21,15 @@ RUTAS_BILLING = (
 
 #################### Imports Seccion Clientes####################
 #################### Imports Seccion Clientes####################
-from models.seccion_cliente.clientes import obtener_clientes, insertar_cliente, actualizar_cliente, registrar_cliente, eliminar_cliente_logico
-from models.seccion_cliente.telefonos_clientes import insertar_telefonos_clientes, actualizar_telefonos_clientes, eliminar_telefonos_clientes_logica, obtener_telefonos_clientes
-from models.seccion_cliente.correos_clientes import insertar_correos_clientes, actualizar_correos_clientes, eliminar_correos_clientes_logica, obtener_correos_clientes
+from models.seccion_cliente.clientes import obtener_clientes, buscar_clientes, insertar_cliente, actualizar_cliente, registrar_cliente, eliminar_cliente_logico
+from models.seccion_cliente.telefonos_clientes import insertar_telefonos_clientes, actualizar_telefonos_clientes, eliminar_telefono_cliente_logico, obtener_telefonos_clientes
+from models.seccion_cliente.correos_clientes import insertar_correos_clientes, actualizar_correos_clientes, eliminar_correo_cliente_logica, obtener_correos_clientes
 from models.seccion_cliente.direcciones_clientes import insertar_direcciones_clientes, actualizar_direcciones_clientes, eliminar_direcciones_clientes_logica, obtener_direcciones_clientes
 
 #################### Imports Seccion Recursos Humanos y Seguridad ####################
 #################### Imports Seccion Recursos Humanos y Seguridad ####################
 from models.seccion_HR_SEC.puestos import insertar_puesto, actualizar_puesto, eliminar_puesto_logico, obtener_puestos_general
-from models.seccion_HR_SEC.empleados import obtener_empleados, insertar_empleados, actualizar_empleados, obtener_puestos, eliminar_empleados_logica
+from models.seccion_HR_SEC.empleados import obtener_empleados, insertar_empleado, actualizar_empleados, obtener_puestos, eliminar_empleados_logica
 from models.seccion_HR_SEC.correos_empleados import insertar_correo_empleado, actualizar_correo_empleado, eliminar_correo_empleado_logico, obtener_correos_empleados
 from models.seccion_HR_SEC.roles_permisos import obtener_roles_permisos, obtener_roles, obtener_permisos, insertar_permiso_x_rol, eliminar_permiso_x_rol_logico
 from models.seccion_HR_SEC.usuarios import obtener_usuarios, eliminar_usuario_logico
@@ -89,7 +90,7 @@ def clientes():
 
 #INSERT
 #INSERT
-from flask import Flask, render_template, request, jsonify
+
 
 @app.route("/clientes/agregar", methods=["POST"])
 def agregar_cliente():
@@ -137,7 +138,16 @@ def eliminar_cliente(id_cliente):
         return jsonify({'success': True, 'message': 'Cliente eliminado correctamente'})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
-    
+
+@app.route('/clientes/buscar', methods=['GET'])
+def api_buscar_clientes():
+    # 1. Extraer el parámetro 'q' de la URL
+    query = request.args.get('q', '').strip()    
+    # 2. Llamar a la función del archivo clientes.py
+    lista_clientes = buscar_clientes(query)
+    # 3. Devolver la respuesta JSON
+    return jsonify(lista_clientes)
+
 # ---------------- Telefonos de clientes (vista para Admin/Empleado) ----------------
 # ---------------- Telefonos de clientes (vista para Admin/Empleado) ----------------
 # ---------------- Telefonos de clientes (vista para Admin/Empleado) ----------------
@@ -148,19 +158,38 @@ def telefonos_clientes():
 
 #INSERT
 #INSERT
-@app.route("/api/telefonos_clientes/guardar", methods=["POST"])
+@app.route("/telefonos_clientes/guardar", methods=["POST"])
 def api_guardar_telefono_cliente():
-    datos = request.get_json()
+    datos = request.get_json() or {}
+    
+    id_cliente = datos.get("id_cliente")
+    # .strip() elimina espacios accidentales al inicio o al final
+    telefono = str(datos.get("telefono") or "").strip()
+    tipo = str(datos.get("tipo") or "").strip()
+    id_estado = datos.get("id_estado")
+
+    # VALIDACIONES OBLIGATORIAS
+    if id_cliente is None:
+        return jsonify({"message": "Por favor selecciona un cliente válido."}), 400
+
+    if not telefono:  # Si el teléfono está vacío
+        return jsonify({"message": "El número de teléfono es obligatorio."}), 400
+
+    if id_estado is None:
+        return jsonify({"message": "Por favor selecciona un estado para el teléfono."}), 400
+
     try:
         insertar_telefonos_clientes(
-            ID_CLIENTE=datos["id_cliente"],
-            TELEFONO=datos["telefono"],
-            TIPO=datos["tipo"],
-            ID_ESTADO=datos["id_estado"]
+            ID_CLIENTE=int(id_cliente),
+            TELEFONO=telefono,
+            TIPO=tipo,
+            ID_ESTADO=int(id_estado)
         )
-        return jsonify({"message": "¡Teléfono agregado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Teléfono agregado con éxito!"}), 200
+
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+
 
 #UPDATE
 #UPDATE
@@ -179,19 +208,14 @@ def api_actualizar_telefono_cliente():
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
 # #DELETE 
-# @app.route('/delete/telefonos_clientes/<int:id_cliente>/', methods=['POST'])
-# def handle_delete(id_cliente):
-#     try:
-#         # Call your Python function here
-#         eliminar_cliente_logico(id_cliente)
-        
-#         # Return success response to JavaScript
-#         return jsonify({'success': True, 'message': 'Cliente eliminado correctamente'})
-#     except Exception as e:
-#         # Return failure response with error details to JavaScript
-#         return jsonify({'success': False, 'message': str(e)}), 500
-   
-
+@app.route('/delete/telefonos_clientes/<int:id_cliente>/<string:telefono>', methods=['POST'])
+def eliminar_telefono_cliente(id_cliente, telefono):
+    try:
+        eliminar_telefono_cliente_logico(id_cliente, telefono)
+        return jsonify({'success': True, 'message': 'Telefono eliminado correctamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+  
 
 # ---------------- Correos de clientes (vista para Admin/Empleado) ----------------
 # ---------------- Correos de clientes (vista para Admin/Empleado) ----------------
@@ -201,19 +225,39 @@ def correos_clientes():
     datos_correos = obtener_correos_clientes()    
     return render_template('seccion_clientes/correos_clientes.html', correos=datos_correos)
 
-@app.route("/api/correos_clientes/guardar", methods=["POST"])
+
+@app.route("/correos_clientes/guardar", methods=["POST"])
 def api_guardar_correo_cliente():
-    datos = request.get_json()
+    datos = request.get_json() or {}
+    
+    id_cliente = datos.get("id_cliente")
+    # .strip() elimina espacios accidentales al inicio o al final
+    correo = str(datos.get("correo") or "").strip()
+    tipo = str(datos.get("tipo") or "").strip()
+    id_estado = datos.get("id_estado")
+
+    # VALIDACIONES OBLIGATORIAS
+    if id_cliente is None:
+        return jsonify({"message": "Por favor selecciona un cliente válido."}), 400
+
+    if not correo:  # Si el teléfono está vacío
+        return jsonify({"message": "El correo es obligatorio."}), 400
+
+    if id_estado is None:
+        return jsonify({"message": "Por favor selecciona un estado para el correo."}), 400
+
     try:
         insertar_correos_clientes(
-            ID_CLIENTE=datos["id_cliente"],
-            CORREO=datos["correo"],
-            TIPO=datos["tipo"],
-            ID_ESTADO=datos["id_estado"]
+            ID_CLIENTE=int(id_cliente),
+            CORREO=correo,
+            TIPO=tipo,
+            ID_ESTADO=int(id_estado)
         )
-        return jsonify({"message": "¡Correo agregado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡CORREO agregado con éxito!"}), 200
+
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+
 
 @app.route("/api/correos_clientes/actualizar", methods=["POST"])
 def api_actualizar_correo_cliente():
@@ -228,6 +272,17 @@ def api_actualizar_correo_cliente():
         return jsonify({"message": "¡Correo actualizado con éxito en Oracle!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+
+
+#DELETE
+#DELETE 
+@app.route('/delete/correos_clientes/<int:id_cliente>/<string:correo>', methods=['POST'])
+def eliminar_correo_cliente(id_cliente, correo):
+    try:
+        eliminar_correo_cliente_logica(id_cliente, correo)
+        return jsonify({'success': True, 'message': 'Correo eliminado correctamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 # ---------------- Direcciones de clientes (vista para Admin/Empleado) ----------------
 # ---------------- Direcciones de clientes (vista para Admin/Empleado) ----------------
@@ -281,18 +336,17 @@ def puestos():
     return render_template("seccion_HR-SEC/puestos.html", puestos=lista_puestos, filtro=id_estado)
 
 
-@app.route("/api/puestos/guardar", methods=["POST"])
-def api_guardar_puesto():
-    datos = request.get_json()
+@app.route("/puestos/agregar", methods=["POST"])
+def agregar_puesto():
     try:
-        insertar_puesto(
-            id_puesto=datos["id_puesto"],
-            nombre=datos["nombre"],
-            descripcion=datos["descripcion"]
+        insertar_puesto(            
+            nombre=request.form["puesto"],
+            descripcion=request.form["descripcion"],
+            id_estado=int(request.form["id_estado"]),
         )
-        return jsonify({"message": "¡Puesto agregado con éxito en Oracle!"}), 200
+        return jsonify({"success": True, "message": "¡Puesto agregado con éxito en Oracle!"}), 200
     except Exception as e:
-        return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+        return jsonify({"success": False, "message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
 
 @app.route("/api/puestos/actualizar", methods=["POST"])
@@ -313,9 +367,9 @@ def api_actualizar_puesto():
 def api_eliminar_puesto(id_puesto):
     try:
         eliminar_puesto_logico(id_puesto)
-        return jsonify({"message": "¡Puesto eliminado con éxito!"}), 200
+        return jsonify({"success": True,"message": "¡Puesto eliminado con éxito!"}), 200
     except Exception as e:
-        return jsonify({"message": f"Error al eliminar en Base de Datos: {str(e)}"}), 500
+        return jsonify({"success": False,"message": f"Error al eliminar en Base de Datos: {str(e)}"}), 500
 
 # ---------------- Empleados (vista para Admin/HHRR) ----------------
 # ---------------- Empleados (vista para Admin/HHRR) ----------------
@@ -329,10 +383,10 @@ def empleados():
 
 
 @app.route("/api/empleados/guardar", methods=["POST"])
-def api_guardar_empleado():
+def agregar_empleado():
     datos = request.get_json()
     try:
-        insertar_empleados(
+        insertar_empleado(
             id_empleado=datos["id_empleado"],
             nombre=datos["nombre"],
             apellido_paterno=datos["apellido_paterno"],
@@ -344,6 +398,20 @@ def api_guardar_empleado():
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
+# @app.route("/clientes/agregar", methods=["POST"])
+# def agregar_cliente():
+#     try:
+#         insertar_cliente( 
+#             nombre=request.form["nombre"],
+#             apellido_paterno=request.form["apellido_paterno"],
+#             apellido_materno=request.form["apellido_materno"],
+#             fecha_registro=None,
+#             id_estado=int(request.form["id_estado"]),
+#         )
+#         return jsonify({"success": True, "message": "Cliente agregado exitosamente"}), 200
+#     except Exception as e:
+#         return jsonify({"success": False, "message": f"Error al guardar: {str(e)}"}), 400
+    
 
 @app.route("/api/empleados/actualizar", methods=["POST"])
 def api_actualizar_empleado():

@@ -17,46 +17,41 @@
   </header>
 
   <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-cantones" data-title="Cantones">
+    <section class="panel active mt-5" id="panel-cantones" data-title="Cantones">
       <div class="panel__header">
         <h1>Cantones</h1>
       </div>
       {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
-          <label for="filtro-busqueda">Buscar Cantón:</label>
+      {# Filtro de búsqueda #}
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
+          <label for="filtro-busqueda">Buscar Canton:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="cantones"
-            placeholder="Escribe el nombre del cantón." />
-        </form>
+            placeholder="Escribe el nombre del canton." />
+        </div>
       </div>
       <div class="panel__body_inverse">
         <div style="display:flex; flex-direction:column; gap:16px;">
-          <form class="entity-form" id="formCantones" data-entity="cantones"
-            style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
+          <div class="form-card">
+            <h2>Agregar Canton</h2>
+            <p class="sub">Completa los campos para agregar un canton nuevo.</p>
             <div class="field">
-              <label for="can-id">ID Cantón</label>
-              <input type="number" id="can-id" name="id_canton" placeholder="1" required />
+              <label>Nombre del canton</label>
+              <input type="text" id="nombre" placeholder="Ingresa el nombre del canton">
             </div>
-            <div class="field">
-              <label for="can-nombre">Nombre</label>
-              <input type="text" id="can-nombre" name="nombre" placeholder="Nombre del cantón" required />
-            </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="can-estado">Estado</label>
-              <select id="can-estado" name="id_estado" required>
-                <option value="">Selecciona un estado</option>
-                {% for e in estados %}
-                <option value="{{ e[0] }}">{{ e[1] }}</option>
-                {% endfor %}
+            <div class="field id-field">
+              <label>Estado del canton</label>
+              <select id="estado">
+                <option value="">-- Selecciona una opcion --</option>
+                <option value="1">Activo</option>
+                <option value="2">Inactivo</option>
               </select>
             </div>
-            <div class="form-actions" style="grid-column: 1 / -1;">
-              <button type="button" id="btnAgregarCanton" class="btn btn--primary btn-agregar">Agregar</button>
-              <button type="button" id="btnActualizarCanton"
-                class="btn btn--secondary btn-actualizar">Actualizar</button>
-              <button type="button" id="btnDesactivarCanton" class="btn-icon btn-delete">Desactivar</button>
+
+            <div class="btn-row">
+              <button class="btn btn-primary" id="AgregarTelefono">Agregar canton</button>
             </div>
-          </form>
+          </div>
         </div>
 
         <div class="table-wrap">

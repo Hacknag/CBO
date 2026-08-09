@@ -17,65 +17,56 @@
   </header>
 
   <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-correos-proveedores" data-title="Correos de Proveedores">
+    <section class="panel active mt-5" id="panel-correos-proveedores" data-title="Correos de Proveedores">
       <div class="panel__header">
         <h1>Correos de Proveedores</h1>
       </div>
       {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
-          <label for="filtro-busqueda">Buscar Correo:</label>
+      {# Filtro de búsqueda #}
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
+          <label for="filtro-busqueda">Buscar Telefono:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="correoProveedor"
             placeholder="Escribe el nombre o el correo del proveedor." />
-        </form>
+        </div>
       </div>
+      <!-- TABLA DE CORREOS -->
+      <!-- TABLA DE CORREOS -->
       <div class="panel__body_inverse">
-        <div style="display:flex; flex-direction:column; gap:16px;">
-          {# <form method="get" class="filtro-form">
-            <label for="filtro-estado">Filtrar por estado:</label>
-            <select name="estado" id="filtro-estado" onchange="this.form.submit()">
-              <option value="" {% if not filtro %}selected{% endif %}>Todos</option>
-              {% for e in estados %}
-              <option value="{{ e[0] }}" {% if filtro==e[0]|string %}selected{% endif %}>{{ e[1] }}</option>
-              {% endfor %}
-            </select>
-          </form> #}
+        <div class="form-card">
+          <h2>Agregar Correo</h2>
+          <p class="sub">Completa los campos para agregar un correo nuevo.</p>
 
-          <form class="entity-form" id="formCorreosProveedores" data-entity="correoProveedor"
-            style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
-            <div class="field">
-              <label for="cp-proveedor">Proveedor</label>
-              <select id="cp-proveedor" name="id_proveedor" required>
-                <option value="">Selecciona un proveedor</option>
-                {% for p in proveedores %}
-                <option value="{{ p[0] }}">{{ p[1] }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="field">
-              <label for="cp-correo">Correo</label>
-              <input type="email" id="cp-correo" name="correo" placeholder="correo@proveedor.com" required />
-            </div>
-            <div class="field">
-              <label for="cp-tipo">Tipo</label>
-              <input type="text" id="cp-tipo" name="tipo" placeholder="Personal / Trabajo / Facturación" required />
-            </div>
-            <div class="field">
-              <label for="cp-estado">Estado</label>
-              <select id="cp-estado" name="id_estado" required>
-                <option value="">Selecciona un estado</option>
-                {% for e in estados %}
-                <option value="{{ e[0] }}">{{ e[1] }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="form-actions" style="grid-column: 1 / -1;">
-              <button type="button" id="btnAgregarCorreoProveedor" class="btn btn--primary btn-agregar">Agregar</button>
-              <button type="button" id="btnActualizarCorreoProveedor"
-                class="btn btn--secondary btn-actualizar">Actualizar</button>
-              <button type="button" id="btnDesactivarCorreoProveedor" class="btn-icon btn-delete">Desactivar</button>
-            </div>
-          </form>
+          <div class="field">
+            <label for="buscar_cliente">Nombre del Proveedor</label>
+            <input type="text" id="buscar_cliente" list="lista_clientes" placeholder="Escribe el nombre del proveedor"
+              autocomplete="off" />
+            <!-- Datalist dinámico -->
+            <datalist id="lista_clientes"></datalist>
+
+            <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
+            <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" />
+          </div>
+          <div class="field">
+            <label>Correo</label>
+            <input type="text" id="correo" placeholder="Ingresa el correo del proveedor">
+          </div>
+          <div class="field">
+            <label>Tipo</label>
+            <input type="text" id="tipo" placeholder="Ingresa el tipo de correo">
+          </div>
+          <div class="field id-field">
+            <label>Estado del correo</label>
+            <select id="estado">
+              <option value="">-- Selecciona una opcion --</option>
+              <option value="1">Activo</option>
+              <option value="2">Inactivo</option>
+            </select>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="AgregarTelefono">Agregar correo</button>
+          </div>
         </div>
 
         <div class="table-wrap">

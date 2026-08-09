@@ -54,10 +54,13 @@
     }
 </script>
 
+{# FUNCION DE ELIMINAR FILA LLAVE COMPUESTA #}
 <script>
     function deleteRow2(button) {
         const row = button.closest('tr');
-        const id = row.getAttribute('data-id1');
+        const id1 = row.getAttribute('data-id1');
+        const id2 = row.getAttribute('data-id2');
+        const entity = row.getAttribute('data-entity');
 
         Swal.fire({
             title: '¿Estás seguro?',
@@ -70,7 +73,7 @@
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch('/delete/' + id, {
+                fetch(`/delete/${entity}/${id1}/${encodeURIComponent(id2)}`, {
                     method: 'POST',
                 })
                     .then(response => response.json())

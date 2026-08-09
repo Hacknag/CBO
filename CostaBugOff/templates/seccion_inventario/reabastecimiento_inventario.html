@@ -22,49 +22,45 @@
       <div class="panel__header">
         <h1>Reabastecimiento de Inventario</h1>
       </div>
-      <div class="panel__body">
-        <div style="display:flex; flex-direction:column; gap:16px;">
-          <form method="get" class="filtro-form">
-            <label for="filtro-estado">Filtrar por estado:</label>
-            <select name="estado" id="filtro-estado" onchange="this.form.submit()">
-              <option value="" {% if not filtro %}selected{% endif %}>Todos</option>
-              {% for e in estados %}
-              <option value="{{ e[0] }}" {% if filtro==e[0]|string %}selected{% endif %}>{{ e[1] }}</option>
-              {% endfor %}
-            </select>
-          </form>
-
-          <form class="entity-form" id="formReabastecimiento" data-entity="Reabastecimiento"
-            style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
-            <div class="field">
-              <label for="reab-id">ID Reabastecimiento</label>
-              <input type="number" id="reab-id" name="id_reabastecimiento" placeholder="1" required />
-            </div>
-            <div class="field">
-              <label for="reab-cantidad">Cantidad</label>
-              <input type="number" id="reab-cantidad" name="cantidad" placeholder="100" required />
-            </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="reab-estado">Estado</label>
-              <select id="reab-estado" name="id_estado" required>
-                <option value="">Selecciona un estado</option>
-                {% for e in estados %}
-                <option value="{{ e[0] }}">{{ e[1] }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="form-actions" style="grid-column: 1 / -1;">
-              <button type="button" id="btnAgregarReabastecimiento"
-                class="btn btn--primary btn-agregar">Agregar</button>
-              <button type="button" id="btnActualizarReabastecimiento"
-                class="btn btn--secondary btn-actualizar">Actualizar</button>
-              <button type="button" id="btnDesactivarReabastecimiento" class="btn-icon btn-delete">Desactivar</button>
-            </div>
-          </form>
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
+          <label for="filtro-busqueda">Buscar:</label>
+          <input type="text" id="filtro-busqueda" data-filter-target="reabastecimiento_inventario"
+            placeholder="Escribe cualquier caracter para filtrar la tabla." />
         </div>
+      </div>
+      <div class="">
+        {# <div class="form-card">
+          <h2>Agregar entrada</h2>
+          <p class="sub">Completa los campos para agregar un cliente nuevo.</p>
+
+          <div class="field">
+            <label>Nombre</label>
+            <input type="text" id="nombre" placeholder="Nombre del cliente">
+          </div>
+          <div class="field">
+            <label>Primer apellido</label>
+            <input type="text" id="apellido_paterno" placeholder="Primer apellido">
+          </div>
+          <div class="field">
+            <label>Segundo apellido</label>
+            <input type="text" id="apellido_materno" placeholder="Segundo apellido">
+          </div>
+          <div class="field id-field">
+            <label>Estado del Cliente</label>
+            <select name="estados" id="estado">
+              <option value="1">Activo</option>
+              <option value="2">Inactivo</option>
+            </select>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="AgregarCliente">Agregar cliente</button>
+          </div>
+        </div> #}
 
         <div class="table-wrap">
-          <table class="data-table" data-entity="Reabastecimiento">
+          <table class="data-table" data-entity="reabastecimiento_inventario">
             <thead>
               <tr>
                 <th>ID</th>
@@ -96,7 +92,6 @@
 
   {# SCRIPTS #}
   {# SCRIPTS #}
-
   <script>
     const URL_API_REABASTECIMIENTO = 'http://127.0.0.1:5001/api/reabastecimiento_inventario'
 

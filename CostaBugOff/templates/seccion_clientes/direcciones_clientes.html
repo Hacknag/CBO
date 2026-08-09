@@ -60,39 +60,55 @@
                 </div>
                 <!-- FORMULARIO DE DIRECCIONES -->
                 <!-- FORMULARIO DE DIRECCIONES -->
-                <form class="entity-form" id="form_direcciones_clientes" data-entity="DireccionCliente">
+                <div class="form-card">
+                    <h2>Agregar Dirección</h2>
+                    <p class="sub">Completa los campos para agregar un dirección nueva.</p>
+                    {# Buscar Clientes #}
                     <div class="field">
-                        <label for="cliente-id">ID del Cliente</label>
-                        <input type="number" id="cliente-id" name="ID_CLIENTE" placeholder="1" required />
+                        <label for="buscar_cliente">Nombre del Cliente</label>
+                        <input type="text" id="buscar_cliente" list="lista_clientes"
+                            placeholder="Escribe el nombre del cliente" autocomplete="off" />
+                        <!-- Datalist dinámico -->
+                        <datalist id="lista_clientes"></datalist>
+
+                        <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
+                        <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" />
                     </div>
+                    {# Buscar Provincia #}
                     <div class="field">
-                        <label for="telefono">Telefono</label>
-                        <input type="text" id="telefono" name="telefono"
-                            placeholder="Ingresa el telefono en el formato XXXX-XXXX" required />
+                        <label>Correo</label>
+                        <input type="text" id="correo_cliente" placeholder="Correo del cliente">
                     </div>
-                    <div class="field">
-                        <label for="tel-tipo">Tipo</label>
-                        <input type="text" id="tel-tipo" name="tipo" placeholder="Ingresa el tipo de telefono"
-                            required />
+                    {# Buscar Canton #}
+                    <div class="field id-field">
+                        <label>Tipo de correo</label>
+                        <select name="tipo_correo" id="tipo_correo">
+                            <option value="Personal">Personal</option>
+                            <option value="Empresarial">Empresarial</option>
+                        </select>
                     </div>
-                    <div class="field">
-                        <label for="tel-estado">ID Estado</label>
-                        <input type="number" id="tel-estado" name="id_estado" placeholder="1 = Activo, 2 = Inactivo"
-                            required />
+                    {# Buscar Distrito #}
+                    <div class="field id-field">
+                        <label>Tipo de correo</label>
+                        <select name="tipo_correo" id="tipo_correo">
+                            <option value="Personal">Personal</option>
+                            <option value="Empresarial">Empresarial</option>
+                        </select>
+                    </div>
+                    {# Estado #}
+                    <div class="field id-field">
+                        <label>Estado del Cliente</label>
+                        <select name="estados" id="estado">
+                            <option value="1">Activo</option>
+                            <option value="2">Inactivo</option>
+                        </select>
                     </div>
 
-                    <div class="form-actions">
-                        <button type="button" id="btnAgregar" class="btn btn--primary">
-                            Agregar
-                        </button>
-                        <button type="button" id="btnActualizar" class="btn btn--secondary">
-                            Actualizar
-                        </button>
-                        <button type="button" id="btnEliminar" class="btn-icon btn-delete">
-                            Eliminar
-                        </button>
+                    <div class="btn-row">
+                        <button class="btn btn-primary" id="AgregarCliente">Agregar cliente</button>
                     </div>
-                </form>
+                </div>
+
             </div>
         </section>
     </main>
@@ -170,6 +186,67 @@
                     )
                 }
             })
+    </script>
+    <script>
+
+        // 1. Declaración e inicialización de elementos del DOM
+        const inputBuscar = document.getElementById('buscar_cliente');
+        const datalist = document.getElementById('lista_clientes');
+        const inputHiddenId = document.getElementById('id_cliente_seleccionado');
+        const inputTelefono = document.getElementById('telefono');
+        const selectTipo = document.getElementById('tipo');
+        const selectEstado = document.getElementById('estado');
+
+        // Mapa global para relacionar: Nombre Completo -> ID del Cliente
+        const clientesMapa = new Map();
+        let debounceTimer;
+
+        // -------------------------------------------------------------
+        // 2. LÓGICA DE BÚSQUEDA Y SELECCIÓN DE CLIENTE
+        // -------------------------------------------------------------
+        if (inputBuscar) {
+            inputBuscar.addEventListener('input', (e) => {
+                const query = e.target.value.trim();
+
+                // Si lo que escribió coincide con un cliente cargado, asignamos su ID
+                if (clientesMapa.has(query)) {
+                    inputHiddenId.value = clientesMapa.get(query);
+                    return;
+                } else {
+                    // Si modifica el texto, borramos el ID
+                    inputHiddenId.value = '';
+                }
+
+                // Ignorar búsquedas de menos de 2 caracteres
+                if (query.length < 2) {
+                    datalist.innerHTML = '';
+                    return;
+                }
+
+                // Debounce: espera 300ms a que el usuario deje de escribir
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(async () => {
+                    try {
+                        const response = await fetch(`/clientes/buscar?q=${encodeURIComponent(query)}`);
+                        const clientes = await response.json();
+
+                        datalist.innerHTML = '';
+                        clientesMapa.clear();
+
+                        clientes.forEach(cliente => {
+                            clientesMapa.set(cliente.nombre_completo, cliente.id);
+
+                            const option = document.createElement('option');
+                            option.value = cliente.nombre_completo;
+                            datalist.appendChild(option);
+                        });
+                    } catch (error) {
+                        console.error('Error al buscar clientes:', error);
+                    }
+                }, 100);
+            });
+        }
+
     </script>
     {% include 'plantillas/_default_scripts.html' %}
 </body>

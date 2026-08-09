@@ -1,12 +1,12 @@
 import oracledb
 from db import get_connection
 
-def insertar_puesto(id_puesto, nombre, descripcion, id_estado=1):
+def insertar_puesto(nombre, descripcion, id_estado):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
         cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_PUESTOS_INSERT_SP", [
-            id_puesto, nombre, descripcion, id_estado
+            nombre, descripcion, id_estado
         ])
         conexion.commit()
     except Exception as e:

@@ -17,67 +17,19 @@
   </header>
 
   <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-puestos" data-title="Puestos">
+    <section class="panel active mt-5" id="panel-puestos" data-title="Puestos">
       <div class="panel__header">
         <h1>Puestos</h1>
       </div>
       {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
           <label for="filtro-busqueda">Buscar Puesto:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="puestos"
             placeholder="Escribe el nombre o la descripcion del puesto." />
-        </form>
-      </div>
-      <div class="panel__body_inverse">
-        <div style="display: flex; flex-direction: column; gap: 16px">
-          {# <form method="get" class="filtro-form">
-            <label for="filtro-estado">Filtrar por estado:</label>
-            <select name="estado" s id="filtro-estado" onchange="this.form.submit()">
-              <option value="" {% if not filtro %}selected{% endif %}>
-                Todos
-              </option>
-              <option value="1" {% if filtro=="1" %}selected{% endif %}>
-                Activos
-              </option>
-              <option value="2" {% if filtro=="2" %}selected{% endif %}>
-                Inactivos
-              </option>
-            </select>
-          </form> #}
-
-          <form class="entity-form" id="formPuestos" data-entity="puestos"
-            style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px">
-            <div class="field">
-              <label for="p-id-puesto">ID Puesto</label>
-              <input type="number" id="p-id-puesto" name="id_puesto" placeholder="1" required />
-            </div>
-            <div class="field">
-              <label for="p-nombre">Nombre</label>
-              <input type="text" id="p-nombre" name="nombre" placeholder="Nombre del puesto" required />
-            </div>
-            <div class="field" style="grid-column: 1 / -1">
-              <label for="p-descripcion">Descripción</label>
-              <input type="text" id="p-descripcion" name="descripcion" placeholder="Descripción del puesto" />
-            </div>
-            <div class="field" style="grid-column: 1 / -1">
-              <label for="p-estado">Estado</label>
-              <input type="text" id="p-estado" name="estado" placeholder="Estado del puesto" />
-            </div>
-            <div class="form-actions" style="grid-column: 1 / -1">
-              <button type="button" id="btnAgregarPuesto" class="btn btn--primary btn-agregar">
-                Agregar
-              </button>
-              <button type="button" id="btnActualizarPuesto" class="btn btn--secondary btn-actualizar">
-                Actualizar
-              </button>
-              <button type="button" id="btnDesactivarPuesto" class="btn-icon btn-delete">
-                Desactivar
-              </button>
-            </div>
-          </form>
         </div>
-
+      </div>
+      <div class="panel__body">
         <div class="table-wrap">
           <table class="data-table" data-entity="puestos">
             <thead>
@@ -103,6 +55,35 @@
               {% endfor %}
             </tbody>
           </table>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 16px">
+
+
+          <div class="form-card">
+            <h2>Agregar Puestos</h2>
+            <p class="sub">Completa los campos para agregar un puesto nuevo.</p>
+
+            <div class="field">
+              <label>Puesto</label>
+              <input type="text" id="puesto" placeholder="Nombre del puesto">
+            </div>
+            <div class="field">
+              <label>Descripción</label>
+              <input type="text" id="descripcion" placeholder="Descripción del puesto">
+            </div>
+            <div class="field id-field">
+              <label>Estado del puesto</label>
+              <select id="estado">
+                <option value="">-- Selecciona una opcion --</option>
+                <option value="1">Activo</option>
+                <option value="2">Inactivo</option>
+              </select>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn btn-primary" id="AgregarPuesto">Agregar puesto</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -202,6 +183,88 @@
         }
       })
   </script>
+
+  {# AGREGAR PUESTO #}
+  <script>
+    document.getElementById('AgregarPuesto').addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const puesto = document.getElementById('puesto').value;
+      const descripcion = document.getElementById('descripcion').value;
+      const idEstado = document.getElementById('estado').value;
+
+      // 1. Validar Teléfono obligatorio
+      if (!puesto) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campo incompleto',
+          text: 'Por favor ingresa un puesto.',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
+
+      // 2. Validar Estado
+      if (!idEstado) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Estado no seleccionado',
+          text: 'Por favor selecciona un estado para el teléfono.',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('puesto', puesto);
+      formData.append('descripcion', descripcion);
+      formData.append('id_estado', idEstado);
+
+      try {
+        const response = await fetch('/puestos/agregar', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+        console.log(result);
+        if (result.success) {
+          // Modal de éxito
+          Swal.fire({
+            icon: 'success',
+            title: '¡Guardado!',
+            text: result.message,
+            confirmButtonColor: '#3085d6'
+          }).then(() => {
+            // Limpiar inputs
+            document.getElementById('puesto').value = '';
+            document.getElementById('descripcion').value = '';
+
+            // Recargar la página para refrescar la tabla de clientes
+            location.reload();
+          });
+        } else {
+          // Modal de error retornado por la base de datos/Flask
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: result.message,
+            confirmButtonColor: '#d33'
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        // Modal de error de red
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de conexión',
+          text: 'No se pudo conectar con el servidor.',
+          confirmButtonColor: '#d33'
+        });
+      }
+    });
+  </script>
+
   {% include 'plantillas/_default_scripts.html' %}
 </body>
 

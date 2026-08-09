@@ -1,5 +1,6 @@
 import oracledb
 from db import get_connection
+from flask import Flask, request, jsonify
 #tener cuidado con esto que con quitar una linea se pudre toda la pagina xddddddd
 
 # ---------------- Insertar Clientes ---------------- #
@@ -83,3 +84,45 @@ def registrar_cliente(nombre, apellido_paterno, apellido_materno, correo, passwo
         cursor.close()
         conexion.close()
     return v_id_usuario.getvalue(), v_id_cliente.getvalue(), v_mensaje.getvalue()
+
+
+
+# ---------------- Buscar Clientes ---------------- #
+# ---------------- Buscar Clientes ---------------- #
+# ---------------- Buscar Clientes ---------------- #
+def buscar_clientes(query):
+    """Consulta directamente la tabla clientes en Oracle Database y retorna una lista de diccionarios."""
+    if not query:
+        return []
+
+    conexion = get_connection()
+    cursor = conexion.cursor() 
+    search_term = f"%{query}%"
+    
+    # Consulta directa a la TABLA clientes (Sintaxis Oracle SQL)
+    sql = """
+    SELECT 
+        ID_CLIENTE, 
+        TRIM(NOMBRE || ' ' || NVL(APELLIDO_PATERNO, '') || ' ' || NVL(APELLIDO_MATERNO, '')) AS nombre_completo
+    FROM FIDE_CLIENTES_TB 
+    WHERE ID_ESTADO = 1
+    AND LOWER(NOMBRE || ' ' || NVL(APELLIDO_PATERNO, '') || ' ' || NVL(APELLIDO_MATERNO, '')) LIKE LOWER(:1)
+    FETCH FIRST 8 ROWS ONLY
+    """
+    
+    cursor.execute(sql, (search_term,))
+    resultados = cursor.fetchall()
+    
+    cursor.close()
+    conexion.close()
+
+    # Mapeo de la lista de tuplas de Oracle
+    clientes = [
+        {
+            "id": row[0],
+            "nombre_completo": row[1]
+        }
+        for row in resultados
+    ]
+    
+    return clientes

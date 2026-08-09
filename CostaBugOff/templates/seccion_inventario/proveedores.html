@@ -17,48 +17,45 @@
   </header>
 
   <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-proveedores" data-title="Proveedores">
+    <section class="panel active mt-5" id="panel-proveedores" data-title="Proveedores">
       <div class="panel__header">
         <h1>Proveedores</h1>
       </div>
       {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
+      {# Filtro de búsqueda #}
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
           <label for="filtro-busqueda">Buscar Proveedor:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="proveedores"
             placeholder="Escribe el nombre del proveedor." />
-        </form>
+        </div>
       </div>
       <div class="panel__body_inverse">
-        <div style="display:flex; flex-direction:column; gap:16px;">
+        {# Tarjeta #}
+        {# Tarjeta #}
+        <div class="form-card">
+          <h2>Agregar Proveedor</h2>
+          <p class="sub">Completa los campos para agregar un proveedor nuevo.</p>
 
+          <div class="field">
+            <label>Nombre</label>
+            <input type="text" id="nombre" placeholder="Nombre del proveedor">
+          </div>
+          <div class="field">
+            <label>Numero de Reabastecimiento</label>
+            <input type="text" id="numero_reabastecimiento" placeholder="Ingresa el numero de reabastecimiento">
+          </div>
+          <div class="field id-field">
+            <label>Estado del Cliente</label>
+            <select name="estados" id="estado">
+              <option value="1">Activo</option>
+              <option value="2">Inactivo</option>
+            </select>
+          </div>
 
-          <form class="entity-form" id="formProveedores" data-entity="proveedores"
-            style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
-            <div class="field">
-              <label for="prov-id">ID Proveedor</label>
-              <input type="number" id="prov-id" name="id_proveedor" placeholder="1" required />
-            </div>
-            <div class="field">
-              <label for="prov-nombre">Nombre</label>
-              <input type="text" id="prov-nombre" name="nombre" placeholder="Nombre del proveedor" required />
-            </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="prov-reabastecimiento">ID Reabastecimiento (opcional)</label>
-              <input type="number" id="prov-reabastecimiento" name="id_reabastecimiento" placeholder="Opcional" />
-            </div>
-            <div class="form-actions" style="grid-column: 1 / -1;">
-              <button type="button" id="btnAgregarProveedor" class="btn btn--primary btn-agregar">
-                Agregar
-              </button>
-              <button type="button" id="btnActualizarProveedor" class="btn btn--secondary btn-actualizar">
-                Actualizar
-              </button>
-              <button type="button" id="btnDesactivarProveedor" class="btn-icon btn-delete">
-                Desactivar
-              </button>
-            </div>
-          </form>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="AgregarCliente">Agregar proveedor</button>
+          </div>
         </div>
 
         <div class="table-wrap">

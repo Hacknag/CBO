@@ -1,24 +1,36 @@
 <!doctype html>
 <html lang="es">
-{% include 'plantillas/_default_head.html' %}
+
+<head>
+  {% include 'plantillas/_default_head.html' %}
+</head>
 
 <body>
-  <header class="topbar">
-    <div class="topbar__brand">
-      {% include 'plantillas/_logo.html' %}
-      <span class="topbar__view-tag" id="viewTag">Vista Usuarios</span>
-    </div>
-    <div class="topbar__user" title="Usuario">A</div>
+  <header>
+    {# NAVBAR #}
+    {# NAVBAR #}
+    {% with brand_tag="Vista Clientes" %}
+    {% include 'plantillas/_navbar.html' %}
+    {% endwith %}
   </header>
 
   {% include 'plantillas/_navbar.html' %}
 
-  <main class="app">
-    <section class="panel active" id="panel-usuarios" data-title="Usuarios">
+  <main class="app mt-5 pt-4">
+    <section class="panel active mt-5" id="panel-usuarios" data-title="Usuarios">
       <div class="panel__header">
         <h1>Usuarios</h1>
       </div>
+      {# Filtro de búsqueda #}
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
+          <label for="filtro-busqueda">Buscar Usuario:</label>
+          <input type="text" id="filtro-busqueda" data-filter-target="usuarios"
+            placeholder="Escribe el correo associado con el usuario." />
+        </div>
+      </div>
       <div class="panel__body">
+        {# Tabla #}
         <div class="table-wrap">
           <table class="data-table" data-entity="usuarios">
             <thead>
@@ -47,10 +59,47 @@
             </tbody>
           </table>
         </div>
+        {# Tarjeta #}
+        {# Tarjeta #}
+        <div class="form-card">
+          <h2>Agregar Clientes</h2>
+          <p class="sub">Completa los campos para agregar un cliente nuevo.</p>
+
+          <div class="field">
+            <label>Nombre</label>
+            <input type="text" id="nombre" placeholder="Nombre del cliente">
+          </div>
+          <div class="field">
+            <label>Primer apellido</label>
+            <input type="text" id="apellido_paterno" placeholder="Primer apellido">
+          </div>
+          <div class="field">
+            <label>Segundo apellido</label>
+            <input type="text" id="apellido_materno" placeholder="Segundo apellido">
+          </div>
+          <div class="field id-field">
+            <label>Estado del Cliente</label>
+            <select name="estados" id="estado">
+              <option value="1">Activo</option>
+              <option value="2">Inactivo</option>
+            </select>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="AgregarCliente">Agregar cliente</button>
+          </div>
+        </div>
       </div>
     </section>
   </main>
 
+  {# FOOTER #}
+  {# FOOTER #}
+  {% include 'plantillas/_footer.html' %}
+
+
+  {# SCRIPTS #}
+  {# SCRIPTS #}
   {% include 'plantillas/_default_scripts.html' %}
 </body>
 

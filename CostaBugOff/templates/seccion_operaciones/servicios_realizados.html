@@ -17,61 +17,67 @@
   </header>
 
   <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-serviciosr" data-title="Servicios Realizados">
+    <section class="panel active mt-5" id="panel-serviciosr" data-title="Servicios Realizados">
       <div class="panel__header">
         <h1>Servicios Realizados</h1>
       </div>
       {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
-          <label for="filtro-busqueda">Buscar Servicio Realizado:</label>
+      {# Filtro de búsqueda #}
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
+          <label for="filtro-busqueda">Buscar Servicios Realizados:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="servicioRealizado"
-            placeholder="Escribe la fecha o ubicación del servicio realizado." />
-        </form>
+            placeholder="Escribe la fecha o ubicacion del servicio realizado." />
+        </div>
       </div>
       <div class="panel__body_inverse">
         <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="form-card">
+            <h2>Agregar Servicio Realizado</h2>
+            <p class="sub">Completa los campos para agregar un nuevo servicio realizado.</p>
 
+            <div class="field">
+              <label for="buscar_cliente">Nombre del Cliente</label>
+              <input type="text" id="buscar_cliente" list="lista_clientes" placeholder="Escribe el nombre del cliente"
+                autocomplete="off" />
+              <!-- Datalist dinámico -->
+              <datalist id="lista_clientes"></datalist>
 
-          <form class="entity-form" id="formServiciosR" data-entity="servicioRealizado"
-            style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
-            <div class="field">
-              <label for="ser-id">ID Servicio</label>
-              <input type="number" id="ser-id" name="id_servicio_realizado" placeholder="1" required />
+              <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
+              <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" />
             </div>
             <div class="field">
-              <label for="ser-ubicacion">Ubicación</label>
-              <input type="text" id="ser-ubicacion" name="ubicacion" placeholder="Ubicación del servicio" required />
+              <label>Fecha</label>
+              <input type="date" id="fecha" lang="es" placeholder="Ingresa la fecha del servicio">
             </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="ser-informe">Informe</label>
-              <input type="text" id="ser-informe" name="informe" placeholder="Informe del servicio" />
+            <div class="field">
+              <label>Ubicacion</label>
+              <input type="text" id="ubicacion" placeholder="Ingresa la ubicacion del servicio">
             </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="ser-estado">Estado</label>
-              <select id="ser-estado" name="id_estado" required>
-                <option value="">Selecciona un estado</option>
-                {% for e in estados %}
-                <option value="{{ e[0] }}">{{ e[1] }}</option>
-                {% endfor %}
+            <div class="field">
+              <label>Informe</label>
+              <input type="text" id="informe" placeholder="Ingresa los detalles del servicio">
+            </div>
+            <div class="field id-field">
+              <label>Estado del servicio</label>
+              <select id="estado">
+                <option value="">-- Selecciona una opcion --</option>
+                <option value="1">Activo</option>
+                <option value="2">Inactivo</option>
               </select>
             </div>
-            <div class="form-actions" style="grid-column: 1 / -1;">
-              <button type="button" id="btnAgregarServicio" class="btn btn--primary btn-agregar">
-                Agregar
-              </button>
-              <button type="button" id="btnActualizarServicio" class="btn btn--secondary btn-actualizar">
-                Actualizar
-              </button>
+
+            <div class="btn-row">
+              <button class="btn btn-primary" id="AgregarTelefono">Agregar telefono</button>
             </div>
-          </form>
+          </div>
         </div>
 
         <div class="table-wrap">
           <table class="data-table" data-entity="servicioRealizado">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>Numero de servicio</th>
                 <th>Fecha</th>
                 <th>Ubicación</th>
                 <th>Informe</th>

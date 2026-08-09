@@ -18,59 +18,52 @@
   </header>
 
   <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-empleados" data-title="Empleados">
+    <section class="panel active mt-5" id="panel-empleados" data-title="Empleados">
       <div class="panel__header">
         <h1>Empleados</h1>
       </div>
       {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
+
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
           <label for="filtro-busqueda">Buscar Empleado:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="empleados"
             placeholder="Escribe el nombre o el puesto del empleado." />
-        </form>
+        </div>
+
       </div>
       <div class="panel__body_inverse">
-        <div style="display:flex; flex-direction:column; gap:16px;">
-          <form class="entity-form" id="formEmpleados" data-entity="empleados"
-            style="display:grid; grid-template-columns: 1fr 1fr; gap: 0 16px;">
-            <div class="field">
-              <label for="emp-id-empleado">ID Empleado</label>
-              <input type="number" id="emp-id-empleado" name="id_empleado" placeholder="1" required />
-            </div>
-            <div class="field">
-              <label for="emp-nombre">Nombre</label>
-              <input type="text" id="emp-nombre" name="nombre" placeholder="Nombre" required />
-            </div>
-            <div class="field">
-              <label for="emp-apellido1">Primer apellido</label>
-              <input type="text" id="emp-apellido1" name="apellido1" placeholder="Primer apellido" />
-            </div>
-            <div class="field">
-              <label for="emp-apellido2">Segundo apellido</label>
-              <input type="text" id="emp-apellido2" name="apellido2" placeholder="Segundo apellido" />
-            </div>
-            <div class="field" style="grid-column: 1 / -1;">
-              <label for="emp-idPuesto">Puesto</label>
-              <select id="emp-idPuesto" name="id_puesto" required>
-                <option value="">Selecciona un puesto</option>
-                {% for p in puestos %}
-                <option value="{{ p[0] }}">{{ p[1] }}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="form-actions" style="grid-column: 1 / -1;">
-              <button type="button" id="btnAgregarEmpleado" class="btn btn--primary btn-agregar">
-                Agregar
-              </button>
-              <button type="button" id="btnActualizarEmpleado" class="btn btn--secondary btn-actualizar">
-                Actualizar
-              </button>
-              <button type="button" id="btnDesactivarEmpleado" class="btn-icon btn-delete">
-                Desactivar
-              </button>
-            </div>
-          </form>
+        <div class="form-card">
+          <h2>Agregar Empleado</h2>
+          <p class="sub">Completa los campos para agregar un empleado nuevo.</p>
+
+          <div class="field">
+            <label>Nombre</label>
+            <input type="text" id="nombre" placeholder="Nombre del empleado">
+          </div>
+          <div class="field">
+            <label>Primer apellido</label>
+            <input type="text" id="apellido_paterno" placeholder="Primer apellido">
+          </div>
+          <div class="field">
+            <label>Segundo apellido</label>
+            <input type="text" id="apellido_materno" placeholder="Segundo apellido">
+          </div>
+          <div class="field">
+            <label>Puesto</label>
+            <input type="text" id="puesto" placeholder="Puesto del empleado">
+          </div>
+          <div class="field id-field">
+            <label>Estado del Cliente</label>
+            <select name="estados" id="estado">
+              <option value="1">Activo</option>
+              <option value="2">Inactivo</option>
+            </select>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="AgregarCliente">Agregar empleado</button>
+          </div>
         </div>
 
         <div class="table-wrap">

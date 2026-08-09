@@ -22,12 +22,13 @@
         <h1>Visitas</h1>
       </div>
       {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
+      {# Filtro de búsqueda #}
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
           <label for="filtro-busqueda">Buscar Visita:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="visitas"
-            placeholder="Escribe la descripción o el cliente asociado a la visita" />
-        </form>
+            placeholder="Escribe algun detalle de la visita." />
+        </div>
       </div>
       <div class="panel__body">
         <div class="table-wrap">
@@ -63,41 +64,49 @@
           </table>
         </div>
 
-        <form class="entity-form" data-entity="Visitas">
+        <!-- FORMULARIO DE VISITAS -->
+        <!-- FORMULARIO DE VISITAS -->
+        <div class="form-card">
+          <h2>Agregar Visita</h2>
+          <p class="sub">Completa los campos para agregar una visita nueva.</p>
+
           <div class="field">
-            <label for="v-idVisita">ID visita</label>
-            <input type="number" id="v-idVisita" name="idVisita" placeholder="ID de la visita">
-          </div>
-          <div class="field">
-            <label for="v-Nombre">Nombre</label>
-            <input type="text" id="v-Nombre" name="nombre" placeholder="Nombre del cliente">
-          </div>
-          <div class="field">
-            <label for="v-fechaP">Fecha Programada</label>
-            <input type="date" id="v-fechaP" name="fechaP" placeholder="fecha programada de la visita">
+            <label for="detalles">Descripcion</label>
+            <textarea id="Descripcion" name="Descripcion" rows="4"
+              placeholder="Escribe el detalle de la visita"></textarea>
           </div>
           <div class="field">
-            <label for="v-fechaR">Fecha Realizada</label>
-            <input type="date" id="v-fechaR" name="fechaR" placeholder="fecha realizada de la visita">
+            <label>Fecha programada</label>
+            <input type="date" id="fechaprogramada" placeholder="Ingresa la fecha programada">
           </div>
           <div class="field">
-            <label for="v-idSuscripcion">ID Suscripcion</label>
-            <input type="number" id="v-idSuscripcion" name="idSuscripcion" placeholder="ID de la suscripcion">
+            <label>Fecha realizada</label>
+            <input type="date" id="fecharealizada" placeholder="Ingresa la fecha realizada">
           </div>
           <div class="field">
-            <label for="v-idCliente">ID del Cliente</label>
-            <input type="number" id="v-idCliente" name="idCliente" placeholder="ID del cliente">
+            <label for="buscar_cliente">Nombre del Cliente</label>
+            <input type="text" id="buscar_cliente" list="lista_clientes" placeholder="Escribe el nombre del cliente"
+              autocomplete="off" />
+            <!-- Datalist dinámico -->
+            <datalist id="lista_clientes"></datalist>
+
+            <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
+            <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" />
           </div>
-          <div class="field">
-            <label for="v-idEstado">ID Estado</label>
-            <input type="number" id="v-idEstado" name="idEstado" placeholder="1 = Activo, 2 = Inactivo">
+          <div class="field id-field">
+            <label>Estado de la visita</label>
+            <select id="estado">
+              <option value="">-- Selecciona una opcion --</option>
+              <option value="7">Realizada</option>
+              <option value="6">Programada</option>
+              <option value="5">Cancelada</option>
+            </select>
           </div>
-          <div class="form-actions">
-            <button type="button" class="btn btn--primary btn-agregar">Agregar</button>
-            <button type="button" class="btn btn--secondary btn-actualizar">Actualizar</button>
-            <button type="button" id="btnActualizar" class="btn-icon btn-delete">Eliminar</button>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="AgregarTelefono">Agregar Visita</button>
           </div>
-        </form>
+        </div>
 
       </div>
     </section>

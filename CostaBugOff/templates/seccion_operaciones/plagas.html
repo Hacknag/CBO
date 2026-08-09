@@ -17,7 +17,7 @@
   </header>
 
   <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-plagas" data-title="Plaga">
+    <section class="panel active mt-5" id="panel-plagas" data-title="Plaga">
       <div class="panel__header">
         <h1>Plagas</h1>
 
@@ -26,14 +26,17 @@
         </button>
       </div>
       {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
+      {# Filtro de búsqueda #}
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
           <label for="filtro-busqueda">Buscar Plaga:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="plagas"
-            placeholder="Escribe el nombre o la descripcion de la plaga." />
-        </form>
+            placeholder="Escribe el nombre o el tipo de plaga." />
+        </div>
       </div>
       <div class="panel__body">
+        <!-- TABLA DE PLAGAS -->
+        <!-- TABLA DE PLAGAS -->
         <div class="table-wrap">
           <table class="data-table" data-entity="plagas">
             <thead>
@@ -64,41 +67,43 @@
             </tbody>
           </table>
         </div>
+        <!-- FORMULARIO DE PLAGAS -->
+        <!-- FORMULARIO DE PLAGAS -->
+        <div class="form-card">
+          <h2>Agregar Plaga</h2>
+          <p class="sub">Completa los campos para agregar una plaga nueva.</p>
 
-        <form class="entity-form" data-entity="Plagas">
           <div class="field">
-            <label for="plag-nombre">Tipo</label>
-            <input type="text" id="plag-nombre" name="tipo" placeholder="Tipo" />
-          </div>
-          <div class="field">
-            <label for="plag-nombre">Nombre</label>
-            <input type="text" id="plag-nombre" name="nombre" placeholder="Nombre" />
+            <label>Nombre de plaga</label>
+            <input type="text" id="plaga" placeholder="Escribe el nombre de la plaga">
           </div>
           <div class="field">
-            <label for="plag-descripcion">Descripcion</label>
-            <input type="text" id="plag-descripcion" name="descripcion" placeholder="Descripcion" />
+            <label for="buscar_cliente">Tipo</label>
+            <input type="text" id="buscar_cliente" list="lista_clientes" placeholder="Busca el tipo de plaga"
+              autocomplete="off" />
+            <!-- Datalist dinámico -->
+            <datalist id="lista_clientes"></datalist>
+
+            <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
+            <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" />
           </div>
           <div class="field">
-            <label for="plag-unidadesNecesarias">Unidades Necesarias</label>
-            <input type="tel" id="plag-unidadesNecesarias" name="undadesNecesarias" placeholder="UnidadesNecesarias" />
+            <label>Descripcion</label>
+            <input type="text" id="descripcion" placeholder="Ingresa una descripcion">
           </div>
-          <div class="field">
-            <label for="plag-correo">Estado</label>
-            <input type="email" id="plag-estado" name="estado" placeholder="1 = Activo, 2 = Inactivo" />
+          <div class="field id-field">
+            <label>Estado del Cliente</label>
+            <select id="estado">
+              <option value="">-- Selecciona una opcion --</option>
+              <option value="1">Activo</option>
+              <option value="2">Inactivo</option>
+            </select>
           </div>
-          <div class="field">
-            <label for="plag-id">ID (solo actualización)</label>
-            <input type="text" id="plag-id" name="id" readonly />
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="AgregarTelefono">Agregar plaga</button>
           </div>
-          <div class="form-actions">
-            <button type="button" class="btn btn--primary btn-agregar">
-              Agregar
-            </button>
-            <button type="button" class="btn btn--secondary btn-actualizar">
-              Actualizar
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
     </section>
   </main>

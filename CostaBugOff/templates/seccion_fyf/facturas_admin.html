@@ -21,12 +21,14 @@
       <div class="panel__header">
         <h1>Facturas</h1>
       </div>
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
+
+      {# Filtro de búsqueda #}
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
           <label for="filtro-busqueda">Buscar Factura:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="facturas"
             placeholder="Escribe el número or cliente associado a la factura." />
-        </form>
+        </div>
       </div>
       <div class="panel__body panel__body--full">
         <form method="get" action="/facturas" class="filtro-toolbar">

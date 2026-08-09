@@ -18,17 +18,18 @@
   </header>
 
   <main class="app mt-5 pt-4">
-    <section class="panel active mt-5 pt-4" id="panel-productos" data-title="Productos">
+    <section class="panel active mt-5" id="panel-productos" data-title="Productos">
       <div class="panel__header">
         <h1>Productos</h1>
       </div>
       {# Filtro de búsqueda #}
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <form class="filtro-form" onsubmit="return false;">
-          <label for="filtro-busqueda">Buscar Producto:</label>
+      {# Filtro de búsqueda #}
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
+          <label for="filtro-busqueda">Buscar producto:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="producto"
-            placeholder="Escribe el nombre o la descripcion del producto." />
-        </form>
+            placeholder="Escribe el nombre o el descripcion del producto." />
+        </div>
       </div>
       <!-- TABLA DE PRODUCTOS -->
       <!-- TABLA DE PRODUCTOS -->
@@ -107,9 +108,28 @@
               border: none;
               border-top: 1px solid var(--line);
             " />
+      </div>
+    </section>
 
-        <h2 style="margin-bottom: 12px">Proveedores por Producto</h2>
+    {# SECCION 2 #}
+    {# SECCION 2 #}
+    {# SECCION 2 #}
+    <section class="panel active" id="relaciones" data-title="relaciones">
+      {# <div class="panel__header">
+        <h1>Productos</h1>
+      </div> #}
+      {# Filtro de búsqueda #}
+      {# Filtro de búsqueda #}
+      {# <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
+          <label for="filtro-busqueda">Buscar producto:</label>
+          <input type="text" id="filtro-busqueda" data-filter-target="relaciones"
+            placeholder="Escribe el nombre del producto o del proveedor." />
+        </div>
+      </div> #}
 
+      {# TABLE #}
+      <div class="panel__body">
         <div class="table-wrap">
           <table class="data-table" data-entity="ProductosXProveedor">
             <thead>
@@ -327,6 +347,7 @@
         }
       })
   </script>
+
   {% include 'plantillas/_default_scripts.html' %}
 </body>
 

@@ -24,7 +24,7 @@
             <div style="display:flex; flex-direction:column;">
                 <div class="search-row">
                     <label for="filtro-busqueda">Buscar Correo:</label>
-                    <input type="text" id="filtro-busqueda" data-filter-target="CorreoCliente"
+                    <input type="text" id="filtro-busqueda" data-filter-target="correos_clientes"
                         placeholder="Escribe el nombre o el correo del cliente." />
                 </div>
             </div>
@@ -33,7 +33,7 @@
             <!-- TABLA DE CORREOS -->
             <div class="panel__body">
                 <div class="table-wrap">
-                    <table class="data-table" data-entity="CorreoCliente">
+                    <table class="data-table" data-entity="correos_clientes">
                         <thead>
                             <tr>
                                 <th>Cliente</th>
@@ -42,17 +42,23 @@
                                 <th>Correo</th>
                                 <th>Tipo</th>
                                 <th>Estado</th>
+                                <th>Borrar</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for t in correos %}
-                            <tr>
-                                <td>{{ t[0] }}</td>
+                            <tr data-id1="{{ t[0] }}" data-id2="{{ t[4] }}" data-entity="correos_clientes">
                                 <td>{{ t[1] }}</td>
                                 <td>{{ t[2] }}</td>
                                 <td>{{ t[3] }}</td>
                                 <td>{{ t[4] }}</td>
                                 <td>{{ t[5] }}</td>
+                                <td>{{ t[6] }}</td>
+                                <td>
+                                    <button class="delete-btn" onclick="deleteRow2(this)">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -62,19 +68,26 @@
                 <!-- FORMULARIO DE CORREOS -->
                 <div class="form-card">
                     <h2>Agregar Correo</h2>
-                    <p class="sub">Completa los campos para agregar un cliente nuevo.</p>
+                    <p class="sub">Completa los campos para agregar un correo nuevo.</p>
 
                     <div class="field">
-                        <label>Nombre</label>
-                        <input type="text" id="nombre" placeholder="Nombre del cliente">
+                        <label for="buscar_cliente">Nombre del Cliente</label>
+                        <input type="text" id="buscar_cliente" list="lista_clientes"
+                            placeholder="Escribe el nombre del cliente" autocomplete="off" />
+                        <!-- Datalist dinámico -->
+                        <datalist id="lista_clientes"></datalist>
+
+                        <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
+                        <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" />
                     </div>
                     <div class="field">
                         <label>Correo</label>
-                        <input type="text" id="correo_cliente" placeholder="Correo del cliente">
+                        <input type="email" id="correo_cliente" placeholder="Correo del cliente">
                     </div>
                     <div class="field id-field">
                         <label>Tipo de correo</label>
-                        <select name="tipo_correo" id="tipo_correo">
+                        <select name="tipo_correo" id="correo">
+                            <option value="">-- Selecciona una opcion --</option>
                             <option value="Personal">Personal</option>
                             <option value="Empresarial">Empresarial</option>
                         </select>
@@ -82,13 +95,14 @@
                     <div class="field id-field">
                         <label>Estado del Cliente</label>
                         <select name="estados" id="estado">
+                            <option value="">-- Selecciona una opcion --</option>
                             <option value="1">Activo</option>
                             <option value="2">Inactivo</option>
                         </select>
                     </div>
 
                     <div class="btn-row">
-                        <button class="btn btn-primary" id="AgregarCliente">Agregar cliente</button>
+                        <button class="btn btn-primary" id="AgregarCorreo">Agregar cliente</button>
                     </div>
                 </div>
 
@@ -169,6 +183,168 @@
                     )
                 }
             })
+    </script>
+
+    <script>
+
+        // 1. Declaración e inicialización de elementos del DOM
+        const inputBuscar = document.getElementById('buscar_cliente');
+        const datalist = document.getElementById('lista_clientes');
+        const inputHiddenId = document.getElementById('id_cliente_seleccionado');
+        const inputTelefono = document.getElementById('correo_cliente');
+        const inputCorreo = document.getElementById('correo_cliente');
+        const selectTipo = document.getElementById('tipo');
+        const selectEstado = document.getElementById('estado');
+
+        // Mapa global para relacionar: Nombre Completo -> ID del Cliente
+        const clientesMapa = new Map();
+        let debounceTimer;
+
+        // -------------------------------------------------------------
+        // 2. LÓGICA DE BÚSQUEDA Y SELECCIÓN DE CLIENTE
+        // -------------------------------------------------------------
+        if (inputBuscar) {
+            inputBuscar.addEventListener('input', (e) => {
+                const query = e.target.value.trim();
+
+                // Si lo que escribió coincide con un cliente cargado, asignamos su ID
+                if (clientesMapa.has(query)) {
+                    inputHiddenId.value = clientesMapa.get(query);
+                    return;
+                } else {
+                    // Si modifica el texto, borramos el ID
+                    inputHiddenId.value = '';
+                }
+
+                // Ignorar búsquedas de menos de 2 caracteres
+                if (query.length < 2) {
+                    datalist.innerHTML = '';
+                    return;
+                }
+
+                // Debounce: espera 300ms a que el usuario deje de escribir
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(async () => {
+                    try {
+                        const response = await fetch(`/clientes/buscar?q=${encodeURIComponent(query)}`);
+                        const clientes = await response.json();
+
+                        datalist.innerHTML = '';
+                        clientesMapa.clear();
+
+                        clientes.forEach(cliente => {
+                            clientesMapa.set(cliente.nombre_completo, cliente.id);
+
+                            const option = document.createElement('option');
+                            option.value = cliente.nombre_completo;
+                            datalist.appendChild(option);
+                        });
+                    } catch (error) {
+                        console.error('Error al buscar clientes:', error);
+                    }
+                }, 100);
+            });
+        }
+
+
+        // -------------------------------------------------------------
+        // 4. LÓGICA PARA AGREGAR EL CORREO
+        // -------------------------------------------------------------
+        const btnAgregar = document.getElementById('AgregarCorreo');
+        if (btnAgregar) {
+            btnAgregar.addEventListener('click', async (e) => {
+                e.preventDefault();
+
+                // Lectura de valores al hacer click
+                const idCliente = inputHiddenId ? inputHiddenId.value.trim() : '';
+                const correo = inputCorreo ? inputCorreo.value.trim() : '';
+                const tipo = selectTipo ? selectTipo.value.trim() : '';
+                const idEstado = selectEstado ? selectEstado.value.trim() : '';
+
+                // 1. Validar Cliente seleccionado
+                if (!idCliente) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cliente no seleccionado',
+                        text: 'Por favor, busca y selecciona un cliente de la lista desplegable.',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    return;
+                }
+
+
+                // 2. Validar Teléfono obligatorio
+                if (!correo) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Campo incompleto',
+                        text: 'Por favor ingresa un correo electronico.',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    return;
+                }
+
+                // 3. Validar Estado
+                if (!idEstado) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Estado no seleccionado',
+                        text: 'Por favor selecciona un estado para el correo.',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    return;
+                }
+
+                // Petición al servidor
+                try {
+                    const response = await fetch('/correos_clientes/guardar', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id_cliente: parseInt(idCliente, 10),
+                            correo: correo,
+                            tipo: tipo,
+                            id_estado: parseInt(idEstado, 10)
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Guardado!',
+                            text: result.message || 'Teléfono agregado con éxito.',
+                            confirmButtonColor: '#3085d6'
+                        }).then(() => {
+                            if (inputBuscar) inputBuscar.value = '';
+                            if (inputHiddenId) inputHiddenId.value = '';
+                            if (inputCorreo) inputCorreo.value = '';
+
+                            // Recargar la página para refrescar la tabla
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: result.message || 'Ocurrió un error al guardar.',
+                            confirmButtonColor: '#d33'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de conexión',
+                        text: 'No se pudo conectar con el servidor.',
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            });
+        }
     </script>
     {% include 'plantillas/_default_scripts.html' %}
 </body>

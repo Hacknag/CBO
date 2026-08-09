@@ -1,23 +1,33 @@
 <!doctype html>
 <html lang="es">
-{% include 'plantillas/_default_head.html' %}
+
+<head>
+  {% include 'plantillas/_default_head.html' %}
+</head>
 
 <body>
-  <header class="topbar">
-    <div class="topbar__brand">
-      {% include 'plantillas/_logo.html' %}
-      <span class="topbar__view-tag" id="viewTag">Vista Roles y Permisos</span>
-    </div>
-    <div class="topbar__user" title="Usuario">A</div>
+  <header>
+    {# NAVBAR #}
+    {# NAVBAR #}
+    {% with brand_tag="Vista Teléfonos de Clientes" %}
+    {% include 'plantillas/_navbar.html' %}
+    {% endwith %}
   </header>
 
-  {% include 'plantillas/_navbar.html' %}
-
-  <main class="app">
-    <section class="panel active" id="panel-roles_permisos" data-title="Roles y Permisos">
+  <main class="app mt-5 pt-4">
+    <section class="panel active mt-5" id="panel-roles_permisos" data-title="roles_permisos">
       <div class="panel__header">
         <h1>Roles y Permisos</h1>
       </div>
+      <div style="display:flex; flex-direction:column;">
+        <div class="search-row">
+          <label for="filtro-busqueda">Buscar Rol:</label>
+          <input type="text" id="filtro-busqueda" data-filter-target="RolPermiso"
+            placeholder="Escribe el nombre del rol." />
+        </div>
+      </div>
+      <!-- TABLA DE ROLES Y PERMISOS -->
+      <!-- TABLA DE ROLES Y PERMISOS -->
       <div class="panel__body">
         <div class="table-wrap">
           <table class="data-table" data-entity="RolPermiso">
@@ -39,37 +49,47 @@
             </tbody>
           </table>
         </div>
+        <div class="form-card">
+          <h2>Agregar Telefonos</h2>
+          <p class="sub">Completa los campos para agregar un telefono nuevo.</p>
 
-        <h2 style="margin: 24px 0 12px">Asignar Permiso a un Rol</h2>
-
-        <form class="entity-form" id="formRolPermiso" data-entity="RolPermiso">
           <div class="field">
-            <label for="rp-rol">Rol</label>
-            <select id="rp-rol" name="id_rol" required>
-              <option value="">Selecciona un rol</option>
-              {% for r in roles %}
-              <option value="{{ r[0] }}">{{ r[1] }}</option>
-              {% endfor %}
+            <label for="buscar_cliente">Nombre del Cliente</label>
+            <input type="text" id="buscar_cliente" list="lista_clientes" placeholder="Escribe el nombre del cliente"
+              autocomplete="off" />
+            <!-- Datalist dinámico -->
+            <datalist id="lista_clientes"></datalist>
+
+            <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
+            <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" />
+          </div>
+          <div class="field">
+            <label>Telefono</label>
+            <input type="text" id="telefono" placeholder="Ingresalo con el formato XXXX-XXXX">
+          </div>
+          <div class="field id-field">
+            <label>Tipo</label>
+            <select name="tipo_telefono" id="tipo">
+              <option value="">-- Selecciona una opcion --</option>
+              <option value="Residencial">Residencial</option>
+              <option value="Celular">Celular</option>
+              <option value="Trabajo">Trabajo</option>
             </select>
           </div>
-          <div class="field">
-            <label for="rp-permiso">Permiso</label>
-            <select id="rp-permiso" name="id_permiso" required>
-              <option value="">Selecciona un permiso</option>
-              {% for p in permisos %}
-              <option value="{{ p[0] }}">{{ p[1] }}</option>
-              {% endfor %}
+          <div class="field id-field">
+            <label>Estado del Cliente</label>
+            <select id="estado">
+              <option value="">-- Selecciona una opcion --</option>
+              <option value="1">Activo</option>
+              <option value="2">Inactivo</option>
             </select>
           </div>
-          <div class="form-actions">
-            <button type="button" id="btnAgregarRolPermiso" class="btn btn--primary btn-agregar">
-              Agregar
-            </button>
-            <button type="button" id="btnDesactivarRolPermiso" class="btn-icon btn-delete">
-              Desactivar
-            </button>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" id="AgregarTelefono">Agregar telefono</button>
           </div>
-        </form>
+        </div>
+
       </div>
     </section>
   </main>
