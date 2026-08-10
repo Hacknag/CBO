@@ -31,12 +31,12 @@ def actualizar_direcciones_clientes(ID_CLIENTE, ID_PROVINCIA, ID_CANTON, ID_DIST
         cursor.close()
         conexion.close()
 
-def eliminar_direcciones_clientes_logica(ID_CLIENTE, ID_PROVINCIA, ID_CANTON, ID_DISTRITO, ID_ESTADO):
+def eliminar_direccion_clientes_logica(ID_CLIENTE, ID_PROVINCIA, ID_CANTON, ID_DISTRITO):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
         cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_DIRECCIONES_DELETE_SP", [
-            ID_CLIENTE, ID_PROVINCIA, ID_CANTON, ID_DISTRITO, ID_ESTADO
+            ID_CLIENTE, ID_PROVINCIA, ID_CANTON, ID_DISTRITO
         ])
         conexion.commit()
     except Exception as e:

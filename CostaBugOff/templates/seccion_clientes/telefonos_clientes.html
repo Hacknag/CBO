@@ -130,65 +130,6 @@
     }
   </script>
 
-  {#
-  <script>
-    document
-      .getElementById('btnAgregar')
-      .addEventListener('click', async () => {
-        const datos = obtenerDatosFormulario()
-        if (!datos.id_cliente || !datos.telefono)
-          return alert('Por favor, llena los campos requeridos.')
-
-        try {
-          const respuesta = await fetch(`${URL_API}/guardar`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datos),
-          })
-          const resultado = await respuesta.json()
-
-          alert(resultado.message)
-          if (respuesta.ok) {
-            document.getElementById('form_telefonos_clientes').reset()
-            location.reload()
-          }
-        } catch (error) {
-          alert(
-            'No se pudo conectar con el servidor de Flask en el puerto 5001.',
-          )
-        }
-      })
-
-    document
-      .getElementById('btnActualizar')
-      .addEventListener('click', async () => {
-        const datos = obtenerDatosFormulario()
-        if (!datos.id_cliente || !datos.telefono)
-          return alert(
-            'Especifica el ID del cliente y el teléfono a actualizar.',
-          )
-
-        try {
-          const respuesta = await fetch(`${URL_API}/actualizar`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datos),
-          })
-          const resultado = await respuesta.json()
-
-          alert(resultado.message)
-          if (respuesta.ok) {
-            document.getElementById('form_telefonos_clientes').reset()
-            location.reload()
-          }
-        } catch (error) {
-          alert(
-            'No se pudo conectar con el servidor de Flask en el puerto 5001.',
-          )
-        }
-      })
-  </script> #}
-
   <script>
     // 1. Declaración e inicialización de elementos del DOM
     const inputBuscar = document.getElementById('buscar_cliente');

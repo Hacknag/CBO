@@ -24,7 +24,7 @@ RUTAS_BILLING = (
 from models.seccion_cliente.clientes import obtener_clientes, buscar_clientes, insertar_cliente, actualizar_cliente, registrar_cliente, eliminar_cliente_logico
 from models.seccion_cliente.telefonos_clientes import insertar_telefonos_clientes, actualizar_telefonos_clientes, eliminar_telefono_cliente_logico, obtener_telefonos_clientes
 from models.seccion_cliente.correos_clientes import insertar_correos_clientes, actualizar_correos_clientes, eliminar_correo_cliente_logica, obtener_correos_clientes
-from models.seccion_cliente.direcciones_clientes import insertar_direcciones_clientes, actualizar_direcciones_clientes, eliminar_direcciones_clientes_logica, obtener_direcciones_clientes
+from models.seccion_cliente.direcciones_clientes import insertar_direcciones_clientes, actualizar_direcciones_clientes, eliminar_direccion_clientes_logica, obtener_direcciones_clientes
 
 #################### Imports Seccion Recursos Humanos y Seguridad ####################
 #################### Imports Seccion Recursos Humanos y Seguridad ####################
@@ -52,7 +52,7 @@ from models.seccion_operaciones.servicios_realizados import insertar_servicio_re
 from models.seccion_operaciones.visitas import obtener_visitas, insertar_visita, actualizar_visita, eliminar_visita_logica
 from models.seccion_operaciones.cantones import insertar_canton, actualizar_canton, eliminar_cantones_logico, obtener_cantones, buscar_cantones
 from models.seccion_operaciones.provincias import insertar_provincia, actualizar_provincia, eliminar_provincia_logico, obtener_provincia, buscar_provincias
-from models.seccion_operaciones.distritos import obtener_distritos, insertar_distrito, actualizar_distrito, eliminar_distrito_logico
+from models.seccion_operaciones.distritos import obtener_distritos, insertar_distrito, actualizar_distrito, eliminar_distrito_logico, buscar_distritos
 
 #################### Imports Seccion Facturacion y Finanzas ####################
 #################### Imports Seccion Facturacion y Finanzas ####################
@@ -290,14 +290,15 @@ def direcciones_clientes():
     datos_direcciones = obtener_direcciones_clientes()    
     return render_template('seccion_clientes/direcciones_clientes.html', direcciones=datos_direcciones)
 
-@app.route("/api/direcciones_clientes/guardar", methods=["POST"])
+@app.route("/direcciones_clientes/guardar", methods=["POST"])
 def api_guardar_direccion_cliente():
     datos = request.get_json()
     try:
         insertar_direcciones_clientes(
             ID_CLIENTE=datos["id_cliente"],
-            DIRECCION=datos["direccion"],
-            TIPO=datos["tipo"],
+            ID_PROVINCIA=datos["id_provincia"],
+            ID_CANTON=datos["id_canton"],
+            ID_DISTRITO=datos["id_distrito"],
             ID_ESTADO=datos["id_estado"]
         )
         return jsonify({"message": "¡Dirección agregada con éxito!"}), 200
@@ -318,7 +319,14 @@ def api_actualizar_direccion_cliente():
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
-     
+# DELETE
+@app.route('/delete/direcciones_clientes/<int:id_cliente>/<int:id_provincia>/<int:id_canton>/<int:id_distrito>', methods=['POST'])
+def eliminar_direccion_cliente(id_cliente, id_provincia, id_canton, id_distrito):
+    try:
+        eliminar_direccion_clientes_logica(id_cliente, id_provincia, id_canton, id_distrito)
+        return jsonify({'success': True, 'message': 'Correo eliminado correctamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 
 ###########################################################################################
@@ -819,42 +827,45 @@ def api_eliminar_proveedor(id_proveedor):
 @app.route("/telefonos_proveedores")
 def telefonos_proveedores():
     lista_telefonos = obtener_telefonos_proveedores()
-    return render_template("seccion_inventario/telefonos_proveedores.html", telefonos_proveedores=lista_telefonos)
-
+    lista_proveedores = obtener_proveedores()
+    return render_template("seccion_inventario/telefonos_proveedores.html", telefonos_proveedores=lista_telefonos, proveedores=lista_proveedores)
+ 
 @app.route("/api/telefonos_proveedores/guardar", methods=["POST"])
 def api_guardar_telefono_proveedor():
     datos = request.get_json()
     try:
         insertar_telefonos_proveedores(
-            id_proveedor=datos["id_proveedor"],
-            nombre=datos["nombre"],
-            id_estado= 1
+            ID_PROVEEDOR=datos["id_proveedor"],
+            TELEFONO=datos["telefono"],
+            TIPO=datos["tipo"],
+            ID_ESTADO=datos["id_estado"]
         )
-        return jsonify({"message": "¡Proveedor agregado con éxito!"}), 200
+        return jsonify({"success": True, "message": "¡Teléfono agregado con éxito en Oracle!"}), 200
     except Exception as e:
-        return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
-
+        return jsonify({"success": False, "message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+ 
 @app.route("/api/telefonos_proveedores/actualizar", methods=["POST"])
 def api_actualizar_telefono_proveedor():
     datos = request.get_json()
     try:
         actualizar_telefonos_proveedores(
-            id_proveedor=datos["id_proveedor"],
-            nombre=datos["nombre"],
-            id_estado=1
+            ID_PROVEEDOR=datos["id_proveedor"],
+            TELEFONO_ACTUAL=datos["telefono_actual"],
+            TELEFONO_NUEVO=datos["telefono_nuevo"],
+            TIPO=datos["tipo"],
+            ID_ESTADO=datos["id_estado"]
         )
-        return jsonify({"message": "¡Proveedor actualizado con éxito!"}), 200
+        return jsonify({"success": True, "message": "¡Teléfono actualizado con éxito!"}), 200
     except Exception as e:
-        return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
-
-@app.route("/api/telefonos_proveedores/eliminar/<int:id_proveedor>", methods=["POST"])
-def api_eliminar_telefono_proveedor(id_proveedor):
+        return jsonify({"success": False, "message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+ 
+@app.route("/delete/telefonos_proveedores/<int:id_proveedor>/<string:telefono>", methods=["POST"])
+def api_eliminar_telefono_proveedor(id_proveedor, telefono):
     try:
-        eliminar_telefonos_proveedores_logica(id_proveedor)
-        return jsonify({"message": "¡Telefono eliminado con éxito!"}), 200
+        eliminar_telefonos_proveedores_logica(id_proveedor, telefono)
+        return jsonify({"success": True, "message": "¡Telefono eliminado con éxito!"}), 200
     except Exception as e:
-        return jsonify({"message": f"Error al eliminar en Base de Datos: {str(e)}"}), 500
-
+        return jsonify({"success": False, "message": f"Error al eliminar en Base de Datos: {str(e)}"}), 500
 
 # ---------------- Correos de proveedores (vista para Admin/Empleado) ----------------
 # ---------------- Correos de proveedores (vista para Admin/Empleado) ----------------
@@ -892,15 +903,15 @@ def api_actualizar_correo_proveedor():
     datos = request.get_json()
     try:
         actualizar_correo_proveedor(
-            id_proveedor=datos["id_proveedor"],
-            correo_actual=datos["correo_actual"],
-            correo_nuevo=datos["correo_nuevo"],
-            tipo=datos["tipo"],
-            id_estado=datos["id_estado"]
+            ID_PROVEEDOR=datos["id_proveedor"],
+            CORREO=datos["correo_actual"],
+            CORREO_NUEVO=datos["correo_nuevo"],
+            TIPO=datos["tipo"],
+            ID_ESTADO=datos["id_estado"]
         )
-        return jsonify({"message": "¡Correo actualizado con éxito en Oracle!"}), 200
+        return jsonify({"success": True, "message": "¡Correo actualizado con éxito en Oracle!"}), 200
     except Exception as e:
-        return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+        return jsonify({"success": False, "message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
     
 ###########################################################################################
 ################################## SECCION - OPERACIONES ##################################
@@ -1154,7 +1165,17 @@ def api_actualizar_distrito():
     except Exception as e:
         return jsonify({'success': False, "message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
  
- 
+@app.route('/distritos/buscar', methods=['GET'])
+def api_buscar_distritos():
+    
+    # 1. Extraer el parámetro 'q' de la URL
+    query = request.args.get('q', '').strip()    
+    print(query)
+    # 2. Llamar a la función del archivo clientes.py
+    lista_distrito = buscar_distritos(query)
+    # 3. Devolver la respuesta JSON
+    return jsonify(lista_distrito)
+
 ###########################################################################################
 ############################# SECCION - FACTURACION Y FINANZAS ############################
 ###########################################################################################
@@ -1756,6 +1777,7 @@ def contacto():
             enviar_correo_contacto(
                 nombre=request.form["nombre"],
                 correo=request.form["correo"],
+                asunto=request.form["asunto"],
                 mensaje=request.form["mensaje"],
             )
             return render_template("contacto.html", enviado=True)

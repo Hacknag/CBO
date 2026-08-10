@@ -64,3 +64,44 @@ def obtener_distritos(id_estado=None):
     cursor.close()
     conn.close()
     return datos
+
+
+# ---------------- Buscar CANTON ---------------- #
+# ---------------- Buscar CANTON ---------------- #
+# ---------------- Buscar CANTON ---------------- #
+def buscar_distritos(query):
+    """Consulta directamente la tabla clientes en Oracle Database y retorna una lista de diccionarios."""
+    if not query:
+        return []
+
+    conexion = get_connection()
+    cursor = conexion.cursor() 
+    search_term = f"%{query}%"
+    
+    # Consulta directa a la TABLA clientes (Sintaxis Oracle SQL)
+    sql = """
+    SELECT 
+        ID_DISTRITO, 
+        TRIM(NOMBRE) AS DISTRITO
+    FROM FIDE_DISTRITOS_TB 
+    WHERE ID_ESTADO = 1
+    AND LOWER(NOMBRE) LIKE LOWER(:1)
+    FETCH FIRST 8 ROWS ONLY
+    """
+    
+    cursor.execute(sql, (search_term,))
+    resultados = cursor.fetchall()
+    
+    cursor.close()
+    conexion.close()
+
+    # Mapeo de la lista de tuplas de Oracle
+    distritos = [
+        {
+            "id": row[0],
+            "nombre": row[1]
+        }
+        for row in resultados
+    ]
+    
+    return distritos

@@ -23,7 +23,7 @@
             <div style="display:flex; flex-direction:column;">
                 <div class="search-row">
                     <label for="filtro-busqueda">Direcciones de cliente:</label>
-                    <input type="text" id="filtro-busqueda" data-filter-target="DireccionCliente"
+                    <input type="text" id="filtro-busqueda" data-filter-target="direcciones_clientes"
                         placeholder="Escribe el nombre o la direccion del cliente." />
                 </div>
             </div>
@@ -31,7 +31,7 @@
             <!-- TABLA DE DIRECCIONES -->
             <div class="panel__body">
                 <div class="table-wrap">
-                    <table class="data-table" data-entity="DireccionCliente">
+                    <table class="data-table" data-entity="direcciones_clientes">
                         <thead>
                             <tr>
                                 <th>Cliente</th>
@@ -41,18 +41,25 @@
                                 <th>Canton</th>
                                 <th>Distrito</th>
                                 <th>Estado</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for t in direcciones %}
-                            <tr>
-                                <td>{{ t[0] }}</td>
-                                <td>{{ t[1] }}</td>
-                                <td>{{ t[2] }}</td>
-                                <td>{{ t[3] }}</td>
+                            <tr data-id_cliente="{{ t[0] }}" data-id_provincia="{{ t[1] }}" data-id_canton="{{ t[2] }}"
+                                data-id_distrito="{{ t[3] }}" data-entity="direcciones_clientes">
                                 <td>{{ t[4] }}</td>
                                 <td>{{ t[5] }}</td>
                                 <td>{{ t[6] }}</td>
+                                <td>{{ t[7] }}</td>
+                                <td>{{ t[8] }}</td>
+                                <td>{{ t[9] }}</td>
+                                <td>{{ t[10] }}</td>
+                                <td>
+                                    <button class="delete-btn" onclick="deleteRow4(this)">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -117,7 +124,7 @@
                     </div>
 
                     <div class="btn-row">
-                        <button class="btn btn-primary" id="AgregarCliente">Agregar cliente</button>
+                        <button class="btn btn-primary" id="AgregarCliente">Agregar dirección</button>
                     </div>
                 </div>
 
@@ -131,6 +138,7 @@
 
     {# SCRIPTS #}
     {# SCRIPTS #}
+
     {#
     <script>
 
@@ -367,7 +375,7 @@
 
                 // Enviar datos al Backend
                 try {
-                    const response = await fetch('/direcciones/agregar', {
+                    const response = await fetch('/direcciones_clientes/guardar', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

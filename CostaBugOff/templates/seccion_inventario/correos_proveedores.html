@@ -50,13 +50,9 @@
             <label>Correo</label>
             <input type="text" id="correo" placeholder="Ingresa el correo del proveedor">
           </div>
-          <div class="field id-field">
-            <label>Tipo de correo</label>
-            <select name="tipo_correo" id="tipo">
-              <option value="">-- Selecciona una opcion --</option>
-              <option value="Personal">Personal</option>
-              <option value="Empresarial">Empresarial</option>
-            </select>
+          <div class="field">
+            <label>Tipo</label>
+            <input type="text" id="tipo" placeholder="Ingresa el tipo de correo">
           </div>
           <div class="field id-field">
             <label>Estado del correo</label>
@@ -76,7 +72,7 @@
           <table class="data-table" data-entity="correos_proveedores">
             <thead>
               <tr>
-                <th>ID Proveedor</th>
+
                 <th>Proveedor</th>
                 <th>Correo</th>
                 <th>Tipo</th>
@@ -87,7 +83,7 @@
             <tbody>
               {% for c in correos %}
               <tr data-id1="{{ c[0] }}" data-id2="{{ c[2] }}" data-entity="correos_proveedores">
-                <td>{{ c[0] }}</td>
+
                 <td>{{ c[1] }}</td>
                 <td>{{ c[2] }}</td>
                 <td>{{ c[3] }}</td>
@@ -127,13 +123,13 @@
       const celdas = fila.querySelectorAll('td');
 
       idCorreoProveedorEditando = fila.dataset.id1;
-      correoOriginalProveedor = celdas[2].textContent.trim();
+      correoOriginalProveedor = celdas[1].textContent.trim();
 
       document.getElementById('proveedor').value = fila.dataset.id1;
       document.getElementById('correo').value = correoOriginalProveedor;
-      document.getElementById('tipo').value = celdas[3].textContent.trim();
+      document.getElementById('tipo').value = celdas[2].textContent.trim();
 
-      const estadoTexto = celdas[4].textContent.trim();
+      const estadoTexto = celdas[3].textContent.trim();
       document.getElementById('estado').value = estadoTexto.toUpperCase() === 'ACTIVO' ? '1' : '2';
 
       document.getElementById('tituloCorreoProveedor').textContent = 'Editar Correo';

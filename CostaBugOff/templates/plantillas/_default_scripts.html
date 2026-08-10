@@ -93,6 +93,47 @@
         });
     }
 </script>
+{# FUNCION DE ELIMINAR FILA LLAVE COMPUESTA 4#}
+<script>
+    function deleteRow4(button) {
+        const row = button.closest('tr');
+        const id_cliente = row.getAttribute('data-id_cliente');
+        const id_provincia = row.getAttribute('data-id_provincia');
+        const id_canton = row.getAttribute('data-id_canton');
+        const id_distrito = row.getAttribute('data-id_distrito');
+        const entity = row.getAttribute('data-entity');
+
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "¡No podrás revertir esta acción!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545', // Rojo peligro
+            cancelButtonColor: '#6c757d',  // Gris secundario
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/delete/${entity}/${id_cliente}/${id_provincia}/${id_canton}/${id_distrito}`, {
+                    method: 'POST',
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            row.remove();
+                            Swal.fire('¡Eliminado!', 'El registro ha sido eliminado con éxito.', 'success');
+                        } else {
+                            Swal.fire('Error', data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('Error', 'Ocurrió un problema al procesar la solicitud.', 'error');
+                    });
+            }
+        });
+    }
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
     integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
