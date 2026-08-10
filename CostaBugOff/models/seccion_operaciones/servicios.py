@@ -2,28 +2,36 @@ import oracledb
 from db import get_connection
 
 
-def insertar_servicio(id_servicio, nombre, id_plaga, id_usuario, id_servicio_realizado, id_estado):
+def insertar_servicio(NOMBRE, ID_PLAGA, ID_ESTADO, ID_USUARIO=1, ID_SERVICIO_REALIZADO=1):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_SERVICIOS_INSERT", [
-            id_servicio, nombre, id_plaga, id_usuario, id_servicio_realizado, id_estado
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_SERVICIOS_INSERT_SP", [              # Se envía None/NULL para que aplique la secuencia DEFAULT en Oracle
+            NOMBRE,
+            int(ID_PLAGA) if ID_PLAGA else None,
+            int(ID_USUARIO),
+            int(ID_SERVICIO_REALIZADO),
+            int(ID_ESTADO)
         ])
         conexion.commit()
-    except Exception as e:
+    except Exception as e:  
         conexion.rollback()
         raise e
     finally:
         cursor.close()
         conexion.close()
 
-
-def actualizar_servicio(id_servicio, nombre, id_plaga, id_usuario, id_servicio_realizado, id_estado):
+def actualizar_servicio(ID_SERVICIO, NOMBRE, ID_PLAGA, ID_ESTADO, ID_USUARIO=1, ID_SERVICIO_REALIZADO=1):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_SERVICIOS_UPDATE", [
-            id_servicio, nombre, id_plaga, id_usuario, id_servicio_realizado, id_estado
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_SERVICIOS_UPDATE_SP", [
+            int(ID_SERVICIO),
+            NOMBRE,
+            int(ID_PLAGA) if ID_PLAGA else None,
+            int(ID_USUARIO),
+            int(ID_SERVICIO_REALIZADO),
+            int(ID_ESTADO)
         ])
         conexion.commit()
     except Exception as e:

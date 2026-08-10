@@ -21,7 +21,7 @@
                 <!-- Contenido oculto del dropdown -->
                 <ul class="dropdown-menu dropdown-background">
                     <li>
-                        <a class="dropdown-item" href="/">Lista de Clientes</a>
+                        <a class="dropdown-item" href="{{ url_for('clientes') }}">Lista de Clientes</a>
                     </li>
                     <li>
                         <a class="dropdown-item" href="{{ url_for('telefonos_clientes') }}"
@@ -159,7 +159,7 @@
                             Pago</a>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="/pagos" data-section="pagos">Pagos</a>
+                        <a class="dropdown-item" href="{{ url_for('pagos') }}" data-section="pagos">Pagos</a>
                     </li>
                     <li>
                         <a class="dropdown-item" href="{{ url_for('transacciones') }}"

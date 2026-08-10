@@ -12,8 +12,8 @@ RUTAS_CLIENTE = (
     "/planes", "/programar-visita", "/informacion", "/inicio-cliente", "/logout",
     "/carrito", "/checkout", "/factura", "/mis-facturas",
 )
-RUTAS_RRHH = ("/empleados", "/api/empleados", "/logout")
-RUTAS_BILLING = (
+RUTAS_RRHH = ("/index","/empleados", "/api/empleados", "/logout")
+RUTAS_BILLING = ("/index",
     "/facturas", "/factura", "/mis-facturas",
     "/reporte_ventas", "/facturas_billing",
     "/logout",
@@ -85,9 +85,14 @@ from models.contacto import enviar_correo_contacto
 # ---------------- Clientes (vista para Admin/Empleado) ----------------
 @app.route("/")
 @app.route("/index")
+def index():
+    return render_template("index.html")
+
+
+@app.route("/clientes")
 def clientes():
     lista_clientes = obtener_clientes()
-    return render_template("index.html", clientes=lista_clientes)
+    return render_template("seccion_clientes/clientes.html", clientes=lista_clientes)
 
 #INSERT
 #INSERT
@@ -987,6 +992,45 @@ def servicios():
     lista_servicios = obtener_servicios(id_estado)
     return render_template("seccion_operaciones/servicios.html", servicios=lista_servicios, filtro=id_estado)
 
+@app.route("/servicios/guardar", methods=["POST"])
+def api_guardar_servicio():
+    datos = request.get_json()
+    try:
+        insertar_servicio(
+            nombre=datos.get("nombre"),
+            id_plaga=datos.get("id_plaga"),
+            id_estado=datos.get("id_estado")
+        )
+        return jsonify({
+            "success": True, 
+            "message": "¡Servicio registrado con éxito!"
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "success": False, 
+            "message": f"Error al guardar en Base de Datos: {str(e)}"
+        }), 500
+
+
+@app.route("/servicios/actualizar", methods=["POST"])
+def api_actualizar_servicio():
+    datos = request.get_json()
+    try:
+        actualizar_servicio(
+            id_servicio=datos.get("id_servicio"),
+            nombre=datos.get("nombre"),
+            id_plaga=datos.get("id_plaga"),
+            id_estado=datos.get("id_estado")
+        )
+        return jsonify({
+            "success": True, 
+            "message": "¡Servicio actualizado con éxito!"
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "success": False, 
+            "message": f"Error al actualizar en Base de Datos: {str(e)}"
+        }), 500
 
 @app.route('/delete/servicios/<int:id_servicio>', methods=['POST'])
 def eliminar_servicio(id_servicio):
@@ -1009,22 +1053,20 @@ def servicios_realizados():
     return render_template("seccion_operaciones/servicios_realizados.html", serviciosr=lista_servicios_realizados, filtro=id_estado, estados=lista_estados)
 
 
-@app.route("/api/servicios_realizados/guardar", methods=["POST"])
+@app.route("/servicios_realizados/guardar", methods=["POST"])
 def api_guardar_servicio_realizado():
     datos = request.get_json()
     try:
         insertar_servicio_realizado(
-            id_servicio_realizado=datos["id_servicio_realizado"],
-            ubicacion=datos["ubicacion"],
-            informe=datos["informe"],
-            id_estado=datos["id_estado"]
+            ubicacion=datos.get("ubicacion"),
+            informe=datos.get("informe"),
+            id_estado=datos.get("id_estado")
         )
-        return jsonify({"message": "¡Servicio registrado con éxito!"}), 200
+        return jsonify({"success": True, "message": "¡Servicio registrado con éxito!"}), 200
     except Exception as e:
-        return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+        return jsonify({"success": False, "message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
-
-@app.route("/api/servicios_realizados/actualizar", methods=["POST"])
+@app.route("/servicios_realizados/actualizar", methods=["POST"])
 def api_actualizar_servicio_realizado():
     datos = request.get_json()
     try:
@@ -1826,7 +1868,7 @@ def login():
                 return redirect(url_for("inicio_cliente"))
             if usuario["rol"] == "RRHH":
                 return redirect(url_for("empleados"))
-            return redirect(url_for("clientes"))
+            return redirect(url_for("index"))
         return render_template("login.html", error=mensaje)
     return render_template("login.html")
 

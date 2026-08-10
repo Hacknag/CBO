@@ -41,6 +41,7 @@ html, body {
   margin: 0;
   padding: 0;
   background: var(--paper);
+  color: var(--white);
   color: var(--ink);
   font-family: var(--font-ui);
   font-size: 15px;
@@ -442,6 +443,14 @@ tbody tr:nth-child(even) {
   overflow: auto;
   height: 70vh;
 }
+
+table-wrap-small {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: auto;
+}
+
 
 .data-table {
   width: 100%;

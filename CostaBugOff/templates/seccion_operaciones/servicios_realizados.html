@@ -5,11 +5,9 @@
   {% include 'plantillas/_default_head.html' %}
 </head>
 <!--http://127.0.0.1:5001/serviciosr para correr servicios realizados -->
-<!--correr con control + ñ y despues ingresar python app.py para que ande -->
 
 <body>
   <header>
-    {# NAVBAR #}
     {# NAVBAR #}
     {% with brand_tag="Vista Servicios Realizados" %}
     {% include 'plantillas/_navbar.html' %}
@@ -21,79 +19,75 @@
       <div class="panel__header">
         <h1>Servicios Realizados</h1>
       </div>
-      {# Filtro de búsqueda #}
+
       {# Filtro de búsqueda #}
       <div style="display:flex; flex-direction:column;">
         <div class="search-row">
           <label for="filtro-busqueda">Buscar Servicios Realizados:</label>
-          <input type="text" id="filtro-busqueda" data-filter-target="servicioRealizado"
+          <input type="text" id="filtro-busqueda" data-filter-target="servicios_realizados"
             placeholder="Escribe la fecha o ubicacion del servicio realizado." />
         </div>
       </div>
+
       <div class="panel__body_inverse">
+        <!-- FORMULARIO DE SERVICIOS REALIZADOS -->
         <div style="display:flex; flex-direction:column; gap:16px;">
-          <div class="form-card">
-            <h2>Agregar Servicio Realizado</h2>
-            <p class="sub">Completa los campos para agregar un nuevo servicio realizado.</p>
+          <div class="form-card" id="cardServicioRealizado">
+            <h2 id="form-titulo">Agregar Servicio Realizado</h2>
+            <p class="sub" id="form-subtitulo">Completa los campos para agregar un nuevo servicio realizado.</p>
+
+
 
             <div class="field">
-              <label for="buscar_cliente">Nombre del Cliente</label>
-              <input type="text" id="buscar_cliente" list="lista_clientes" placeholder="Escribe el nombre del cliente"
-                autocomplete="off" />
-              <!-- Datalist dinámico -->
-              <datalist id="lista_clientes"></datalist>
-
-              <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
-              <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" />
-            </div>
-            <div class="field">
-              <label>Fecha</label>
-              <input type="date" id="fecha" lang="es" placeholder="Ingresa la fecha del servicio">
-            </div>
-            <div class="field">
-              <label>Ubicacion</label>
+              <label for="ubicacion">Ubicación</label>
               <input type="text" id="ubicacion" placeholder="Ingresa la ubicacion del servicio">
             </div>
+
             <div class="field">
-              <label>Informe</label>
+              <label for="informe">Informe</label>
               <input type="text" id="informe" placeholder="Ingresa los detalles del servicio">
             </div>
+
             <div class="field id-field">
-              <label>Estado del servicio</label>
+              <label for="estado">Estado del Servicio</label>
               <select id="estado">
-                <option value="">-- Selecciona una opcion --</option>
+                <option value="">-- Selecciona una opción --</option>
                 <option value="1">Activo</option>
                 <option value="2">Inactivo</option>
               </select>
             </div>
 
             <div class="btn-row">
-              <button class="btn btn-primary" id="AgregarTelefono">Agregar telefono</button>
+              <button class="btn btn-primary" id="AgregarServicio">Agregar servicio</button>
+              <button class="btn btn-secondary" id="CancelarEdicion" style="display: none;"
+                type="button">Cancelar</button>
             </div>
           </div>
         </div>
 
+        <!-- TABLA DE SERVICIOS REALIZADOS -->
         <div class="table-wrap">
-          <table class="data-table" data-entity="servicioRealizado">
+          <table class="data-table" data-entity="servicios_realizados">
             <thead>
               <tr>
-                <th>Numero de servicio</th>
                 <th>Fecha</th>
                 <th>Ubicación</th>
                 <th>Informe</th>
                 <th>Estado</th>
-                <th>Borrar</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {% for s in serviciosr %}
-              <tr data-id="{{ s[0] }}" data-entity="servicioRealizado">
-                <td>{{ s[0] }}</td>
+              <tr data-id="{{ s[0] }}" data-entity="servicios_realizados">
                 <td>{{ s[1] }}</td>
                 <td>{{ s[2] }}</td>
                 <td>{{ s[3] }}</td>
                 <td>{{ s[5] }}</td>
                 <td>
+                  <button class="edit-btn" onclick="editarServicioRealizado(this)">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
                   <button class="delete-btn" onclick="deleteRow(this)">
                     <i class="fa-solid fa-trash"></i>
                   </button>
@@ -106,66 +100,176 @@
       </div>
     </section>
   </main>
-  {# FOOTER #}
+
   {# FOOTER #}
   {% include 'plantillas/_footer.html' %}
 
-
-  {# SCRIPTS #}
   {# SCRIPTS #}
   <script>
-    const URL_API_SERVICIOSR = 'http://127.0.0.1:5001/api/serviciosr'
+    // -------------------------------------------------------------
+    // 1. REFERENCIAS AL DOM Y ESTADO GLOBAL
+    // -------------------------------------------------------------
+    let idServicioEditando = null;
 
-    function obtenerDatosServicio() {
-      return {
-        id_servicio_realizado: parseInt(document.getElementById('ser-id').value),
-        ubicacion: document.getElementById('ser-ubicacion').value,
-        informe: document.getElementById('ser-informe').value,
-        id_estado: parseInt(document.getElementById('ser-estado').value),
-      }
+
+    const inputUbicacion = document.getElementById('ubicacion');
+    const inputInforme = document.getElementById('informe');
+    const selectEstado = document.getElementById('estado');
+
+    const btnAgregar = document.getElementById('AgregarServicio');
+    const btnCancelar = document.getElementById('CancelarEdicion');
+    const formTitulo = document.getElementById('form-titulo');
+    const formSubtitulo = document.getElementById('form-subtitulo');
+
+    // -------------------------------------------------------------
+    // 2. FUNCIÓN EDITAR SERVICIO REALIZADO (TODOS LOS CAMPOS HABILITADOS)
+    // -------------------------------------------------------------
+    function editarServicioRealizado(button) {
+      const fila = button.closest('tr');
+      const celdas = fila.querySelectorAll('td');
+
+      idServicioEditando = fila.dataset.id;
+
+      // Cargar valores de la tabla en los inputs del formulario
+
+      inputUbicacion.value = celdas[1].textContent.trim();
+      inputInforme.value = celdas[2].textContent.trim();
+
+      const estadoTexto = celdas[3].textContent.trim().toUpperCase();
+      selectEstado.value = (estadoTexto === 'ACTIVO' || estadoTexto === '1') ? '1' : '2';
+
+      // Habilitar TODOS los campos para su edición
+
+
+      inputUbicacion.disabled = false;
+      inputInforme.disabled = false;
+      selectEstado.disabled = false;
+
+      // Cambiar interfaz a modo edición
+      formTitulo.textContent = 'Editar Servicio Realizado';
+      formSubtitulo.textContent = 'Modifica los campos necesarios para actualizar este servicio realizado.';
+      btnAgregar.textContent = 'Guardar cambios';
+      btnCancelar.style.display = 'inline-block';
+
+      document.getElementById('cardServicioRealizado').scrollIntoView({ behavior: 'smooth' });
     }
 
-    document.getElementById('btnAgregarServicio').addEventListener('click', async () => {
-      const datos = obtenerDatosServicio()
-      if (!datos.id_servicio_realizado || !datos.ubicacion || !datos.id_estado)
-        return alert('Llena ID, Ubicación y Estado.')
-      try {
-        const respuesta = await fetch(`${URL_API_SERVICIOSR}/guardar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formServiciosR').reset()
-          location.reload()
-        }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
+    // -------------------------------------------------------------
+    // 3. RESTAURAR FORMULARIO
+    // -------------------------------------------------------------
+    function resetearFormulario() {
+      idServicioEditando = null;
 
-    document.getElementById('btnActualizarServicio').addEventListener('click', async () => {
-      const datos = obtenerDatosServicio()
-      if (!datos.id_servicio_realizado || !datos.ubicacion || !datos.id_estado)
-        return alert('Llena ID, Ubicación y Estado antes de actualizar.')
-      try {
-        const respuesta = await fetch(`${URL_API_SERVICIOSR}/actualizar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formServiciosR').reset()
-          location.reload()
+
+
+      inputUbicacion.value = '';
+      inputUbicacion.disabled = false;
+
+      inputInforme.value = '';
+      inputInforme.disabled = false;
+
+      selectEstado.value = '';
+      selectEstado.disabled = false;
+
+      formTitulo.textContent = 'Agregar Servicio Realizado';
+      formSubtitulo.textContent = 'Completa los campos para agregar un nuevo servicio realizado.';
+      btnAgregar.textContent = 'Agregar servicio';
+      btnCancelar.style.display = 'none';
+    }
+
+    if (btnCancelar) {
+      btnCancelar.addEventListener('click', resetearFormulario);
+    }
+
+    // -------------------------------------------------------------
+    // 4. GUARDAR / ACTUALIZAR
+    // -------------------------------------------------------------
+    if (btnAgregar) {
+      btnAgregar.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+
+        const ubicacion = inputUbicacion.value.trim();
+        const informe = inputInforme.value.trim();
+        const idEstado = selectEstado.value.trim();
+
+        // Validaciones de campos obligatorios
+
+
+        if (!ubicacion) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Campo incompleto',
+            text: 'Por favor ingresa la ubicación del servicio.',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
         }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
+
+        if (!idEstado) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Estado no seleccionado',
+            text: 'Por favor selecciona un estado para el servicio.',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
+        }
+
+        // Definir endpoint y datos según el modo
+        const url = idServicioEditando ? '/servicios_realizados/actualizar' : '/servicios_realizados/guardar';
+
+        const payload = idServicioEditando ? {
+          id_servicio_realizado: parseInt(idServicioEditando, 10),
+          ubicacion: ubicacion,
+          informe: informe,
+          id_estado: parseInt(idEstado, 10)
+        } : {
+          ubicacion: ubicacion,
+          informe: informe,
+          id_estado: parseInt(idEstado, 10)
+        };
+
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.success !== false) {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Operación Exitosa!',
+              text: result.message || (idServicioEditando ? 'Servicio actualizado con éxito.' : 'Servicio agregado con éxito.'),
+              confirmButtonColor: '#3085d6'
+            }).then(() => {
+              resetearFormulario();
+              location.reload();
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: result.message || 'Ocurrió un error al procesar la solicitud.',
+              confirmButtonColor: '#d33'
+            });
+          }
+        } catch (error) {
+          console.error('Error al procesar el servicio:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error de conexión',
+            text: 'No se pudo conectar con el servidor.',
+            confirmButtonColor: '#d33'
+          });
+        }
+      });
+    }
   </script>
   {% include 'plantillas/_default_scripts.html' %}
 </body>

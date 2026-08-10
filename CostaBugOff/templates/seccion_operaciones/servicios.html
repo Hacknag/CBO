@@ -5,11 +5,9 @@
   {% include 'plantillas/_default_head.html' %}
 </head>
 <!--http://127.0.0.1:5001/servicios para correr servicios -->
-<!--correr con control + ñ y despues ingresar python app.py para que ande -->
 
 <body>
   <header>
-    {# NAVBAR #}
     {# NAVBAR #}
     {% with brand_tag="Vista Servicios" %}
     {% include 'plantillas/_navbar.html' %}
@@ -21,71 +19,74 @@
       <div class="panel__header">
         <h1>Servicios</h1>
       </div>
-      {# Filtro de búsqueda #}
+
       {# Filtro de búsqueda #}
       <div style="display:flex; flex-direction:column;">
         <div class="search-row">
           <label for="filtro-busqueda">Buscar Servicio:</label>
           <input type="text" id="filtro-busqueda" data-filter-target="servicios"
-            placeholder="Escribe el nombre o plaga associada al servicio." />
+            placeholder="Escribe el nombre o plaga asociada al servicio." />
         </div>
       </div>
-      <div class="panel__body_inverse">
-        <div style="display:flex; flex-direction:column; gap:16px;">
 
-          <div class="form-card">
-            <h2>Agregar Servicio</h2>
+      <div class="panel__body_inverse">
+        <!-- FORMULARIO DE SERVICIOS -->
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <div class="form-card" id="cardServicio">
+            <h2 id="tituloServicio">Agregar Servicio</h2>
             <p class="sub">Completa los campos para agregar un servicio nuevo.</p>
 
             <div class="field">
-              <label>Nombre</label>
+              <label>Nombre del Servicio</label>
               <input type="text" id="nombre" placeholder="Escribe el nombre del servicio">
             </div>
 
             <div class="field">
-              <label for="buscar_cliente">Plaga Asociada</label>
-              <input type="text" id="plaga" list="lista_clientes" placeholder="Busca la plaga asociada"
+              <label for="buscar_plaga">Plaga Asociada</label>
+              <input type="text" id="buscar_plaga" list="lista_plagas" placeholder="Busca la plaga asociada"
                 autocomplete="off" />
               <!-- Datalist dinámico -->
-              <datalist id="lista_clientes"></datalist>
+              <datalist id="lista_plagas"></datalist>
 
-              <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
-              <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" />
+              <!-- Campo oculto para almacenar el ID de la plaga seleccionada -->
+              <input type="hidden" id="id_plaga_seleccionada" name="id_plaga" />
             </div>
+
             <div class="field id-field">
-              <label>Estado del Cliente</label>
+              <label>Estado del Servicio</label>
               <select id="estado">
-                <option value="">-- Selecciona una opcion --</option>
                 <option value="1">Activo</option>
                 <option value="2">Inactivo</option>
               </select>
             </div>
 
             <div class="btn-row">
-              <button class="btn btn-primary" id="AgregarTelefono">Agregar Servicio</button>
+              <button class="btn btn-primary" id="AgregarServicio">Agregar servicio</button>
             </div>
           </div>
         </div>
 
+        <!-- TABLA DE SERVICIOS -->
         <div class="table-wrap">
           <table class="data-table" data-entity="servicios">
             <thead>
               <tr>
-                <th>ID</th>
                 <th>Nombre</th>
                 <th>Plaga Asociada</th>
                 <th>Estado</th>
-                <th>Borrar</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {% for s in servicios %}
               <tr data-id="{{ s[0] }}" data-entity="servicios">
-                <td>{{ s[0] }}</td>
                 <td>{{ s[1] }}</td>
                 <td>{{ s[2] }}</td>
                 <td>{{ s[3] }}</td>
                 <td>
+                  <button class="edit-btn" onclick="editarServicio(this)">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
                   <button class="delete-btn" onclick="deleteRow(this)">
                     <i class="fa-solid fa-trash"></i>
                   </button>
@@ -98,92 +99,240 @@
       </div>
     </section>
   </main>
-  {# FOOTER #}
+
   {# FOOTER #}
   {% include 'plantillas/_footer.html' %}
 
-
-  {# SCRIPTS #}
   {# SCRIPTS #}
 
+  {# EDITAR SERVICIO #}
   <script>
-    const URL_API_SERVICIOS = 'http://127.0.0.1:5001/api/servicios'
+    let idServicioEditando = null;
 
-    function obtenerDatosServicio() {
-      const idPlaga = document.getElementById('serv-plaga').value
-      const idUsuario = document.getElementById('serv-usuario').value
-      const idServicioRealizado = document.getElementById('serv-servicio-realizado').value
-      return {
-        id_servicio: parseInt(document.getElementById('serv-id').value),
-        nombre: document.getElementById('serv-nombre').value,
-        id_plaga: idPlaga ? parseInt(idPlaga) : null,
-        id_usuario: idUsuario ? parseInt(idUsuario) : null,
-        id_servicio_realizado: idServicioRealizado ? parseInt(idServicioRealizado) : null,
-        id_estado: parseInt(document.getElementById('serv-estado').value),
+    async function editarServicio(button) {
+      const fila = button.closest('tr');
+      idServicioEditando = fila.dataset.id;
+
+      const nombre = fila.children[0].textContent.trim();
+      const plagaNombre = fila.children[1].textContent.trim();
+      const estadoTexto = fila.children[2].textContent.trim().toUpperCase();
+
+      // Llenar campos del formulario
+      document.getElementById('nombre').value = nombre;
+      document.getElementById('buscar_plaga').value = plagaNombre;
+      document.getElementById('estado').value = (estadoTexto === 'ACTIVO' || estadoTexto === '1') ? '1' : '2';
+
+      // Buscar/resolver el ID de la plaga seleccionada
+      if (plagasMapa.has(plagaNombre)) {
+        document.getElementById('id_plaga_seleccionada').value = plagasMapa.get(plagaNombre);
+      } else {
+        try {
+          const response = await fetch(`/plagas/buscar?q=${encodeURIComponent(plagaNombre)}`);
+          const plagas = await response.json();
+          if (Array.isArray(plagas) && plagas.length > 0) {
+            const coincidencia = plagas.find(p => p.nombre.toLowerCase() === plagaNombre.toLowerCase()) || plagas[0];
+            document.getElementById('id_plaga_seleccionada').value = coincidencia.id;
+            plagasMapa.set(coincidencia.nombre, coincidencia.id);
+          }
+        } catch (error) {
+          console.error('Error al resolver ID de la plaga:', error);
+        }
       }
+
+      // Cambiar interfaz al modo edición
+      document.getElementById('tituloServicio').textContent = 'Editar Servicio';
+      document.getElementById('AgregarServicio').textContent = 'Guardar cambios';
+      document.getElementById('cardServicio').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+
+  {# LÓGICA DE BÚSQUEDA DE PLAGAS Y GUARDAR/ACTUALIZAR SERVICIO #}
+  <script>
+    // Referencias del DOM
+    const inputBuscar = document.getElementById('buscar_plaga');
+    const datalist = document.getElementById('lista_plagas');
+    const inputHiddenId = document.getElementById('id_plaga_seleccionada');
+
+    // Mapa global para relacionar: Nombre -> ID de la Plaga
+    const plagasMapa = new Map();
+    let debounceTimer;
+
+    // -------------------------------------------------------------
+    // LÓGICA DE BÚSQUEDA Y SELECCIÓN DE PLAGA (DATALIST)
+    // -------------------------------------------------------------
+    if (inputBuscar) {
+      inputBuscar.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+
+        if (plagasMapa.has(query)) {
+          inputHiddenId.value = plagasMapa.get(query);
+          return;
+        } else {
+          inputHiddenId.value = '';
+        }
+
+        if (query.length < 2) {
+          datalist.innerHTML = '';
+          return;
+        }
+
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(async () => {
+          try {
+            const response = await fetch(`/plagas/buscar?q=${encodeURIComponent(query)}`);
+            const plagas = await response.json();
+
+            datalist.innerHTML = '';
+            plagasMapa.clear();
+
+            if (Array.isArray(plagas)) {
+              plagas.forEach(plaga => {
+                plagasMapa.set(plaga.nombre, plaga.id);
+
+                const option = document.createElement('option');
+                option.value = plaga.nombre;
+                datalist.appendChild(option);
+              });
+            }
+          } catch (error) {
+            console.error('Error al buscar plaga:', error);
+          }
+        }, 100);
+      });
     }
 
-    document.getElementById('btnAgregarServicio').addEventListener('click', async () => {
-      const datos = obtenerDatosServicio()
-      if (!datos.id_servicio || !datos.nombre || !datos.id_estado)
-        return alert('Llena al menos ID, Nombre y Estado.')
-      try {
-        const respuesta = await fetch(`${URL_API_SERVICIOS}/guardar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formServicios').reset()
-          location.reload()
-        }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
+    // -------------------------------------------------------------
+    // LÓGICA PARA AGREGAR / ACTUALIZAR EL SERVICIO
+    // -------------------------------------------------------------
+    const btnAgregar = document.getElementById('AgregarServicio');
+    if (btnAgregar) {
+      btnAgregar.addEventListener('click', async (e) => {
+        e.preventDefault();
 
-    document.getElementById('btnActualizarServicio').addEventListener('click', async () => {
-      const datos = obtenerDatosServicio()
-      if (!datos.id_servicio || !datos.nombre || !datos.id_estado)
-        return alert('Llena al menos ID, Nombre y Estado antes de actualizar.')
-      try {
-        const respuesta = await fetch(`${URL_API_SERVICIOS}/actualizar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formServicios').reset()
-          location.reload()
-        }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
+        const nombre = document.getElementById('nombre') ? document.getElementById('nombre').value.trim() : '';
+        const idPlaga = document.getElementById('id_plaga_seleccionada') ? document.getElementById('id_plaga_seleccionada').value.trim() : '';
+        const idEstado = document.getElementById('estado') ? document.getElementById('estado').value.trim() : '';
 
-    document.getElementById('btnDesactivarServicio').addEventListener('click', async () => {
-      const datos = obtenerDatosServicio()
-      if (!datos.id_servicio)
-        return alert('Especifica el ID del servicio a desactivar.')
-      try {
-        const respuesta = await fetch(`${URL_API_SERVICIOS}/eliminar/${datos.id_servicio}`, {
-          method: 'POST',
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formServicios').reset()
-          location.reload()
+        // Validaciones básicas
+        if (!nombre) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Campo incompleto',
+            text: 'Por favor ingresa el nombre del servicio.',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
         }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
+
+        if (!idPlaga) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Plaga no seleccionada',
+            text: 'Por favor busca y selecciona una plaga válida de la lista desplegable.',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
+        }
+
+        if (!idEstado) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Estado no seleccionado',
+            text: 'Por favor selecciona un estado.',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
+        }
+
+        // MODO ACTUALIZAR / EDITAR
+        if (idServicioEditando) {
+          try {
+            const respuesta = await fetch('/servicios/actualizar', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id_servicio: parseInt(idServicioEditando, 10),
+                nombre: nombre,
+                id_plaga: parseInt(idPlaga, 10),
+                id_estado: parseInt(idEstado, 10)
+              })
+            });
+
+            const resultado = await respuesta.json();
+
+            if (respuesta.ok && resultado.success !== false) {
+              Swal.fire({
+                icon: 'success',
+                title: '¡Actualizado!',
+                text: resultado.message || 'Servicio actualizado con éxito.',
+                confirmButtonColor: '#3085d6'
+              }).then(() => location.reload());
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: resultado.message || 'Ocurrió un error al actualizar el servicio.',
+                confirmButtonColor: '#d33'
+              });
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error de conexión',
+              text: 'No se pudo conectar con el servidor.',
+              confirmButtonColor: '#d33'
+            });
+          }
+          return;
+        }
+
+        // MODO GUARDAR / CREAR NUEVO
+        try {
+          const response = await fetch('/servicios/guardar', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              nombre: nombre,
+              id_plaga: parseInt(idPlaga, 10),
+              id_estado: parseInt(idEstado, 10)
+            })
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.success !== false) {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Guardado!',
+              text: result.message || 'Servicio agregado con éxito.',
+              confirmButtonColor: '#3085d6'
+            }).then(() => {
+              location.reload();
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: result.message || 'Ocurrió un error al guardar el servicio.',
+              confirmButtonColor: '#d33'
+            });
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error de conexión',
+            text: 'No se pudo conectar con el servidor.',
+            confirmButtonColor: '#d33'
+          });
+        }
+      });
+    }
   </script>
+
   {% include 'plantillas/_default_scripts.html' %}
 </body>
 

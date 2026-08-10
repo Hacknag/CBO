@@ -1,12 +1,15 @@
 import oracledb
 from db import get_connection
 
-def insertar_servicio_realizado(id_servicio_realizado, ubicacion, informe, id_estado):
+def insertar_servicio_realizado(ubicacion, informe, id_estado):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_SERVICIOS_REALIZADOS_INSERT_SP", [
-            id_servicio_realizado, ubicacion, informe, id_estado
+        # Se envía None (NULL) para que la BD aplique el DEFAULT de la secuencia
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_SERVICIOS_REALIZADOS_INSERT_SP", [            
+            ubicacion,
+            informe,
+            int(id_estado)
         ])
         conexion.commit()
     except Exception as e:
@@ -21,7 +24,10 @@ def actualizar_servicio_realizado(id_servicio_realizado, ubicacion, informe, id_
     try:
         cursor = conexion.cursor()
         cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_SERVICIOS_REALIZADOS_UPDATE_SP", [
-            id_servicio_realizado, ubicacion, informe, id_estado
+            int(id_servicio_realizado),
+            ubicacion,
+            informe,
+            int(id_estado)
         ])
         conexion.commit()
     except Exception as e:
