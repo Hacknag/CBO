@@ -16,12 +16,12 @@ def insertar_correos_clientes(ID_CLIENTE, CORREO, TIPO, ID_ESTADO):
         cursor.close()
         conexion.close()
 
-def actualizar_correos_clientes(ID_CLIENTE, CORREO, TIPO, ID_ESTADO):
+def actualizar_correos_clientes(ID_CLIENTE, CORREO, CORREO_NUEVO, TIPO, ID_ESTADO):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
         cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_CORREOS_UPDATE_SP", [
-            ID_CLIENTE, CORREO, TIPO, ID_ESTADO
+            ID_CLIENTE, CORREO, CORREO_NUEVO, TIPO, ID_ESTADO
         ])
         conexion.commit()
     except Exception as e:

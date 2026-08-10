@@ -1,13 +1,12 @@
 <!doctype html>
 <html lang="es">
 
-{% include 'plantillas/_default_head.html' %}
-<!--http://127.0.0.1:5001/productos para correr productos -->
-<!--correr con control + ñ y despues ingresar python app.py para que ande -->
+<head>
+    {% include 'plantillas/_default_head.html' %}
+</head>
 
 <body>
     <header>
-        {# NAVBAR #}
         {# NAVBAR #}
         {% with brand_tag="Vista Direcciones de Clientes" %}
         {% include 'plantillas/_navbar.html' %}
@@ -19,15 +18,16 @@
             <div class="panel__header">
                 <h1>Direcciones de Clientes</h1>
             </div>
+
             {# Filtro de búsqueda #}
             <div style="display:flex; flex-direction:column;">
                 <div class="search-row">
                     <label for="filtro-busqueda">Direcciones de cliente:</label>
                     <input type="text" id="filtro-busqueda" data-filter-target="direcciones_clientes"
-                        placeholder="Escribe el nombre o la direccion del cliente." />
+                        placeholder="Escribe el nombre o la dirección del cliente." />
                 </div>
             </div>
-            <!-- TABLA DE DIRECCIONES -->
+
             <!-- TABLA DE DIRECCIONES -->
             <div class="panel__body">
                 <div class="table-wrap">
@@ -38,10 +38,10 @@
                                 <th>Primer Apellido</th>
                                 <th>Segundo Apellido</th>
                                 <th>Provincia</th>
-                                <th>Canton</th>
+                                <th>Cantón</th>
                                 <th>Distrito</th>
                                 <th>Estado</th>
-                                <th></th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -56,6 +56,9 @@
                                 <td>{{ t[9] }}</td>
                                 <td>{{ t[10] }}</td>
                                 <td>
+                                    <button class="edit-btn" onclick="editarDireccionCliente(this)">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
                                     <button class="delete-btn" onclick="deleteRow4(this)">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
@@ -65,11 +68,12 @@
                         </tbody>
                     </table>
                 </div>
+
                 <!-- FORMULARIO DE DIRECCIONES -->
-                <!-- FORMULARIO DE DIRECCIONES -->
-                <div class="form-card">
-                    <h2>Agregar Dirección</h2>
-                    <p class="sub">Completa los campos para agregar un dirección nueva.</p>
+                <div class="form-card" id="cardDireccion">
+                    <h2 id="form-titulo">Agregar Dirección</h2>
+                    <p class="sub" id="form-subtitulo">Completa los campos para agregar una dirección nueva.</p>
+
                     {# Buscar Clientes #}
                     <div class="field">
                         <label for="buscar_cliente">Nombre del Cliente</label>
@@ -81,6 +85,7 @@
                         <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
                         <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" />
                     </div>
+
                     {# Buscar Provincia #}
                     <div class="field">
                         <label for="buscar_provincia">Provincia</label>
@@ -89,20 +94,22 @@
                         <!-- Datalist dinámico -->
                         <datalist id="lista_provincias"></datalist>
 
-                        <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
+                        <!-- Campo oculto para almacenar el ID de la provincia seleccionada -->
                         <input type="hidden" id="id_provincia_seleccionada" name="id_provincia" />
                     </div>
+
                     {# Buscar Canton #}
                     <div class="field">
-                        <label for="buscar_canton">Canton</label>
+                        <label for="buscar_canton">Cantón</label>
                         <input type="text" id="buscar_canton" list="lista_cantones"
-                            placeholder="Escribe el nombre del canton" autocomplete="off" />
+                            placeholder="Escribe el nombre del cantón" autocomplete="off" />
                         <!-- Datalist dinámico -->
                         <datalist id="lista_cantones"></datalist>
 
-                        <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
+                        <!-- Campo oculto para almacenar el ID del cantón seleccionado -->
                         <input type="hidden" id="id_canton_seleccionado" name="id_canton" />
                     </div>
+
                     {# Buscar Distrito #}
                     <div class="field">
                         <label for="buscar_distrito">Distrito</label>
@@ -111,97 +118,35 @@
                         <!-- Datalist dinámico -->
                         <datalist id="lista_distritos"></datalist>
 
-                        <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
+                        <!-- Campo oculto para almacenar el ID del distrito seleccionado -->
                         <input type="hidden" id="id_distrito_seleccionado" name="id_distrito" />
                     </div>
+
                     {# Estado #}
                     <div class="field id-field">
-                        <label>Estado del Cliente</label>
+                        <label for="estado">Estado del Registro</label>
                         <select name="estados" id="estado">
+                            <option value="">-- Selecciona una opción --</option>
                             <option value="1">Activo</option>
                             <option value="2">Inactivo</option>
                         </select>
                     </div>
 
                     <div class="btn-row">
-                        <button class="btn btn-primary" id="AgregarCliente">Agregar dirección</button>
+                        <button class="btn btn-primary" id="AgregarDireccion">Agregar dirección</button>
+                        <button class="btn btn-secondary" id="CancelarEdicion" style="display: none;"
+                            type="button">Cancelar</button>
                     </div>
                 </div>
 
             </div>
         </section>
     </main>
-    {# FOOTER #}
+
     {# FOOTER #}
     {% include 'plantillas/_footer.html' %}
 
-
     {# SCRIPTS #}
-    {# SCRIPTS #}
-
-    {#
-    <script>
-
-        // 1. Declaración e inicialización de elementos del DOM
-        const inputBuscar = document.getElementById('buscar_cliente');
-        const datalist = document.getElementById('lista_clientes');
-        const inputHiddenId = document.getElementById('id_cliente_seleccionado');
-        const inputTelefono = document.getElementById('telefono');
-        const selectTipo = document.getElementById('tipo');
-        const selectEstado = document.getElementById('estado');
-
-        // Mapa global para relacionar: Nombre Completo -> ID del Cliente
-        const clientesMapa = new Map();
-        let debounceTimer;
-
-        // -------------------------------------------------------------
-        // 2. LÓGICA DE BÚSQUEDA Y SELECCIÓN DE CLIENTE
-        // -------------------------------------------------------------
-        if (inputBuscar) {
-            inputBuscar.addEventListener('input', (e) => {
-                const query = e.target.value.trim();
-
-                // Si lo que escribió coincide con un cliente cargado, asignamos su ID
-                if (clientesMapa.has(query)) {
-                    inputHiddenId.value = clientesMapa.get(query);
-                    return;
-                } else {
-                    // Si modifica el texto, borramos el ID
-                    inputHiddenId.value = '';
-                }
-
-                // Ignorar búsquedas de menos de 2 caracteres
-                if (query.length < 2) {
-                    datalist.innerHTML = '';
-                    return;
-                }
-
-                // Debounce: espera 300ms a que el usuario deje de escribir
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(async () => {
-                    try {
-                        const response = await fetch(`/clientes/buscar?q=${encodeURIComponent(query)}`);
-                        const clientes = await response.json();
-
-                        datalist.innerHTML = '';
-                        clientesMapa.clear();
-
-                        clientes.forEach(cliente => {
-                            clientesMapa.set(cliente.nombre_completo, cliente.id);
-
-                            const option = document.createElement('option');
-                            option.value = cliente.nombre_completo;
-                            datalist.appendChild(option);
-                        });
-                    } catch (error) {
-                        console.error('Error al buscar clientes:', error);
-                    }
-                }, 100);
-            });
-        }
-
-    </script> #}
-
     <script>
         // -------------------------------------------------------------
         // 1. FUNCIÓN GENÉRICA PARA AUTOCOMPLETE / DATALIST
@@ -217,22 +162,18 @@
             input.addEventListener('input', (e) => {
                 const query = e.target.value.trim();
 
-                // Si lo escrito coincide con un elemento mapeado, asignamos el ID
                 if (mapa.has(query)) {
                     inputHidden.value = mapa.get(query);
                     return;
                 } else {
-                    // Limpiar el ID si se modifica el texto
                     inputHidden.value = '';
                 }
 
-                // Evitar búsquedas de menos de 2 caracteres
                 if (query.length < 2) {
                     datalist.innerHTML = '';
                     return;
                 }
 
-                // Debounce: espera 300ms
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(async () => {
                     try {
@@ -244,7 +185,6 @@
 
                         if (Array.isArray(items)) {
                             items.forEach(item => {
-                                // Obtiene el nombre según la propiedad devuelta por la API (nombre_completo o nombre)
                                 const valorMostrar = item[propNombre] || item.nombre_completo || item.nombre;
                                 mapa.set(valorMostrar, item.id);
 
@@ -268,7 +208,6 @@
         const cantonesMapa = new Map();
         const distritosMapa = new Map();
 
-        // Cliente
         configurarAutocomplete({
             inputId: 'buscar_cliente',
             datalistId: 'lista_clientes',
@@ -278,7 +217,6 @@
             propNombre: 'nombre_completo'
         });
 
-        // Provincia
         configurarAutocomplete({
             inputId: 'buscar_provincia',
             datalistId: 'lista_provincias',
@@ -288,7 +226,6 @@
             propNombre: 'nombre'
         });
 
-        // Cantón
         configurarAutocomplete({
             inputId: 'buscar_canton',
             datalistId: 'lista_cantones',
@@ -298,7 +235,6 @@
             propNombre: 'nombre'
         });
 
-        // Distrito
         configurarAutocomplete({
             inputId: 'buscar_distrito',
             datalistId: 'lista_distritos',
@@ -309,9 +245,118 @@
         });
 
         // -------------------------------------------------------------
-        // 3. LÓGICA PARA AGREGAR LA DIRECCIÓN
+        // 3. ESTADO DE EDICIÓN Y REFERENCIAS DE INTERFAZ
         // -------------------------------------------------------------
-        const btnAgregar = document.getElementById('AgregarCliente'); // Coincide con id="AgregarCliente" del HTML
+        let esModoEdicion = false;
+        let idClienteOriginal = null;
+        let idProvinciaOriginal = null;
+        let idCantonOriginal = null;
+        let idDistritoOriginal = null;
+
+        const btnAgregar = document.getElementById('AgregarDireccion');
+        const btnCancelar = document.getElementById('CancelarEdicion');
+        const formTitulo = document.getElementById('form-titulo');
+        const formSubtitulo = document.getElementById('form-subtitulo');
+
+        const inputCliente = document.getElementById('buscar_cliente');
+        const inputProvincia = document.getElementById('buscar_provincia');
+        const inputCanton = document.getElementById('buscar_canton');
+        const inputDistrito = document.getElementById('buscar_distrito');
+        const selectEstado = document.getElementById('estado');
+
+        // -------------------------------------------------------------
+        // 4. FUNCIÓN EDITAR DIRECCIÓN (CLIENTE BLOQUEADO, RESTO EDITABLE)
+        // -------------------------------------------------------------
+        function editarDireccionCliente(button) {
+            const row = button.closest('tr');
+            const celdas = row.querySelectorAll('td');
+
+            esModoEdicion = true;
+
+            idClienteOriginal = row.dataset.id_cliente;
+            idProvinciaOriginal = row.dataset.id_provincia;
+            idCantonOriginal = row.dataset.id_canton;
+            idDistritoOriginal = row.dataset.id_distrito;
+
+            const nombreCliente = `${celdas[0].textContent.trim()} ${celdas[1].textContent.trim()} ${celdas[2].textContent.trim()}`.trim();
+            const provincia = celdas[3].textContent.trim();
+            const canton = celdas[4].textContent.trim();
+            const distrito = celdas[5].textContent.trim();
+            const estadoTexto = celdas[6].textContent.trim().toUpperCase();
+
+            // Bloquear únicamente el campo cliente
+            inputCliente.value = nombreCliente;
+            inputCliente.disabled = true;
+            document.getElementById('id_cliente_seleccionado').value = idClienteOriginal;
+            clientesMapa.set(nombreCliente, idClienteOriginal);
+
+            // Cargar ubicación actual (editables)
+            inputProvincia.value = provincia;
+            inputProvincia.disabled = false;
+            document.getElementById('id_provincia_seleccionada').value = idProvinciaOriginal;
+            provinciasMapa.set(provincia, idProvinciaOriginal);
+
+            inputCanton.value = canton;
+            inputCanton.disabled = false;
+            document.getElementById('id_canton_seleccionado').value = idCantonOriginal;
+            cantonesMapa.set(canton, idCantonOriginal);
+
+            inputDistrito.value = distrito;
+            inputDistrito.disabled = false;
+            document.getElementById('id_distrito_seleccionado').value = idDistritoOriginal;
+            distritosMapa.set(distrito, idDistritoOriginal);
+
+            selectEstado.value = (estadoTexto === 'ACTIVO' || estadoTexto === '1') ? '1' : '2';
+
+            formTitulo.textContent = 'Editar Dirección';
+            formSubtitulo.textContent = 'Modifica la provincia, cantón, distrito o estado para este cliente.';
+            btnAgregar.textContent = 'Guardar cambios';
+            btnCancelar.style.display = 'inline-block';
+
+            document.getElementById('cardDireccion').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // -------------------------------------------------------------
+        // 5. RESTAURAR FORMULARIO
+        // -------------------------------------------------------------
+        function resetearFormulario() {
+            esModoEdicion = false;
+            idClienteOriginal = null;
+            idProvinciaOriginal = null;
+            idCantonOriginal = null;
+            idDistritoOriginal = null;
+
+            inputCliente.value = '';
+            inputCliente.disabled = false;
+            document.getElementById('id_cliente_seleccionado').value = '';
+
+            inputProvincia.value = '';
+            inputProvincia.disabled = false;
+            document.getElementById('id_provincia_seleccionada').value = '';
+
+            inputCanton.value = '';
+            inputCanton.disabled = false;
+            document.getElementById('id_canton_seleccionado').value = '';
+
+            inputDistrito.value = '';
+            inputDistrito.disabled = false;
+            document.getElementById('id_distrito_seleccionado').value = '';
+
+            selectEstado.value = '';
+
+            formTitulo.textContent = 'Agregar Dirección';
+            formSubtitulo.textContent = 'Completa los campos para agregar una dirección nueva.';
+            btnAgregar.textContent = 'Agregar dirección';
+            btnCancelar.style.display = 'none';
+        }
+
+        if (btnCancelar) {
+            btnCancelar.addEventListener('click', resetearFormulario);
+        }
+
+        // -------------------------------------------------------------
+        // 6. LÓGICA PARA GUARDAR O ACTUALIZAR DIRECCIÓN
+        // -------------------------------------------------------------
         if (btnAgregar) {
             btnAgregar.addEventListener('click', async (e) => {
                 e.preventDefault();
@@ -320,14 +365,13 @@
                 const idProvincia = document.getElementById('id_provincia_seleccionada')?.value.trim();
                 const idCanton = document.getElementById('id_canton_seleccionado')?.value.trim();
                 const idDistrito = document.getElementById('id_distrito_seleccionado')?.value.trim();
-                const idEstado = document.getElementById('estado')?.value.trim();
+                const idEstado = selectEstado?.value.trim();
 
-                // Validaciones de campos obligatorios
                 if (!idCliente) {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Cliente no seleccionado',
-                        text: 'Por favor selecciona un cliente de la lista.',
+                        text: 'Por favor selecciona un cliente válido de la lista.',
                         confirmButtonColor: '#3085d6'
                     });
                     return;
@@ -337,7 +381,7 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Provincia no seleccionada',
-                        text: 'Por favor selecciona una provincia de la lista.',
+                        text: 'Por favor selecciona una provincia válida de la lista.',
                         confirmButtonColor: '#3085d6'
                     });
                     return;
@@ -347,7 +391,7 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Cantón no seleccionado',
-                        text: 'Por favor selecciona un cantón de la lista.',
+                        text: 'Por favor selecciona un cantón válido de la lista.',
                         confirmButtonColor: '#3085d6'
                     });
                     return;
@@ -357,7 +401,7 @@
                     Swal.fire({
                         icon: 'warning',
                         title: 'Distrito no seleccionado',
-                        text: 'Por favor selecciona un distrito de la lista.',
+                        text: 'Por favor selecciona un distrito válido de la lista.',
                         confirmButtonColor: '#3085d6'
                     });
                     return;
@@ -373,20 +417,33 @@
                     return;
                 }
 
-                // Enviar datos al Backend
+                const url = esModoEdicion ? '/direcciones_clientes/actualizar' : '/direcciones_clientes/guardar';
+
+                const payload = esModoEdicion ? {
+                    id_cliente_original: parseInt(idClienteOriginal, 10),
+                    id_provincia_original: parseInt(idProvinciaOriginal, 10),
+                    id_canton_original: parseInt(idCantonOriginal, 10),
+                    id_distrito_original: parseInt(idDistritoOriginal, 10),
+                    id_cliente: parseInt(idCliente, 10),
+                    id_provincia: parseInt(idProvincia, 10),
+                    id_canton: parseInt(idCanton, 10),
+                    id_distrito: parseInt(idDistrito, 10),
+                    id_estado: parseInt(idEstado, 10)
+                } : {
+                    id_cliente: parseInt(idCliente, 10),
+                    id_provincia: parseInt(idProvincia, 10),
+                    id_canton: parseInt(idCanton, 10),
+                    id_distrito: parseInt(idDistrito, 10),
+                    id_estado: parseInt(idEstado, 10)
+                };
+
                 try {
-                    const response = await fetch('/direcciones_clientes/guardar', {
+                    const response = await fetch(url, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({
-                            id_cliente: parseInt(idCliente, 10),
-                            id_provincia: parseInt(idProvincia, 10),
-                            id_canton: parseInt(idCanton, 10),
-                            id_distrito: parseInt(idDistrito, 10),
-                            id_estado: parseInt(idEstado, 10)
-                        })
+                        body: JSON.stringify(payload)
                     });
 
                     const result = await response.json();
@@ -394,22 +451,23 @@
                     if (response.ok && result.success !== false) {
                         Swal.fire({
                             icon: 'success',
-                            title: '¡Guardado!',
-                            text: result.message || 'Dirección registrada con éxito.',
+                            title: '¡Operación Exitosa!',
+                            text: result.message || (esModoEdicion ? 'Dirección actualizada con éxito.' : 'Dirección registrada con éxito.'),
                             confirmButtonColor: '#3085d6'
                         }).then(() => {
+                            resetearFormulario();
                             location.reload();
                         });
                     } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: result.message || 'Ocurrió un error al guardar la dirección.',
+                            text: result.message || 'Ocurrió un error al procesar la solicitud.',
                             confirmButtonColor: '#d33'
                         });
                     }
                 } catch (error) {
-                    console.error('Error al guardar la dirección:', error);
+                    console.error('Error al procesar la dirección:', error);
                     Swal.fire({
                         icon: 'error',
                         title: 'Error de conexión',

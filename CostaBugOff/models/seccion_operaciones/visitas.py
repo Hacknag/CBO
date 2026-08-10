@@ -1,12 +1,12 @@
 import oracledb
 from db import get_connection
 #tener cuidado con esto que con quitar una linea se pudre toda la pagina xddddddd
-def insertar_visita(id_visita, nombre, fecha_programada, fecha_realizada, id_suscripcion,id_cliente, id_estado):
+def insertar_visita(NOMBRE, FECHA_PROGRAMADA, FECHA_REALIZADA, ID_SUSCRIPCION, ID_CLIENTE, ID_ESTADO):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
         cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_VISITAS_INSERT_SP", [
-            id_visita, nombre, fecha_programada, fecha_realizada, id_suscripcion, id_cliente, id_estado
+            NOMBRE, FECHA_PROGRAMADA, FECHA_REALIZADA, ID_SUSCRIPCION, ID_CLIENTE, ID_ESTADO
         ])
         conexion.commit()
     except Exception as e:
@@ -16,12 +16,12 @@ def insertar_visita(id_visita, nombre, fecha_programada, fecha_realizada, id_sus
         cursor.close()
         conexion.close()
 
-def actualizar_visita(id_visita, nombre, fecha_programada, fecha_realizada, id_suscripcion, id_cliente, id_estado):
+def actualizar_visita(NOMBRE, FECHA_PROGRAMADA, FECHA_REALIZADA, ID_SUSCRIPCION, ID_CLIENTE, ID_ESTADO):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
         cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_VISITAS_UPDATE_SP", [
-            id_visita, nombre, fecha_programada, fecha_realizada, id_suscripcion, id_cliente, id_estado
+            NOMBRE, FECHA_PROGRAMADA, FECHA_REALIZADA, ID_SUSCRIPCION, ID_CLIENTE, ID_ESTADO
         ])
         conexion.commit()
     except Exception as e:

@@ -10,7 +10,6 @@
 <body>
   <header>
     {# NAVBAR #}
-    {# NAVBAR #}
     {% with brand_tag="Vista Puestos" %}
     {% include 'plantillas/_navbar.html' %}
     {% endwith %}
@@ -30,6 +29,7 @@
         </div>
       </div>
       <div class="panel__body">
+        <!-- TABLA DE PUESTOS -->
         <div class="table-wrap">
           <table class="data-table" data-entity="puestos">
             <thead>
@@ -37,7 +37,7 @@
                 <th>Nombre</th>
                 <th>Descripción</th>
                 <th>Estado</th>
-                <th>Borrar</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -47,6 +47,9 @@
                 <td>{{ p[2] }}</td>
                 <td>{{ p[3] }}</td>
                 <td>
+                  <button class="edit-btn" onclick="editarPuesto(this)">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
                   <button class="delete-btn" onclick="deleteRow(this)">
                     <i class="fa-solid fa-trash"></i>
                   </button>
@@ -56,11 +59,11 @@
             </tbody>
           </table>
         </div>
+
         <div style="display: flex; flex-direction: column; gap: 16px">
-
-
-          <div class="form-card">
-            <h2>Agregar Puestos</h2>
+          <!-- FORMULARIO DE PUESTO -->
+          <div class="form-card" id="cardPuesto">
+            <h2 id="tituloPuesto">Agregar Puestos</h2>
             <p class="sub">Completa los campos para agregar un puesto nuevo.</p>
 
             <div class="field">
@@ -88,45 +91,110 @@
       </div>
     </section>
   </main>
-  {# FOOTER #}
+
   {# FOOTER #}
   {% include 'plantillas/_footer.html' %}
 
-
-  {# SCRIPTS #}
   {# SCRIPTS #}
 
-  {# AGREGAR PUESTO #}
+  {# EDITAR PUESTO #}
+  <script>
+    let idPuestoEditando = null;
+
+    function editarPuesto(button) {
+      const fila = button.closest('tr');
+      idPuestoEditando = fila.dataset.id;
+
+      // Cargar datos de la fila seleccionada en el formulario
+      document.getElementById('puesto').value = fila.children[0].textContent.trim();
+      document.getElementById('descripcion').value = fila.children[1].textContent.trim();
+
+      // Mapear valor del estado
+      const estadoTexto = fila.children[2].textContent.trim().toUpperCase();
+      document.getElementById('estado').value = (estadoTexto === 'ACTIVO' || estadoTexto === '1') ? '1' : '2';
+
+      // Cambiar interfaz a modo edición
+      document.getElementById('tituloPuesto').textContent = 'Editar Puesto';
+      document.getElementById('AgregarPuesto').textContent = 'Guardar cambios';
+      document.getElementById('cardPuesto').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+
+  {# AGREGAR Y ACTUALIZAR PUESTO #}
   <script>
     document.getElementById('AgregarPuesto').addEventListener('click', async (e) => {
       e.preventDefault();
 
-      const puesto = document.getElementById('puesto').value;
-      const descripcion = document.getElementById('descripcion').value;
+      const puesto = document.getElementById('puesto').value.trim();
+      const descripcion = document.getElementById('descripcion').value.trim();
       const idEstado = document.getElementById('estado').value;
 
-      // 1. Validar Teléfono obligatorio
+      // 1. Validaciones
       if (!puesto) {
         Swal.fire({
           icon: 'warning',
           title: 'Campo incompleto',
-          text: 'Por favor ingresa un puesto.',
+          text: 'Por favor ingresa el nombre del puesto.',
           confirmButtonColor: '#3085d6'
         });
         return;
       }
 
-      // 2. Validar Estado
       if (!idEstado) {
         Swal.fire({
           icon: 'warning',
           title: 'Estado no seleccionado',
-          text: 'Por favor selecciona un estado para el teléfono.',
+          text: 'Por favor selecciona un estado para el puesto.',
           confirmButtonColor: '#3085d6'
         });
         return;
       }
 
+      // 2. MODO ACTUALIZAR / EDITAR
+      if (idPuestoEditando) {
+        try {
+          const respuesta = await fetch('/puestos/actualizar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id_puesto: parseInt(idPuestoEditando),
+              puesto: puesto,
+              nombre: puesto,
+              descripcion: descripcion,
+              id_estado: parseInt(idEstado)
+            })
+          });
+
+          const resultado = await respuesta.json();
+
+          if (resultado.success) {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Actualizado!',
+              text: resultado.message,
+              confirmButtonColor: '#3085d6'
+            }).then(() => location.reload());
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: resultado.message,
+              confirmButtonColor: '#d33'
+            });
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error de conexión',
+            text: 'No se pudo conectar con el servidor.',
+            confirmButtonColor: '#d33'
+          });
+        }
+        return;
+      }
+
+      // 3. MODO GUARDAR / AGREGAR NUEVO
       const formData = new FormData();
       formData.append('puesto', puesto);
       formData.append('descripcion', descripcion);
@@ -139,9 +207,8 @@
         });
 
         const result = await response.json();
-        console.log(result);
+
         if (result.success) {
-          // Modal de éxito
           Swal.fire({
             icon: 'success',
             title: '¡Guardado!',
@@ -151,12 +218,12 @@
             // Limpiar inputs
             document.getElementById('puesto').value = '';
             document.getElementById('descripcion').value = '';
+            document.getElementById('estado').value = '';
 
-            // Recargar la página para refrescar la tabla de clientes
+            // Recargar la página
             location.reload();
           });
         } else {
-          // Modal de error retornado por la base de datos/Flask
           Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -166,7 +233,6 @@
         }
       } catch (error) {
         console.error('Error:', error);
-        // Modal de error de red
         Swal.fire({
           icon: 'error',
           title: 'Error de conexión',
@@ -176,8 +242,6 @@
       }
     });
   </script>
-
-
 
   {% include 'plantillas/_default_scripts.html' %}
 </body>

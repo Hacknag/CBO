@@ -16,12 +16,12 @@ def insertar_telefonos_clientes(ID_CLIENTE, TELEFONO, TIPO, ID_ESTADO):
         cursor.close()
         conexion.close()
 
-def actualizar_telefonos_clientes(ID_CLIENTE, TELEFONO, TIPO, ID_ESTADO):
+def actualizar_telefonos_clientes(ID_CLIENTE, TELEFONO, TELEFONO_NUEVO, TIPO, ID_ESTADO):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
         cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_TELEFONOS_UPDATE_SP", [
-            ID_CLIENTE, TELEFONO, TIPO, ID_ESTADO
+            ID_CLIENTE, TELEFONO, TELEFONO_NUEVO, TIPO, ID_ESTADO
         ])
         conexion.commit()
     except Exception as e:

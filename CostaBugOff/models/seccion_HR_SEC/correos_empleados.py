@@ -18,12 +18,12 @@ def insertar_correo_empleado(ID_EMPLEADO, CORREO, TIPO, ID_ESTADO):
         conexion.close()
 
 
-def actualizar_correo_empleado(id_empleado, correo, tipo, id_estado):
+def actualizar_correo_empleado(ID_EMPLEADO, CORREO, CORREO_NUEVO, TIPO, ID_ESTADO):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
         cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_CORREOS_EMPLEADOS_UPDATE_SP", [
-            id_empleado, correo, tipo, id_estado
+            ID_EMPLEADO, CORREO, CORREO_NUEVO, TIPO, ID_ESTADO
         ])
         conexion.commit()
     except Exception as e:

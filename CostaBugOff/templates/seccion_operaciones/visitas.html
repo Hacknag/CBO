@@ -41,7 +41,7 @@
                 <th>Nombre del Cliente</th>
                 <th>Apellido del Cliente</th>
                 <th>Estado de la cita</th>
-                <th>Borrar</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -54,6 +54,9 @@
                 <td>{{ v[5] }}</td>
                 <td>{{ v[6] }}</td>
                 <td>
+                  <button class="edit-btn" onclick="editarVisitas(this)">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
                   <button class="delete-btn" onclick="deleteRow(this)">
                     <i class="fa-solid fa-trash"></i>
                   </button>
@@ -83,6 +86,18 @@
             <label>Fecha realizada</label>
             <input type="date" id="fecharealizada" placeholder="Ingresa la fecha realizada">
           </div>
+
+          <div class="field">
+            <label for="buscar_suscripcion">Suscripción</label>
+            <input type="text" id="buscar_suscripcion" list="lista_suscripciones"
+              placeholder="Escribe el nombre de la suscripción" autocomplete="off" />
+            <!-- Datalist dinámico -->
+            <datalist id="lista_suscripciones"></datalist>
+
+            <!-- Campo oculto para almacenar el ID de la suscripción seleccionado -->
+            <input type="hidden" id="id_suscripcion_seleccionado" name="id_suscripcion" />
+          </div>
+
           <div class="field">
             <label for="buscar_cliente">Nombre del Cliente</label>
             <input type="text" id="buscar_cliente" list="lista_clientes" placeholder="Escribe el nombre del cliente"
@@ -104,7 +119,7 @@
           </div>
 
           <div class="btn-row">
-            <button class="btn btn-primary" id="AgregarTelefono">Agregar Visita</button>
+            <button class="btn btn-primary" id="AgregarVisita">Agregar Visita</button>
           </div>
         </div>
 
@@ -116,7 +131,247 @@
   {# FOOTER #}
   {% include 'plantillas/_footer.html' %}
 
+  <script>
+    let idVisitaEditando = null;
 
+    function editarVisitas(button) {
+      const fila = button.closest('tr');
+      idVisitaEditando = fila.dataset.id;
+
+      document.getElementById('Descripcion').value = fila.children[0].textContent.trim();
+      document.getElementById('fechaprogramada').value = fila.children[1].textContent.trim();
+      document.getElementById('fecharealizada').value = fila.children[2].textContent.trim();
+      document.getElementById('id_suscripcion_seleccionado').value = fila.children[3].textContent.trim();
+      document.getElementById('id_cliente_seleccionado').value = fila.children[4].textContent.trim();
+      document.getElementById('estado').value = fila.children[5].textContent.trim();
+
+      document.getElementById('tituloVisita').textContent = 'Editar Visita';
+      document.getElementById('AgregarVisita').textContent = 'Guardar cambios';
+      document.getElementById('cardVisita').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+
+  <script>
+    document.getElementById('AgregarVisita').addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const descripcion = document.getElementById('Descripcion').value;
+      const fechaprogramada = document.getElementById('fechaprogramada').value;
+      const fecharealizada = document.getElementById('fecharealizada').value;
+      const idSuscripcion = document.getElementById('id_suscripcion_seleccionado').value;
+      const idCliente = document.getElementById('id_cliente_seleccionado').value;
+      const idEstado = document.getElementById('estado').value;
+
+      // Validación rápida con SweetAlert
+      if (!descripcion.trim() || !fechaprogramada || !fecharealizada) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campos incompletos',
+          text: 'Por favor complete todos los campos para continuar.',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
+
+      if (idVisitaEditando) {
+        try {
+          const respuesta = await fetch('/visitas/agregar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              descripcion: descripcion,
+              fechaprogramada: fechaprogramada,
+              fecharealizada: fecharealizada,
+              id_suscripcion: parseInt(idSuscripcion),
+              id_cliente: parseInt(idCliente),
+              id_estado: parseInt(idEstado)
+            })
+          });
+          const resultado = await respuesta.json();
+          if (resultado.success) {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Actualizado!',
+              text: resultado.message,
+              confirmButtonColor: '#3085d6'
+            }).then(() => location.reload());
+          } else {
+            Swal.fire({ icon: 'error', title: 'Error', text: resultado.message, confirmButtonColor: '#d33' });
+          }
+        } catch (error) {
+          Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', confirmButtonColor: '#d33' });
+        }
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('descripcion', descripcion);
+      formData.append('fechaprogramada', fechaprogramada);
+      formData.append('fecharealizada', fecharealizada);
+      formData.append('id_suscripcion', idSuscripcion);
+      formData.append('id_cliente', idCliente);
+      formData.append('id_estado', idEstado);
+
+      try {
+        const response = await fetch('/visitas/agregar', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Modal de éxito
+          Swal.fire({
+            icon: 'success',
+            title: '¡Guardado!',
+            text: result.message,
+            confirmButtonColor: '#3085d6'
+          }).then(() => {
+            // Limpiar inputs
+            document.getElementById('Descripcion').value = '';
+            document.getElementById('fechaprogramada').value = '';
+            document.getElementById('fecharealizada').value = '';
+            document.getElementById('id_suscripcion_seleccionado').value = '';
+            document.getElementById('id_cliente_seleccionado').value = '';
+            document.getElementById('estado').value = '';
+
+            // Recargar la página para refrescar la tabla de plagas
+            location.reload();
+          });
+        } else {
+          // Modal de error retornado por la base de datos/Flask
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: result.message,
+            confirmButtonColor: '#d33'
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        // Modal de error de red
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de conexión',
+          text: 'No se pudo conectar con el servidor.',
+          confirmButtonColor: '#d33'
+        });
+      }
+    });
+
+
+    // 1. Declaración e inicialización de elementos del DOM
+    const inputBuscarS = document.getElementById('buscar_suscripcion');
+    const datalistS = document.getElementById('lista_suscripciones');
+    const inputHiddenIdS = document.getElementById('id_suscripcion_seleccionado');
+    const suscripcionesMapa = new Map();
+    let debounceTimer;
+
+    // -------------------------------------------------------------
+    // 2. LÓGICA DE BÚSQUEDA Y SELECCIÓN DE SUSCRIPCIÓN
+    // -------------------------------------------------------------
+    if (inputBuscarS) {
+      inputBuscarS.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+
+
+        if (suscripcionesMapa.has(query)) {
+          inputHiddenIdS.value = suscripcionesMapa.get(query);
+          return;
+        } else {
+          // Si modifica el texto, borramos el ID hasta que seleccione uno de la lista
+          inputHiddenIdS.value = '';
+        }
+
+        // Ignorar búsquedas de menos de 2 caracteres
+        if (query.length < 2) {
+          datalistS.innerHTML = '';
+          return;
+        }
+
+        // Debounce: espera 300ms a que el usuario deje de escribir
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(async () => {
+          try {
+            const response = await fetch(`/suscripciones/buscar?q=${encodeURIComponent(query)}`);
+            const suscripciones = await response.json();
+
+            datalistS.innerHTML = '';
+            suscripcionesMapa.clear();
+
+            // Validación: si suscripciones es null o no es un arreglo, usa []
+            if (Array.isArray(suscripciones)) {
+              suscripciones.forEach(suscripcion => {
+                suscripcionesMapa.set(suscripcion.nombre, suscripcion.id);
+
+                const option = document.createElement('option');
+                option.value = suscripcion.nombre;
+                datalistS.appendChild(option);
+              });
+            }
+          } catch (error) {
+            console.error('Error al buscar suscripción:', error);
+          }
+        }, 100);
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 2. LÓGICA DE BÚSQUEDA Y SELECCIÓN DE clientes
+    // -------------------------------------------------------------
+
+
+    const inputBuscarC = document.getElementById('buscar_cliente');
+    const datalistC = document.getElementById('lista_clientes');
+    const inputHiddenIdC = document.getElementById('id_cliente_seleccionado');
+    const clientesMapa = new Map();
+
+    if (inputBuscarC) {
+      inputBuscarC.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+
+        // Si lo que escribió coincide con un cliente cargado, asignamos su ID
+        if (clientesMapa.has(query)) {
+          inputHiddenIdC.value = clientesMapa.get(query);
+          return;
+        } else {
+          // Si modifica el texto, borramos el ID hasta que seleccione uno de la lista
+          inputHiddenIdC.value = '';
+        }
+
+        // Ignorar búsquedas de menos de 2 caracteres
+        if (query.length < 2) {
+          datalistC.innerHTML = '';
+          return;
+        }
+
+        // Debounce: espera 300ms a que el usuario deje de escribir
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(async () => {
+          try {
+            const response = await fetch(`/clientes/buscar?q=${encodeURIComponent(query)}`);
+            const clientes = await response.json();
+
+            datalistC.innerHTML = '';
+            clientesMapa.clear();
+
+            clientes.forEach(cliente => {
+              clientesMapa.set(cliente.nombre_completo, cliente.id);
+
+              const option = document.createElement('option');
+              option.value = cliente.nombre_completo;
+              datalistC.appendChild(option);
+            });
+          } catch (error) {
+            console.error('Error al buscar clientes:', error);
+          }
+        }, 300);
+      });
+    }
+
+
+  </script>
   {# SCRIPTS #}
   {# SCRIPTS #}
   {% include 'plantillas/_default_scripts.html' %}

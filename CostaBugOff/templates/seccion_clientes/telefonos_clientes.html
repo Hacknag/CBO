@@ -4,17 +4,14 @@
 <head>
   {% include 'plantillas/_default_head.html' %}
 </head>
-<!--http://127.0.0.1:5001/telefonos_clientes para correr telefonos -->
-<!--correr con control + ñ y despues ingresar python app.py para que ande -->
 
 <body>
   <header>
-    {# NAVBAR #}
-    {# NAVBAR #}
     {% with brand_tag="Vista Teléfonos de Clientes" %}
     {% include 'plantillas/_navbar.html' %}
     {% endwith %}
   </header>
+
   <main class="app mt-5 pt-4">
     <section class="panel active mt-5" id="panel-telefonos" data-title="Teléfonos de Clientes">
       <div class="panel__header">
@@ -29,10 +26,9 @@
             placeholder="Escribe el nombre o el numero de telefono del cliente." />
         </div>
       </div>
-      <!-- TABLA DE TELEFONOS -->
-      <!-- TABLA DE TELEFONOS -->
+
+      <!-- TABLA DE TELEFONOS DE CLIENTES -->
       <div class="panel__body">
-        {# Tabla #}
         <div class="table-wrap overflow-auto">
           <table class="data-table overflow-auto" data-entity="telefonos_clientes">
             <thead>
@@ -43,7 +39,7 @@
                 <th>Teléfono</th>
                 <th>Tipo</th>
                 <th>Estado</th>
-                <th>Borrar</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody id="cuerpoTablaTelefonos">
@@ -56,6 +52,9 @@
                 <td>{{ t[5] }}</td>
                 <td>{{ t[6] }}</td>
                 <td>
+                  <button class="edit-btn" onclick="editarTelefonoCliente(this)">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
                   <button class="delete-btn" onclick="deleteRow2(this)">
                     <i class="fa-solid fa-trash"></i>
                   </button>
@@ -65,26 +64,29 @@
             </tbody>
           </table>
         </div>
+
         <!-- FORMULARIO DE TELEFONOS -->
-        <!-- FORMULARIO DE TELEFONOS -->
-        <div class="form-card">
-          <h2>Agregar Telefonos</h2>
+        <div class="form-card" id="cardTelefonoCliente">
+          <h2 id="tituloTelefonoCliente">Agregar Telefono</h2>
           <p class="sub">Completa los campos para agregar un telefono nuevo.</p>
 
           <div class="field">
             <label for="buscar_cliente">Nombre del Cliente</label>
             <input type="text" id="buscar_cliente" list="lista_clientes" placeholder="Escribe el nombre del cliente"
               autocomplete="off" />
-            <!-- Datalist dinámico -->
+
+            <!-- Datalist dinámico cargado vía API -->
             <datalist id="lista_clientes"></datalist>
 
             <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
             <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" />
           </div>
+
           <div class="field">
             <label>Telefono</label>
             <input type="text" id="telefono" placeholder="Ingresalo con el formato XXXX-XXXX">
           </div>
+
           <div class="field id-field">
             <label>Tipo</label>
             <select name="tipo_telefono" id="tipo">
@@ -94,6 +96,7 @@
               <option value="Trabajo">Trabajo</option>
             </select>
           </div>
+
           <div class="field id-field">
             <label>Estado del telefono</label>
             <select id="estado">
@@ -110,55 +113,27 @@
       </div>
     </section>
   </main>
-  {# FOOTER #}
+
   {# FOOTER #}
   {% include 'plantillas/_footer.html' %}
 
-
   {# SCRIPTS #}
-  {# SCRIPTS #}
-  <script>
-    const URL_API = 'http://127.0.0.1:5001/api/telefonos_clientes'
-
-    function obtenerDatosFormulario() {
-      return {
-        id_cliente: parseInt(document.getElementById('cliente-id').value),
-        telefono: document.getElementById('telefono').value,
-        tipo: document.getElementById('tel-tipo').value,
-        id_estado: parseInt(document.getElementById('tel-estado').value),
-      }
-    }
-  </script>
+  {% include 'plantillas/_default_scripts.html' %}
 
   <script>
-    // 1. Declaración e inicialización de elementos del DOM
+    // Referencias a los elementos del DOM y variables de estado
     const inputBuscar = document.getElementById('buscar_cliente');
-    const datalist = document.getElementById('lista_clientes');
     const inputHiddenId = document.getElementById('id_cliente_seleccionado');
+    const datalist = document.getElementById('lista_clientes');
     const inputTelefono = document.getElementById('telefono');
-    const selectTipo = document.getElementById('tipo');
-    const selectEstado = document.getElementById('estado');
 
-    // Mapa global para relacionar: Nombre Completo -> ID del Cliente
     const clientesMapa = new Map();
-    let debounceTimer;
+    let debounceTimer = null;
+    let idClienteEditando = null;
+    let telefonoOriginalCliente = null;
 
     // -------------------------------------------------------------
-    // 2. MÁSCARA AUTOMÁTICA DE TELÉFONO (XXXX-XXXX)
-    // -------------------------------------------------------------
-    if (inputTelefono) {
-      inputTelefono.addEventListener('input', (e) => {
-        let digitos = e.target.value.replace(/\D/g, '').substring(0, 8);
-        if (digitos.length > 4) {
-          e.target.value = `${digitos.slice(0, 4)}-${digitos.slice(4)}`;
-        } else {
-          e.target.value = digitos;
-        }
-      });
-    }
-
-    // -------------------------------------------------------------
-    // 3. LÓGICA DE BÚSQUEDA Y SELECCIÓN DE CLIENTE
+    // 1. BÚSQUEDA DINÁMICA DE CLIENTES CON DEBOUNCE
     // -------------------------------------------------------------
     if (inputBuscar) {
       inputBuscar.addEventListener('input', (e) => {
@@ -204,105 +179,113 @@
     }
 
     // -------------------------------------------------------------
-    // 4. LÓGICA PARA AGREGAR EL TELÉFONO
+    // 2. MÁSCARA AUTOMÁTICA DE TELÉFONO (XXXX-XXXX)
     // -------------------------------------------------------------
-    const btnAgregar = document.getElementById('AgregarTelefono');
-    if (btnAgregar) {
-      btnAgregar.addEventListener('click', async (e) => {
-        e.preventDefault();
-
-        // Lectura de valores al hacer click
-        const idCliente = inputHiddenId ? inputHiddenId.value.trim() : '';
-        const telefono = inputTelefono ? inputTelefono.value.trim() : '';
-        const tipo = selectTipo ? selectTipo.value.trim() : '';
-        const idEstado = selectEstado ? selectEstado.value.trim() : '';
-
-        // 1. Validar Cliente seleccionado
-        if (!idCliente) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Cliente no seleccionado',
-            text: 'Por favor, busca y selecciona un cliente de la lista desplegable.',
-            confirmButtonColor: '#3085d6'
-          });
-          return;
-        }
-
-        // 2. Validar Teléfono obligatorio
-        if (!telefono) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Campo incompleto',
-            text: 'Por favor ingresa un número de teléfono.',
-            confirmButtonColor: '#3085d6'
-          });
-          return;
-        }
-
-        // 3. Validar Estado
-        if (!idEstado) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Estado no seleccionado',
-            text: 'Por favor selecciona un estado para el teléfono.',
-            confirmButtonColor: '#3085d6'
-          });
-          return;
-        }
-
-        // Petición al servidor
-        try {
-          const response = await fetch('/telefonos_clientes/guardar', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              id_cliente: parseInt(idCliente, 10),
-              telefono: telefono,
-              tipo: tipo,
-              id_estado: parseInt(idEstado, 10)
-            })
-          });
-
-          const result = await response.json();
-
-          if (response.ok) {
-            Swal.fire({
-              icon: 'success',
-              title: '¡Guardado!',
-              text: result.message || 'Teléfono agregado con éxito.',
-              confirmButtonColor: '#3085d6'
-            }).then(() => {
-              if (inputBuscar) inputBuscar.value = '';
-              if (inputHiddenId) inputHiddenId.value = '';
-              if (inputTelefono) inputTelefono.value = '';
-
-              // Recargar la página para refrescar la tabla
-              location.reload();
-            });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: result.message || 'Ocurrió un error al guardar.',
-              confirmButtonColor: '#d33'
-            });
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error de conexión',
-            text: 'No se pudo conectar con el servidor.',
-            confirmButtonColor: '#d33'
-          });
+    if (inputTelefono) {
+      inputTelefono.addEventListener('input', (e) => {
+        let digitos = e.target.value.replace(/\D/g, '').substring(0, 8);
+        if (digitos.length > 4) {
+          e.target.value = `${digitos.slice(0, 4)}-${digitos.slice(4)}`;
+        } else {
+          e.target.value = digitos;
         }
       });
     }
-  </script>
 
-  {% include 'plantillas/_default_scripts.html' %}
+    // -------------------------------------------------------------
+    // 3. FUNCIÓN EDITAR TELÉFONO CLIENTE
+    // -------------------------------------------------------------
+    function editarTelefonoCliente(button) {
+      const fila = button.closest('tr');
+      const celdas = fila.querySelectorAll('td');
+
+      idClienteEditando = fila.dataset.id1;
+      telefonoOriginalCliente = celdas[3].textContent.trim();
+
+      const nombreCompleto = `${celdas[0].textContent.trim()} ${celdas[1].textContent.trim()} ${celdas[2].textContent.trim()}`.trim();
+
+      inputBuscar.value = nombreCompleto;
+      inputHiddenId.value = idClienteEditando;
+      clientesMapa.set(nombreCompleto, idClienteEditando);
+
+      document.getElementById('telefono').value = telefonoOriginalCliente;
+      document.getElementById('tipo').value = celdas[4].textContent.trim();
+
+      const estadoTexto = celdas[5].textContent.trim();
+      document.getElementById('estado').value = estadoTexto.toUpperCase() === 'ACTIVO' ? '1' : '2';
+
+      document.getElementById('tituloTelefonoCliente').textContent = 'Editar Teléfono';
+      document.getElementById('AgregarTelefono').textContent = 'Guardar cambios';
+      document.getElementById('cardTelefonoCliente').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // -------------------------------------------------------------
+    // 4. GUARDAR O ACTUALIZAR TELÉFONO
+    // -------------------------------------------------------------
+    document.getElementById('AgregarTelefono').addEventListener('click', async () => {
+      const idCliente = inputHiddenId.value;
+      const telefono = inputTelefono.value.trim();
+      const tipo = document.getElementById('tipo').value;
+      const idEstado = document.getElementById('estado').value;
+
+      if (!idCliente || !telefono || !tipo || !idEstado) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campos incompletos',
+          text: 'Selecciona un cliente válido de la lista desplegable y llena teléfono, tipo y estado.',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
+
+      if (telefono.length !== 9) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Teléfono inválido',
+          text: 'El teléfono debe tener el formato XXXX-XXXX (8 dígitos).',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
+
+      const url = idClienteEditando
+        ? '/telefonos_clientes/actualizar'
+        : '/telefonos_clientes/guardar';
+
+      const payload = idClienteEditando
+        ? {
+          id_cliente: parseInt(idCliente),
+          telefono_actual: telefonoOriginalCliente,
+          telefono_nuevo: telefono,
+          tipo: tipo,
+          id_estado: parseInt(idEstado)
+        }
+        : {
+          id_cliente: parseInt(idCliente),
+          telefono: telefono,
+          tipo: tipo,
+          id_estado: parseInt(idEstado)
+        };
+
+      try {
+        const respuesta = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const resultado = await respuesta.json();
+
+        if (respuesta.ok) {
+          Swal.fire({ icon: 'success', title: '¡Listo!', text: resultado.message, confirmButtonColor: '#3085d6' })
+            .then(() => location.reload());
+        } else {
+          Swal.fire({ icon: 'error', title: 'Error', text: resultado.message, confirmButtonColor: '#d33' });
+        }
+      } catch (error) {
+        Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', confirmButtonColor: '#d33' });
+      }
+    });
+  </script>
 </body>
 
 </html>

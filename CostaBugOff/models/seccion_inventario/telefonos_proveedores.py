@@ -51,11 +51,7 @@ def obtener_telefonos_proveedores():
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('''
-        SELECT TP.ID_PROVEEDOR, PR.NOMBRE, TP.TELEFONO, TP.TIPO, E.NOMBRE
-        FROM FIDE_TELEFONOS_PROVEEDORES_TB TP
-        JOIN FIDE_PROVEEDORES_TB PR ON TP.ID_PROVEEDOR = PR.ID_PROVEEDOR
-        JOIN FIDE_ESTADOS_TB E ON TP.ID_ESTADO = E.ID_ESTADO
-        ORDER BY TP.ID_PROVEEDOR
+        SELECT * FROM FIDE_TELEFONOS_PROVEEDORES_ACTIVOS_V 
     ''')
     datos = cursor.fetchall()
     cursor.close()

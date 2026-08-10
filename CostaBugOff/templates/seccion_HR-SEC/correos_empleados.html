@@ -5,11 +5,9 @@
   {% include 'plantillas/_default_head.html' %}
 </head>
 <!--http://127.0.0.1:5001/correos_empleados para correr correos de empleados -->
-<!--correr con control + ñ y despues ingresar python app.py para que ande -->
 
 <body>
   <header>
-    {# NAVBAR #}
     {# NAVBAR #}
     {% with brand_tag="Vista Correos de Empleados" %}
     {% include 'plantillas/_navbar.html' %}
@@ -21,6 +19,8 @@
       <div class="panel__header">
         <h1>Correos de Empleados</h1>
       </div>
+
+      {# Filtro de búsqueda #}
       <div style="display:flex; flex-direction:column;">
         <div class="search-row">
           <label for="filtro-busqueda">Buscar Correo:</label>
@@ -28,12 +28,12 @@
             placeholder="Escribe el nombre o el correo del empleado." />
         </div>
       </div>
+
       <div class="panel__body_inverse">
         <!-- FORMULARIO DE CORREOS DE EMPLEADOS -->
-        <!-- FORMULARIO DE CORREOS DE EMPLEADOS -->
         <div class="form-card">
-          <h2>Agregar Correo</h2>
-          <p class="sub">Completa los campos para agregar un correo nuevo.</p>
+          <h2 id="form-titulo">Agregar Correo</h2>
+          <p class="sub" id="form-subtitulo">Completa los campos para agregar un correo nuevo.</p>
 
           <div class="field">
             <label for="buscar_empleado">Nombre del Empleado</label>
@@ -42,25 +42,28 @@
             <!-- Datalist dinámico -->
             <datalist id="lista_empleados"></datalist>
 
-            <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
+            <!-- Campo oculto para almacenar el ID del empleado seleccionado -->
             <input type="hidden" id="id_empleado_seleccionado" name="id_empleado" />
           </div>
+
           <div class="field">
-            <label>Correo</label>
-            <input type="text" id="correo" placeholder="Ingresa el correo del empleado">
+            <label for="correo">Correo Electrónico</label>
+            <input type="email" id="correo" placeholder="Ingresa el correo del empleado">
           </div>
+
           <div class="field id-field">
-            <label>Tipo de correo</label>
-            <select name="tipo_correo" id="tipo_correo">
-              <option value="">-- Selecciona una opcion --</option>
+            <label for="tipo">Tipo de Correo</label>
+            <select name="tipo_correo" id="tipo">
+              <option value="">-- Selecciona una opción --</option>
               <option value="Personal">Personal</option>
               <option value="Empresarial">Empresarial</option>
             </select>
           </div>
+
           <div class="field id-field">
-            <label>Estado del Cliente</label>
+            <label for="estado">Estado del Registro</label>
             <select id="estado">
-              <option value="">-- Selecciona una opcion --</option>
+              <option value="">-- Selecciona una opción --</option>
               <option value="1">Activo</option>
               <option value="2">Inactivo</option>
             </select>
@@ -68,23 +71,23 @@
 
           <div class="btn-row">
             <button class="btn btn-primary" id="AgregarCorreo">Agregar correo</button>
+            <button class="btn btn-secondary" id="CancelarEdicion" style="display: none;"
+              type="button">Cancelar</button>
           </div>
         </div>
 
-        <!-- TABLA DE CORREOS DE EMPLEADOS -->
         <!-- TABLA DE CORREOS DE EMPLEADOS -->
         <div class="table-wrap">
           <table class="data-table" data-entity="correos_empleados">
             <thead>
               <tr>
-
                 <th>Empleado</th>
                 <th>Primer Apellido</th>
                 <th>Segundo Apellido</th>
                 <th>Correo</th>
                 <th>Tipo</th>
                 <th>Estado</th>
-                <th>Borrar</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -97,6 +100,9 @@
                 <td>{{ c[5] }}</td>
                 <td>{{ c[6] }}</td>
                 <td>
+                  <button class="edit-btn" onclick="editarCorreoEmpleado(this)">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
                   <button class="delete-btn" onclick="deleteRow2(this)">
                     <i class="fa-solid fa-trash"></i>
                   </button>
@@ -111,48 +117,54 @@
   </main>
 
   {# FOOTER #}
-  {# FOOTER #}
   {% include 'plantillas/_footer.html' %}
 
+  {# SCRIPTS #}
+  {% include 'plantillas/_default_scripts.html' %}
 
-  {# SCRIPTS #}
-  {# SCRIPTS #}
   <script>
-    // 1. Declaración e inicialización de elementos del DOM
+    // -------------------------------------------------------------
+    // 1. REFERENCIAS AL DOM Y ESTADO GLOBAL
+    // -------------------------------------------------------------
     const inputBuscar = document.getElementById('buscar_empleado');
     const datalist = document.getElementById('lista_empleados');
     const inputHiddenId = document.getElementById('id_empleado_seleccionado');
     const inputCorreo = document.getElementById('correo');
-    const selectTipo = document.getElementById('tipo_correo');
+    const selectTipo = document.getElementById('tipo');
     const selectEstado = document.getElementById('estado');
+    const btnAgregar = document.getElementById('AgregarCorreo');
+    const btnCancelar = document.getElementById('CancelarEdicion');
+    const formTitulo = document.getElementById('form-titulo');
+    const formSubtitulo = document.getElementById('form-subtitulo');
 
     // Mapa global para relacionar: Nombre Completo -> ID del Empleado
     const empleadosMapa = new Map();
     let debounceTimer;
 
+    // Variables de estado para edición
+    let esModoEdicion = false;
+    let idEmpleadoEditando = null;
+    let correoOriginalEditando = null;
+
     // -------------------------------------------------------------
-    // 2. LÓGICA DE BÚSQUEDA Y SELECCIÓN DE EMPLEADO
+    // 2. LÓGICA DE BÚSQUEDA Y SELECCIÓN DE EMPLEADO (DATALIST)
     // -------------------------------------------------------------
     if (inputBuscar) {
       inputBuscar.addEventListener('input', (e) => {
         const query = e.target.value.trim();
 
-        // Si lo que escribió coincide con un empleado cargado, asignamos su ID
         if (empleadosMapa.has(query)) {
           inputHiddenId.value = empleadosMapa.get(query);
           return;
         } else {
-          // Si modifica el texto, borramos el ID
           inputHiddenId.value = '';
         }
 
-        // Ignorar búsquedas de menos de 2 caracteres
         if (query.length < 2) {
           datalist.innerHTML = '';
           return;
         }
 
-        // Debounce: espera 300ms a que el usuario deje de escribir
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(async () => {
           try {
@@ -179,21 +191,83 @@
     }
 
     // -------------------------------------------------------------
-    // 3. LÓGICA PARA AGREGAR EL CORREO DEL EMPLEADO
+    // 3. LÓGICA PARA EDITAR CORREO DE EMPLEADO
     // -------------------------------------------------------------
-    // Escucha el evento del botón (utiliza id="AgregarCorreo" del HTML proporcionado)
-    const btnAgregar = document.getElementById('AgregarCorreo');
+    function editarCorreoEmpleado(button) {
+      const row = button.closest('tr');
+      const celdas = row.querySelectorAll('td');
+
+      esModoEdicion = true;
+      idEmpleadoEditando = row.getAttribute('data-id1');
+      correoOriginalEditando = row.getAttribute('data-id2') || celdas[3].textContent.trim();
+
+      // Cargar datos en el formulario
+      const nombreEmpleado = `${celdas[0].textContent.trim()} ${celdas[1].textContent.trim()} ${celdas[2].textContent.trim()}`.trim();
+      inputBuscar.value = nombreEmpleado;
+      inputHiddenId.value = idEmpleadoEditando;
+
+      // Habilitar la edición del correo
+      inputCorreo.value = celdas[3].textContent.trim();
+      inputCorreo.disabled = false;
+
+      selectTipo.value = celdas[4].textContent.trim();
+
+      const estadoTexto = celdas[5].textContent.trim();
+      selectEstado.value = (estadoTexto.toUpperCase() === 'ACTIVO' || estadoTexto === '1') ? '1' : '2';
+
+      // Inhabilitar la búsqueda del empleado durante la edición para evitar incongruencias
+      inputBuscar.disabled = true;
+
+      // Ajustar interfaz
+      formTitulo.textContent = 'Editar Correo';
+      formSubtitulo.textContent = 'Modifica los campos necesarios para actualizar el correo.';
+      btnAgregar.textContent = 'Guardar cambios';
+      btnCancelar.style.display = 'inline-block';
+
+      document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // -------------------------------------------------------------
+    // 4. CANCELAR / RESETEAR FORMULARIO
+    // -------------------------------------------------------------
+    function resetearFormulario() {
+      esModoEdicion = false;
+      idEmpleadoEditando = null;
+      correoOriginalEditando = null;
+
+      inputBuscar.value = '';
+      inputBuscar.disabled = false;
+      inputHiddenId.value = '';
+
+      inputCorreo.value = '';
+      inputCorreo.disabled = false;
+
+      selectTipo.value = '';
+      selectEstado.value = '';
+
+      formTitulo.textContent = 'Agregar Correo';
+      formSubtitulo.textContent = 'Completa los campos para agregar un correo nuevo.';
+      btnAgregar.textContent = 'Agregar correo';
+      btnCancelar.style.display = 'none';
+    }
+
+    if (btnCancelar) {
+      btnCancelar.addEventListener('click', resetearFormulario);
+    }
+
+    // -------------------------------------------------------------
+    // 5. GUARDAR (AGREGAR O ACTUALIZAR)
+    // -------------------------------------------------------------
     if (btnAgregar) {
       btnAgregar.addEventListener('click', async (e) => {
         e.preventDefault();
 
-        // Lectura de valores al hacer click
         const idEmpleado = inputHiddenId ? inputHiddenId.value.trim() : '';
-        const correo = inputCorreo ? inputCorreo.value.trim() : '';
+        const correoIngresado = inputCorreo ? inputCorreo.value.trim() : '';
         const tipo = selectTipo ? selectTipo.value.trim() : '';
         const idEstado = selectEstado ? selectEstado.value.trim() : '';
 
-        // 1. Validar Empleado seleccionado
+        // Validaciones
         if (!idEmpleado) {
           Swal.fire({
             icon: 'warning',
@@ -204,18 +278,16 @@
           return;
         }
 
-        // 2. Validar Correo obligatorio
-        if (!correo) {
+        if (!correoIngresado) {
           Swal.fire({
             icon: 'warning',
             title: 'Campo incompleto',
-            text: 'Por favor ingresa un correo electrónico.',
+            text: 'Por favor ingresa una dirección de correo electrónico.',
             confirmButtonColor: '#3085d6'
           });
           return;
         }
 
-        // 3. Validar Estado
         if (!idEstado) {
           Swal.fire({
             icon: 'warning',
@@ -226,19 +298,27 @@
           return;
         }
 
-        // Petición al servidor
+        // Definir endpoint y estructura según el modo
+        const url = esModoEdicion ? '/correos_empleados/actualizar' : '/correos_empleados/guardar';
+
+        const payload = esModoEdicion ? {
+          id_empleado: parseInt(idEmpleado, 10),
+          correo: correoOriginalEditando,
+          correo_nuevo: correoIngresado,
+          tipo: tipo,
+          id_estado: parseInt(idEstado, 10)
+        } : {
+          id_empleado: parseInt(idEmpleado, 10),
+          correo: correoIngresado,
+          tipo: tipo,
+          id_estado: parseInt(idEstado, 10)
+        };
+
         try {
-          const response = await fetch('/correos_empleados/guardar', {
+          const response = await fetch(url, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              id_empleado: parseInt(idEmpleado, 10),
-              correo: correo,
-              tipo: tipo,
-              id_estado: parseInt(idEstado, 10)
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
           });
 
           const result = await response.json();
@@ -246,24 +326,18 @@
           if (response.ok) {
             Swal.fire({
               icon: 'success',
-              title: '¡Guardado!',
-              text: result.message || 'Correo agregado con éxito.',
+              title: '¡Operación Exitosa!',
+              text: result.message || (esModoEdicion ? 'Correo actualizado con éxito.' : 'Correo agregado con éxito.'),
               confirmButtonColor: '#3085d6'
             }).then(() => {
-              if (inputBuscar) inputBuscar.value = '';
-              if (inputHiddenId) inputHiddenId.value = '';
-              if (inputCorreo) inputCorreo.value = '';
-              if (selectTipo) selectTipo.value = '';
-              if (selectEstado) selectEstado.value = '';
-
-              // Recargar la página para refrescar la tabla
+              resetearFormulario();
               location.reload();
             });
           } else {
             Swal.fire({
               icon: 'error',
               title: 'Error',
-              text: result.message || 'Ocurrió un error al guardar.',
+              text: result.message || 'Ocurrió un error al procesar la solicitud.',
               confirmButtonColor: '#d33'
             });
           }
@@ -279,83 +353,6 @@
       });
     }
   </script>
-  {#
-  <script>
-    const URL_API_CORREOS_EMPLEADOS = 'http://127.0.0.1:5001/api/correos_empleados'
-
-    function obtenerDatosCorreoEmpleado() {
-      return {
-        id_empleado: parseInt(document.getElementById('ce-empleado').value),
-        correo: document.getElementById('ce-correo').value,
-        tipo: document.getElementById('ce-tipo').value,
-        id_estado: parseInt(document.getElementById('ce-estado').value),
-      }
-    }
-
-    document.getElementById('btnAgregarCorreoEmpleado').addEventListener('click', async () => {
-      const datos = obtenerDatosCorreoEmpleado()
-      if (!datos.id_empleado || !datos.correo || !datos.tipo || !datos.id_estado)
-        return alert('Llena Empleado, Correo, Tipo y Estado.')
-      try {
-        const respuesta = await fetch(`${URL_API_CORREOS_EMPLEADOS}/guardar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formCorreosEmpleados').reset()
-          location.reload()
-        }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
-
-    document.getElementById('btnActualizarCorreoEmpleado').addEventListener('click', async () => {
-      const datos = obtenerDatosCorreoEmpleado()
-      if (!datos.id_empleado || !datos.correo || !datos.tipo || !datos.id_estado)
-        return alert('Llena Empleado, Correo, Tipo y Estado antes de actualizar.')
-      try {
-        const respuesta = await fetch(`${URL_API_CORREOS_EMPLEADOS}/actualizar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formCorreosEmpleados').reset()
-          location.reload()
-        }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
-
-    document.getElementById('btnDesactivarCorreoEmpleado').addEventListener('click', async () => {
-      const datos = obtenerDatosCorreoEmpleado()
-      if (!datos.id_empleado || !datos.correo)
-        return alert('Selecciona el Empleado y el Correo a desactivar.')
-      try {
-        const respuesta = await fetch(
-          `${URL_API_CORREOS_EMPLEADOS}/eliminar/${datos.id_empleado}/${encodeURIComponent(datos.correo)}`,
-          { method: 'POST' },
-        )
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formCorreosEmpleados').reset()
-          location.reload()
-        }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
-  </script> #}
-
-  {% include 'plantillas/_default_scripts.html' %}
 </body>
 
 </html>

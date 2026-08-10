@@ -46,7 +46,7 @@
                 <th>Descripción</th>
                 <th>Unidades_necesarias</th>
                 <th>Estado</th>
-                <th>Borrar</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -58,6 +58,9 @@
                 <td>{{ p[4] }}</td>
                 <td>{{ p[5] }}</td>
                 <td>
+                  <button class="edit-btn" onclick="editarPlagas(this)">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
                   <button class="delete-btn" onclick="deleteRow(this)">
                     <i class="fa-solid fa-trash"></i>
                   </button>
@@ -79,7 +82,7 @@
           </div>
           <div class="field">
             <label for="buscar_cliente">Tipo</label>
-            <input type="text" id="buscar_cliente" list="lista_clientes" placeholder="Busca el tipo de plaga"
+            <input type="text" id="tipo" list="lista_clientes" placeholder="Busca el tipo de plaga"
               autocomplete="off" />
             <!-- Datalist dinámico -->
             <datalist id="lista_clientes"></datalist>
@@ -91,8 +94,12 @@
             <label>Descripcion</label>
             <input type="text" id="descripcion" placeholder="Ingresa una descripcion">
           </div>
+          <div class="field">
+            <label>Unidades Necesarias</label>
+            <input type="number" id="unidades_necesarias" placeholder="Ingresa el número de unidades necesarias">
+          </div>
           <div class="field id-field">
-            <label>Estado del Cliente</label>
+            <label>Estado Plaga</label>
             <select id="estado">
               <option value="">-- Selecciona una opcion --</option>
               <option value="1">Activo</option>
@@ -101,7 +108,7 @@
           </div>
 
           <div class="btn-row">
-            <button class="btn btn-primary" id="AgregarTelefono">Agregar plaga</button>
+            <button class="btn btn-primary" id="AgregarPlaga">Agregar plaga</button>
           </div>
         </div>
       </div>
@@ -112,7 +119,136 @@
   {% include 'plantillas/_footer.html' %}
 
 
+
+
   {# SCRIPTS #}
+
+
+  <script>
+    let idPlagaEditando = null;
+
+    function editarPlagas(button) {
+      const fila = button.closest('tr');
+      idPlagaEditando = fila.dataset.id;
+
+      document.getElementById('plaga').value = fila.children[0].textContent.trim();
+      document.getElementById('tipo').value = fila.children[1].textContent.trim();
+      document.getElementById('descripcion').value = fila.children[2].textContent.trim();
+      document.getElementById('unidades_necesarias').value = fila.children[3].textContent.trim();
+      document.getElementById('estado').value = fila.children[4].textContent.trim();
+
+      document.getElementById('tituloPlaga').textContent = 'Editar Plaga';
+      document.getElementById('AgregarPlaga').textContent = 'Guardar cambios';
+      document.getElementById('cardPlaga').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+
+  <script>
+    document.getElementById('AgregarPlaga').addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const nombre = document.getElementById('plaga').value;
+      const tipo = document.getElementById('tipo').value;
+      const descripcion = document.getElementById('descripcion').value;
+      const unidadesNecesarias = document.getElementById('unidades_necesarias').value;
+      const idEstado = document.getElementById('estado').value;
+
+      // Validación rápida con SweetAlert
+      if (!nombre.trim() || !tipo.trim() || !descripcion.trim()) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campos incompletos',
+          text: 'Por favor complete todos los campos para continuar.',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
+
+      if (idPlagaEditando) {
+        try {
+          const respuesta = await fetch('/plagas/actualizar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nombre: nombre,
+              tipo: tipo,
+              descripcion: descripcion,
+              unidades_necesarias: unidadesNecesarias,
+              id_estado: parseInt(idEstado)
+            })
+          });
+          const resultado = await respuesta.json();
+          if (resultado.success) {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Actualizado!',
+              text: resultado.message,
+              confirmButtonColor: '#3085d6'
+            }).then(() => location.reload());
+          } else {
+            Swal.fire({ icon: 'error', title: 'Error', text: resultado.message, confirmButtonColor: '#d33' });
+          }
+        } catch (error) {
+          Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', confirmButtonColor: '#d33' });
+        }
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('nombre', nombre);
+      formData.append('tipo', tipo);
+      formData.append('descripcion', descripcion);
+      formData.append('unidades_necesarias', unidadesNecesarias);
+      formData.append('id_estado', idEstado);
+
+      try {
+        const response = await fetch('/plagas/agregar', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Modal de éxito
+          Swal.fire({
+            icon: 'success',
+            title: '¡Guardado!',
+            text: result.message,
+            confirmButtonColor: '#3085d6'
+          }).then(() => {
+            // Limpiar inputs
+            document.getElementById('plaga').value = '';
+            document.getElementById('tipo').value = '';
+            document.getElementById('descripcion').value = '';
+            document.getElementById('unidades_necesarias').value = '';
+            document.getElementById('estado').value = '';
+
+            // Recargar la página para refrescar la tabla de plagas
+            location.reload();
+          });
+        } else {
+          // Modal de error retornado por la base de datos/Flask
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: result.message,
+            confirmButtonColor: '#d33'
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        // Modal de error de red
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de conexión',
+          text: 'No se pudo conectar con el servidor.',
+          confirmButtonColor: '#d33'
+        });
+      }
+    });
+  </script>
+
   {# SCRIPTS #}
   {% include 'plantillas/_default_scripts.html' %}
 </body>

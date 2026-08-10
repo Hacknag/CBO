@@ -46,7 +46,7 @@ from models.seccion_inventario.reabastecimiento_inventario import insertar_reaba
 
 #################### Imports Seccion Operaciones ####################
 #################### Imports Seccion Operaciones ####################
-from models.seccion_operaciones.plagas import obtener_plagas, insertar_plaga, actualizar_plaga, eliminar_plaga_logica
+from models.seccion_operaciones.plagas import obtener_plagas, insertar_plaga, actualizar_plaga, eliminar_plaga_logica, buscar_plagas
 from models.seccion_operaciones.servicios import insertar_servicio, actualizar_servicio, eliminar_servicio_logico, obtener_servicios   
 from models.seccion_operaciones.servicios_realizados import insertar_servicio_realizado, actualizar_servicio_realizado, obtener_servicios_realizados, eliminar_servicio_realizado_logico
 from models.seccion_operaciones.visitas import obtener_visitas, insertar_visita, actualizar_visita, eliminar_visita_logica
@@ -56,7 +56,7 @@ from models.seccion_operaciones.distritos import obtener_distritos, insertar_dis
 
 #################### Imports Seccion Facturacion y Finanzas ####################
 #################### Imports Seccion Facturacion y Finanzas ####################
-from models.seccion_fyf.suscripciones import insertar_suscripcion, actualizar_suscripcion, eliminar_suscripcion, obtener_suscripciones
+from models.seccion_fyf.suscripciones import buscar_suscripciones, insertar_suscripcion, actualizar_suscripcion, eliminar_suscripcion, obtener_suscripciones
 from models.seccion_fyf.metodos_pago import insertar_metodos_pago, actualizar_metodos_pago, eliminar_metodo_pago_logico, obtener_metodos_pago_main
 from models.seccion_fyf.pagos import insertar_pago, actualizar_pago, eliminar_pago, obtener_pagos
 from models.seccion_fyf.transacciones import insertar_transaccion, actualizar_transaccion, eliminar_transaccion, obtener_transacciones
@@ -110,7 +110,7 @@ def agregar_cliente():
 
 #UPDATE
 #UPDATE
-@app.route("/api/clientes/actualizar", methods=["POST"])
+@app.route("/clientes/actualizar", methods=["POST"])
 def api_actualizar_cliente():
     datos = request.get_json()
     try:
@@ -191,20 +191,30 @@ def api_guardar_telefono_cliente():
 
 #UPDATE
 #UPDATE
-@app.route("/api/telefonos_clientes/actualizar", methods=["POST"])
+@app.route("/telefonos_clientes/actualizar", methods=["POST"])
 def api_actualizar_telefono_cliente():
     datos = request.get_json()
     try:
-        actualizar_telefonos_clientes(
-            ID_CLIENTE=datos["id_cliente"],
-            TELEFONO=datos["telefono"],
-            TIPO=datos["tipo"],
-            ID_ESTADO=datos["id_estado"]
-        )
-        return jsonify({"message": "¡Teléfono actualizado con éxito!"}), 200
-    except Exception as e:
-        return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+        # Extraemos variables asegurando compatibilidad con el JSON enviado desde JS
+        id_cliente = datos.get("id_cliente")
+        telefono_actual = datos.get("telefono_actual")
+        telefono_nuevo = datos.get("telefono_nuevo") or datos.get("telefono")
+        tipo = datos.get("tipo")
+        id_estado = datos.get("id_estado")
 
+        if not id_cliente or not telefono_actual or not telefono_nuevo:
+            return jsonify({"message": "Faltan datos obligatorios para identificar el registro."}), 400
+
+        actualizar_telefonos_clientes(
+            ID_CLIENTE=id_cliente,
+            TELEFONO=telefono_actual,
+            TELEFONO_NUEVO=telefono_nuevo,
+            TIPO=tipo,
+            ID_ESTADO=id_estado
+        )
+        return jsonify({'success': True, "message": "¡Teléfono actualizado con éxito!"}), 200
+    except Exception as e:
+        return jsonify({'success': False, "message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 # #DELETE 
 @app.route('/delete/telefonos_clientes/<int:id_cliente>/<string:telefono>', methods=['POST'])
 def eliminar_telefono_cliente(id_cliente, telefono):
@@ -257,13 +267,14 @@ def api_guardar_correo_cliente():
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
 
-@app.route("/api/correos_clientes/actualizar", methods=["POST"])
+@app.route("/correos_clientes/actualizar", methods=["POST"])
 def api_actualizar_correo_cliente():
     datos = request.get_json()
     try:
         actualizar_correos_clientes(
             ID_CLIENTE=datos["id_cliente"],
             CORREO=datos["correo"],
+            CORREO_NUEVO=datos["correo_nuevo"],
             TIPO=datos["tipo"],
             ID_ESTADO=datos["id_estado"]
         )
@@ -305,20 +316,29 @@ def api_guardar_direccion_cliente():
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
-@app.route("/api/direcciones_clientes/actualizar", methods=["POST"])
+@app.route("/direcciones_clientes/actualizar", methods=["POST"])
 def api_actualizar_direccion_cliente():
     datos = request.get_json()
     try:
         actualizar_direcciones_clientes(
-            ID_CLIENTE=datos["id_cliente"],
-            DIRECCION=datos["direccion"],
-            TIPO=datos["tipo"],
-            ID_ESTADO=datos["id_estado"]
+            ID_CLIENTE=datos.get("id_cliente"),
+            ID_PROVINCIA=datos.get("id_provincia_original"),
+            ID_PROVINCIA_NUEVA=datos.get("id_provincia"),
+            ID_CANTON=datos.get("id_canton_original"),
+            ID_CANTON_NUEVO=datos.get("id_canton"),
+            ID_DISTRITO=datos.get("id_distrito_original"),
+            ID_DISTRITO_NUEVO=datos.get("id_distrito"),
+            ID_ESTADO=datos.get("id_estado")
         )
-        return jsonify({"message": "¡Dirección actualizada con éxito!"}), 200
+        return jsonify({
+            "success": True,
+            "message": "¡Dirección actualizada con éxito!"
+        }), 200
     except Exception as e:
-        return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
-
+        return jsonify({
+            "success": False,
+            "message": f"Error al actualizar en Base de Datos: {str(e)}"
+        }), 500
 # DELETE
 @app.route('/delete/direcciones_clientes/<int:id_cliente>/<int:id_provincia>/<int:id_canton>/<int:id_distrito>', methods=['POST'])
 def eliminar_direccion_cliente(id_cliente, id_provincia, id_canton, id_distrito):
@@ -355,7 +375,7 @@ def agregar_puesto():
         return jsonify({"success": False, "message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
 
-@app.route("/api/puestos/actualizar", methods=["POST"])
+@app.route("/puestos/actualizar", methods=["POST"])
 def api_actualizar_puesto():
     datos = request.get_json()
     try:
@@ -364,9 +384,9 @@ def api_actualizar_puesto():
             nombre=datos["nombre"],
             descripcion=datos["descripcion"]
         )
-        return jsonify({"message": "¡Puesto actualizado con éxito"}), 200
+        return jsonify({"success": True, "message": "¡Puesto actualizado con éxito"}), 200
     except Exception as e:
-        return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+        return jsonify({"success": False, "message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
 
 @app.route("/delete/puestos/<int:id_puesto>", methods=["POST"])
@@ -415,7 +435,7 @@ def agregar_empleado():
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
 
-@app.route("/api/empleados/actualizar", methods=["POST"])
+@app.route("/empleados/actualizar", methods=["POST"])
 def api_actualizar_empleado():
     datos = request.get_json()
     try:
@@ -499,13 +519,14 @@ def api_guardar_telefono_empleado():
 
 #UPDATE
 #UPDATE
-@app.route("/api/telefonos_empleados/actualizar", methods=["POST"])
+@app.route("/telefonos_empleados/actualizar", methods=["POST"])
 def api_actualizar_telefono_empleado():
     datos = request.get_json()
     try:
         actualizar_telefono_empleado(
             ID_EMPLEADO=datos["id_empleado"],
-            TELEFONO=datos["telefono"],
+            TELEFONO_ACTUAL=datos["telefono_actual"],
+            TELEFONO_NUEVO=datos["telefono_nuevo"],
             TIPO=datos["tipo"],
             ID_ESTADO=datos["id_estado"]
         )
@@ -545,13 +566,14 @@ def api_guardar_correo_empleado():
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
-@app.route("/api/correos_empleados/actualizar", methods=["POST"])
+@app.route("/correos_empleados/actualizar", methods=["POST"])
 def api_actualizar_correo_empleado():
     datos = request.get_json()
     try:
         actualizar_correo_empleado(
             ID_EMPLEADO=datos["id_empleado"],
             CORREO=datos["correo"],
+            CORREO_NUEVO=datos["correo_nuevo"],
             TIPO=datos["tipo"],
             ID_ESTADO=datos["id_estado"]
         )
@@ -687,7 +709,7 @@ def api_guardar_producto():
         return jsonify({'success': False,"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
 
-@app.route("/api/productos/actualizar", methods=["POST"])
+@app.route("/productos/actualizar", methods=["POST"])
 def api_actualizar_producto():
     datos = request.get_json()
     try:
@@ -699,9 +721,9 @@ def api_actualizar_producto():
             unidades=datos["unidades"],
             id_estado=datos["id_estado"]
         )
-        return jsonify({"message": "¡Producto actualizado con éxito!"}), 200
+        return jsonify({'success': True, "message": "¡Producto actualizado con éxito!"}), 200
     except Exception as e:
-        return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+        return jsonify({'success': False, "message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
     
 # ---------------- Productos X Proveedores(vista para Admin/Empleado) ----------------
 @app.route("/api/productos-x-proveedor/guardar", methods=["POST"])
@@ -793,7 +815,7 @@ def api_guardar_proveedor():
             id_reabastecimiento=datos.get("id_reabastecimiento"),
             id_estado= 1
         )
-        return jsonify({"message": "¡Proveedor agregado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Proveedor agregado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
  
@@ -840,7 +862,7 @@ def api_guardar_telefono_proveedor():
             TIPO=datos["tipo"],
             ID_ESTADO=datos["id_estado"]
         )
-        return jsonify({"success": True, "message": "¡Teléfono agregado con éxito en Oracle!"}), 200
+        return jsonify({"success": True, "message": "¡Teléfono agregado con éxito!"}), 200
     except Exception as e:
         return jsonify({"success": False, "message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
  
@@ -894,7 +916,7 @@ def api_guardar_correo_proveedor():
             tipo=datos["tipo"],
             id_estado=datos["id_estado"]
         )
-        return jsonify({"message": "¡Correo agregado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Correo agregado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
  
@@ -909,21 +931,45 @@ def api_actualizar_correo_proveedor():
             TIPO=datos["tipo"],
             ID_ESTADO=datos["id_estado"]
         )
-        return jsonify({"success": True, "message": "¡Correo actualizado con éxito en Oracle!"}), 200
+        return jsonify({"success": True, "message": "¡Correo actualizado con éxito!"}), 200
     except Exception as e:
         return jsonify({"success": False, "message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
     
 ###########################################################################################
 ################################## SECCION - OPERACIONES ##################################
 ###########################################################################################
-# ---------------- Telefono Plagas (vista para Admin/Empleado/Cliente) ----------------
-# ---------------- Telefono Plagas (vista para Admin/Empleado/Cliente) ----------------
-# ---------------- Telefono Plagas (vista para Admin/Empleado/Cliente) ----------------
+# ---------------- Plagas (vista para Admin/Empleado/Cliente) ----------------
+# ---------------- Plagas (vista para Admin/Empleado/Cliente) ----------------
+# ---------------- Plagas (vista para Admin/Empleado/Cliente) ----------------
 @app.route("/plagas")
 def plagas():
-    lista_plagas = obtener_plagas() 
+    lista_plagas = obtener_plagas()
     return render_template("seccion_operaciones/plagas.html", plagas=lista_plagas)
-
+ 
+@app.route("/plagas/agregar", methods=["POST"])
+def agregar_plaga():
+    try:
+        insertar_plaga(
+            tipo=request.form["tipo"],
+            nombre=request.form["nombre"],
+            descripcion=request.form["descripcion"],
+            unidades_necesarias=int(request.form["unidades_necesarias"]),
+            id_estado=int(request.form["id_estado"])
+        )
+        return jsonify({"success": True, "message": "Plaga agregada exitosamente"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error al guardar: {str(e)}"}), 400
+   
+@app.route('/plagas/buscar', methods=['GET'])
+def api_buscar_plagas():
+    # 1. Extraer el parámetro 'q' de la URL
+    query = request.args.get('q', '').strip()    
+    # 2. Llamar a la función del archivo clientes.py
+    lista_plagas = buscar_plagas(query)
+    # 3. Devolver la respuesta JSON
+    return jsonify(lista_plagas)
+ 
+ 
 @app.route('/delete/plagas/<int:id_plaga>', methods=['POST'])
 def eliminar_plaga(id_plaga):
     try:
@@ -931,8 +977,6 @@ def eliminar_plaga(id_plaga):
         return jsonify({'success': True, 'message': 'Plaga eliminada correctamente'})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
-    
-
 
 # ---------------- Servicios (vista para Admin/Empleado/Cliente) ----------------
 # ---------------- Servicios (vista para Admin/Empleado/Cliente) ----------------
@@ -1010,7 +1054,25 @@ def eliminar_servicio_realizado(id_servicio_realizado):
 def visitas():
     lista_visitas = obtener_visitas()
     return render_template("seccion_operaciones/visitas.html", visitas=lista_visitas)
-
+ 
+ 
+@app.route("/visitas/agregar", methods=["POST"])
+def agregar_visita():
+    print(request.form["fechaprogramada"])
+    try:
+        insertar_visita(
+            NOMBRE=request.form["descripcion"],            
+            FECHA_PROGRAMADA=request.form["fechaprogramada"],
+            FECHA_REALIZADA=request.form["fecharealizada"],
+            ID_SUSCRIPCION=int(request.form["id_suscripcion"]),
+            ID_CLIENTE=int(request.form["id_cliente"]),
+            ID_ESTADO=int(request.form["id_estado"])
+        )
+        return jsonify({"success": True, "message": "Visita agregada exitosamente"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error al guardar: {str(e)}"}), 400
+ 
+ 
 @app.route('/delete/visitas/<int:id_visita>', methods=['POST'])
 def eliminar_visita(id_visita):
     try:
@@ -1018,7 +1080,6 @@ def eliminar_visita(id_visita):
         return jsonify({'success': True, 'message': 'Visita eliminada correctamente'})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
-    
 # ---------------- Provincias (vista para Admin) ----------------
 # ---------------- Provincias (vista para Admin) ----------------
 # ---------------- Provincias (vista para Admin) ----------------
@@ -1196,6 +1257,15 @@ def api_guardar_suscripcion():
         id_reabastecimiento=datos.get("id_reabastecimiento"),  # <-- tampoco
         id_estado= 1                                    # <-- se llama "Estado", no "id_estado"
     )
+
+@app.route('/suscripciones/buscar', methods=['GET'])
+def api_buscar_suscripciones():
+    # 1. Extraer el parámetro 'q' de la URL
+    query = request.args.get('q', '').strip()    
+    # 2. Llamar a la función del archivo clientes.py
+    lista_suscripciones = buscar_suscripciones(query)
+    # 3. Devolver la respuesta JSON
+    return jsonify(lista_suscripciones)
  
 
 @app.route("/api/suscripciones/actualizar", methods=["POST"])

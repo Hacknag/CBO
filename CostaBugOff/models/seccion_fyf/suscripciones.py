@@ -55,3 +55,41 @@ def obtener_suscripciones():
     cursor.close()
     conn.close()
     return datos
+
+# ---------------- Buscar SUSCRIPCIONES ---------------- #
+# ---------------- Buscar SUSCRIPCIONES ---------------- #
+# ---------------- Buscar SUSCRIPCIONES ---------------- #
+
+def buscar_suscripciones(query):
+    if not query:
+        return []
+
+    conexion = None
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor() 
+        search_term = f"%{query}%"
+        
+        sql = """
+        SELECT 
+            ID_SUSCRIPCION, 
+            TRIM(NOMBRE) AS SUSCRIPCION
+        FROM FIDE_SUSCRIPCIONES_TB 
+        WHERE ID_ESTADO = 1
+        AND LOWER(NOMBRE) LIKE LOWER(:1)
+        FETCH FIRST 8 ROWS ONLY
+        """
+        
+        cursor.execute(sql, (search_term,))
+        resultados = cursor.fetchall()
+        cursor.close()
+
+        # Formatear el resultado en una lista de diccionarios
+        return [{"id": fila[0], "nombre": fila[1]} for fila in resultados]
+
+    except Exception as e:
+        print(f"Error en buscar_suscripciones: {e}")
+        return [] # Garantiza retornar una lista vacía si falla la BD
+    finally:
+        if conexion:
+            conexion.close()

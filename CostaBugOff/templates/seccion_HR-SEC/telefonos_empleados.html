@@ -1,22 +1,24 @@
 <!doctype html>
 <html lang="es">
 
-{% include 'plantillas/_default_head.html' %}
+<head>
+  {% include 'plantillas/_default_head.html' %}
+</head>
 
 <body>
   <header>
     {# NAVBAR #}
-    {# NAVBAR #}
-    {% with brand_tag="Vista Teléfonos de Clientes" %}
+    {% with brand_tag="Vista Teléfonos de Empleados" %}
     {% include 'plantillas/_navbar.html' %}
     {% endwith %}
   </header>
 
   <main class="app mt-5 pt-4">
-    <section class="panel active mt-5" id="panel-telefonos-empleados" data-title="Telefonos de Empleados">
+    <section class="panel active mt-5" id="panel-telefonos-empleados" data-title="Teléfonos de Empleados">
       <div class="panel__header">
-        <h1>Telefonos de Empleados</h1>
+        <h1>Teléfonos de Empleados</h1>
       </div>
+
       {# Filtro de búsqueda #}
       <div style="display:flex; flex-direction:column;">
         <div class="search-row">
@@ -26,27 +28,66 @@
         </div>
       </div>
 
-      <div class="panel__body_inverse">
-        <!-- FORMULARIO DE TELEFONOS -->
-        <!-- FORMULARIO DE TELEFONOS -->
-        <div class="form-card">
-          <h2>Agregar Telefono</h2>
+      <!-- TABLA DE TELÉFONOS DE EMPLEADOS -->
+      <div class="panel__body">
+        <div class="table-wrap overflow-auto">
+          <table class="data-table overflow-auto" data-entity="telefonos_empleados">
+            <thead>
+              <tr>
+                <th>Empleado</th>
+                <th>Primer Apellido</th>
+                <th>Segundo Apellido</th>
+                <th>Teléfono</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpoTablaTelefonos">
+              {% for t in telefonos %}
+              <tr data-id1="{{ t[0] }}" data-id2="{{ t[4] }}" data-entity="telefonos_empleados">
+                <td>{{ t[1] }}</td>
+                <td>{{ t[2] }}</td>
+                <td>{{ t[3] }}</td>
+                <td>{{ t[4] }}</td>
+                <td>{{ t[5] }}</td>
+                <td>{{ t[6] }}</td>
+                <td>
+                  <button class="edit-btn" onclick="editarTelefonoEmpleado(this)">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
+                  <button class="delete-btn" onclick="deleteRow2(this)">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- FORMULARIO DE TELÉFONOS -->
+        <div class="form-card" id="cardTelefonoEmpleado">
+          <h2 id="tituloTelefonoEmpleado">Agregar Telefono</h2>
           <p class="sub">Completa los campos para agregar un telefono nuevo.</p>
 
           <div class="field">
             <label for="buscar_empleado">Nombre del Empleado</label>
             <input type="text" id="buscar_empleado" list="lista_empleado" placeholder="Escribe el nombre del empleado"
               autocomplete="off" />
-            <!-- Datalist dinámico -->
+
+            <!-- Datalist dinámico cargado vía API -->
             <datalist id="lista_empleado"></datalist>
 
-            <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
+            <!-- Campo oculto para almacenar el ID del empleado seleccionado -->
             <input type="hidden" id="id_empleado_seleccionado" name="id_empleado" />
           </div>
+
           <div class="field">
             <label>Telefono</label>
             <input type="text" id="telefono" placeholder="Ingresalo con el formato XXXX-XXXX">
           </div>
+
           <div class="field id-field">
             <label>Tipo</label>
             <select name="tipo_telefono" id="tipo">
@@ -56,6 +97,7 @@
               <option value="Trabajo">Trabajo</option>
             </select>
           </div>
+
           <div class="field id-field">
             <label>Estado del telefono</label>
             <select id="estado">
@@ -69,78 +111,30 @@
             <button class="btn btn-primary" id="AgregarTelefono">Agregar telefono</button>
           </div>
         </div>
-
-        <div class="table-wrap">
-          <table class="data-table" data-entity="telefonos_empleados">
-            <thead>
-              <tr>
-                <th>Empleado</th>
-                <th>Primer Apellido</th>
-                <th>Segundo Apellido</th>
-                <th>Teléfono</th>
-                <th>Tipo</th>
-                <th>Estado</th>
-                <th>Borrar</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for t in telefonos %}
-              <tr data-id1="{{ t[0] }}" data-id2="{{ t[4] }}" data-entity="telefonos_empleados">
-                <td>{{ t[1] }}</td>
-                <td>{{ t[2] }}</td>
-                <td>{{ t[3] }}</td>
-                <td>{{ t[4] }}</td>
-                <td>{{ t[5] }}</td>
-                <td>{{ t[6] }}</td>
-                <td>
-                  <button class="delete-btn" onclick="deleteRow2(this)">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
       </div>
     </section>
   </main>
-  {# FOOTER #}
+
   {# FOOTER #}
   {% include 'plantillas/_footer.html' %}
 
+  {# SCRIPTS #}
+  {% include 'plantillas/_default_scripts.html' %}
 
-  {# SCRIPTS #}
-  {# SCRIPTS #}
   <script>
-    // 1. Declaración e inicialización de elementos del DOM
+    // Referencias a los elementos del DOM y variables de estado
     const inputBuscar = document.getElementById('buscar_empleado');
-    const datalist = document.getElementById('lista_empleado');
     const inputHiddenId = document.getElementById('id_empleado_seleccionado');
+    const datalist = document.getElementById('lista_empleado');
     const inputTelefono = document.getElementById('telefono');
-    const selectTipo = document.getElementById('tipo');
-    const selectEstado = document.getElementById('estado');
 
-    // Mapa global para relacionar: Nombre Completo -> ID del Empleado
     const empleadosMapa = new Map();
-    let debounceTimer;
+    let debounceTimer = null;
+    let idEmpleadoEditando = null;
+    let telefonoOriginalEmpleado = null;
 
     // -------------------------------------------------------------
-    // 2. MÁSCARA AUTOMÁTICA DE TELÉFONO (XXXX-XXXX)
-    // -------------------------------------------------------------
-    if (inputTelefono) {
-      inputTelefono.addEventListener('input', (e) => {
-        let digitos = e.target.value.replace(/\D/g, '').substring(0, 8);
-        if (digitos.length > 4) {
-          e.target.value = `${digitos.slice(0, 4)}-${digitos.slice(4)}`;
-        } else {
-          e.target.value = digitos;
-        }
-      });
-    }
-
-    // -------------------------------------------------------------
-    // 3. LÓGICA DE BÚSQUEDA Y SELECCIÓN DE EMPLEADO
+    // 1. BÚSQUEDA DINÁMICA DE EMPLEADOS CON DEBOUNCE
     // -------------------------------------------------------------
     if (inputBuscar) {
       inputBuscar.addEventListener('input', (e) => {
@@ -171,7 +165,6 @@
             datalist.innerHTML = '';
             empleadosMapa.clear();
 
-            // Validación para asegurar que se reciba un arreglo
             if (Array.isArray(empleados)) {
               empleados.forEach(empleado => {
                 empleadosMapa.set(empleado.nombre_completo, empleado.id);
@@ -189,185 +182,113 @@
     }
 
     // -------------------------------------------------------------
-    // 4. LÓGICA PARA AGREGAR EL TELÉFONO DEL EMPLEADO
+    // 2. MÁSCARA AUTOMÁTICA DE TELÉFONO (XXXX-XXXX)
     // -------------------------------------------------------------
-    const btnAgregar = document.getElementById('AgregarTelefono');
-    if (btnAgregar) {
-      btnAgregar.addEventListener('click', async (e) => {
-        e.preventDefault();
-
-        // Lectura de valores al hacer click
-        const idEmpleado = inputHiddenId ? inputHiddenId.value.trim() : '';
-        const telefono = inputTelefono ? inputTelefono.value.trim() : '';
-        const tipo = selectTipo ? selectTipo.value.trim() : '';
-        const idEstado = selectEstado ? selectEstado.value.trim() : '';
-
-        // 1. Validar Empleado seleccionado
-        if (!idEmpleado) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Empleado no seleccionado',
-            text: 'Por favor, busca y selecciona un empleado de la lista desplegable.',
-            confirmButtonColor: '#3085d6'
-          });
-          return;
-        }
-
-        // 2. Validar Teléfono obligatorio
-        if (!telefono) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Campo incompleto',
-            text: 'Por favor ingresa un número de teléfono.',
-            confirmButtonColor: '#3085d6'
-          });
-          return;
-        }
-
-        // 3. Validar Estado
-        if (!idEstado) {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Estado no seleccionado',
-            text: 'Por favor selecciona un estado para el teléfono.',
-            confirmButtonColor: '#3085d6'
-          });
-          return;
-        }
-
-        // Petición al servidor
-        try {
-          const response = await fetch('/telefonos_empleados/guardar', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              id_empleado: parseInt(idEmpleado, 10),
-              telefono: telefono,
-              tipo: tipo,
-              id_estado: parseInt(idEstado, 10)
-            })
-          });
-
-          const result = await response.json();
-
-          if (response.ok) {
-            Swal.fire({
-              icon: 'success',
-              title: '¡Guardado!',
-              text: result.message || 'Teléfono agregado con éxito.',
-              confirmButtonColor: '#3085d6'
-            }).then(() => {
-              if (inputBuscar) inputBuscar.value = '';
-              if (inputHiddenId) inputHiddenId.value = '';
-              if (inputTelefono) inputTelefono.value = '';
-              if (selectTipo) selectTipo.value = '';
-              if (selectEstado) selectEstado.value = '';
-
-              // Recargar la página para refrescar la tabla
-              location.reload();
-            });
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Error',
-              text: result.message || 'Ocurrió un error al guardar.',
-              confirmButtonColor: '#d33'
-            });
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error de conexión',
-            text: 'No se pudo conectar con el servidor.',
-            confirmButtonColor: '#d33'
-          });
+    if (inputTelefono) {
+      inputTelefono.addEventListener('input', (e) => {
+        let digitos = e.target.value.replace(/\D/g, '').substring(0, 8);
+        if (digitos.length > 4) {
+          e.target.value = `${digitos.slice(0, 4)}-${digitos.slice(4)}`;
+        } else {
+          e.target.value = digitos;
         }
       });
     }
-  </script>
 
+    // -------------------------------------------------------------
+    // 3. FUNCIÓN EDITAR TELÉFONO EMPLEADO
+    // -------------------------------------------------------------
+    function editarTelefonoEmpleado(button) {
+      const fila = button.closest('tr');
+      const celdas = fila.querySelectorAll('td');
 
+      idEmpleadoEditando = fila.dataset.id1;
+      telefonoOriginalEmpleado = celdas[3].textContent.trim();
 
-  {#
-  <script>
-    const URL_API_TELEFONOS_EMPLEADOS = 'http://127.0.0.1:5001/api/telefonos_empleados'
+      const nombreCompleto = `${celdas[0].textContent.trim()} ${celdas[1].textContent.trim()} ${celdas[2].textContent.trim()}`.trim();
 
-    function obtenerDatosTelefonoEmpleado() {
-      return {
-        id_empleado: parseInt(document.getElementById('te-empleado').value),
-        telefono: document.getElementById('te-telefono').value,
-        tipo: document.getElementById('te-tipo').value,
-        id_estado: parseInt(document.getElementById('te-estado').value),
-      }
+      inputBuscar.value = nombreCompleto;
+      inputHiddenId.value = idEmpleadoEditando;
+      empleadosMapa.set(nombreCompleto, idEmpleadoEditando);
+
+      document.getElementById('telefono').value = telefonoOriginalEmpleado;
+      document.getElementById('tipo').value = celdas[4].textContent.trim();
+
+      const estadoTexto = celdas[5].textContent.trim();
+      document.getElementById('estado').value = estadoTexto.toUpperCase() === 'ACTIVO' ? '1' : '2';
+
+      document.getElementById('tituloTelefonoEmpleado').textContent = 'Editar Teléfono';
+      document.getElementById('AgregarTelefono').textContent = 'Guardar cambios';
+      document.getElementById('cardTelefonoEmpleado').scrollIntoView({ behavior: 'smooth' });
     }
 
-    document.getElementById('btnAgregarTelefonoEmpleado').addEventListener('click', async () => {
-      const datos = obtenerDatosTelefonoEmpleado()
-      if (!datos.id_empleado || !datos.telefono || !datos.tipo || !datos.id_estado)
-        return alert('Llena Empleado, Teléfono, Tipo y Estado.')
+    // -------------------------------------------------------------
+    // 4. GUARDAR O ACTUALIZAR TELÉFONO EMPLEADO
+    // -------------------------------------------------------------
+    document.getElementById('AgregarTelefono').addEventListener('click', async () => {
+      const idEmpleado = inputHiddenId.value;
+      const telefono = inputTelefono.value.trim();
+      const tipo = document.getElementById('tipo').value;
+      const idEstado = document.getElementById('estado').value;
+
+      if (!idEmpleado || !telefono || !tipo || !idEstado) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campos incompletos',
+          text: 'Selecciona un empleado válido de la lista desplegable y llena teléfono, tipo y estado.',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
+
+      if (telefono.length !== 9) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Teléfono inválido',
+          text: 'El teléfono debe tener el formato XXXX-XXXX (8 dígitos).',
+          confirmButtonColor: '#3085d6'
+        });
+        return;
+      }
+
+      const url = idEmpleadoEditando
+        ? '/telefonos_empleados/actualizar'
+        : '/telefonos_empleados/guardar';
+
+      const payload = idEmpleadoEditando
+        ? {
+          id_empleado: parseInt(idEmpleado),
+          telefono_actual: telefonoOriginalEmpleado,
+          telefono_nuevo: telefono,
+          tipo: tipo,
+          id_estado: parseInt(idEstado)
+        }
+        : {
+          id_empleado: parseInt(idEmpleado),
+          telefono: telefono,
+          tipo: tipo,
+          id_estado: parseInt(idEstado)
+        };
+
       try {
-        const respuesta = await fetch(`${URL_API_TELEFONOS_EMPLEADOS}/guardar`, {
+        const respuesta = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
+          body: JSON.stringify(payload)
+        });
+        const resultado = await respuesta.json();
+
         if (respuesta.ok) {
-          document.getElementById('formTelefonosEmpleados').reset()
-          location.reload()
+          Swal.fire({ icon: 'success', title: '¡Listo!', text: resultado.message, confirmButtonColor: '#3085d6' })
+            .then(() => location.reload());
+        } else {
+          Swal.fire({ icon: 'error', title: 'Error', text: resultado.message, confirmButtonColor: '#d33' });
         }
       } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
+        Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', confirmButtonColor: '#d33' });
       }
-    })
-
-    document.getElementById('btnActualizarTelefonoEmpleado').addEventListener('click', async () => {
-      const datos = obtenerDatosTelefonoEmpleado()
-      if (!datos.id_empleado || !datos.telefono || !datos.tipo || !datos.id_estado)
-        return alert('Llena Empleado, Teléfono, Tipo y Estado antes de actualizar.')
-      try {
-        const respuesta = await fetch(`${URL_API_TELEFONOS_EMPLEADOS}/actualizar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formTelefonosEmpleados').reset()
-          location.reload()
-        }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
-
-    document.getElementById('btnDesactivarTelefonoEmpleado').addEventListener('click', async () => {
-      const datos = obtenerDatosTelefonoEmpleado()
-      if (!datos.id_empleado || !datos.telefono)
-        return alert('Selecciona el Empleado y el Teléfono a desactivar.')
-      try {
-        const respuesta = await fetch(
-          `${URL_API_TELEFONOS_EMPLEADOS}/eliminar/${datos.id_empleado}/${encodeURIComponent(datos.telefono)}`,
-          { method: 'POST' },
-        )
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formTelefonosEmpleados').reset()
-          location.reload()
-        }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
-  </script> #}
-
-  {% include 'plantillas/_default_scripts.html' %}
+    });
+  </script>
 </body>
 
 </html>
