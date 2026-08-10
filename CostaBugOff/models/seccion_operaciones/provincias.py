@@ -64,3 +64,46 @@ def obtener_provincia(id_estado=None):
     cursor.close()
     conn.close()
     return datos
+
+
+
+
+# ---------------- Buscar PROVINCIA ---------------- #
+# ---------------- Buscar PROVINCIA ---------------- #
+# ---------------- Buscar PROVINCIA ---------------- #
+def buscar_provincias(query):
+    """Consulta directamente la tabla clientes en Oracle Database y retorna una lista de diccionarios."""
+    if not query:
+        return []
+
+    conexion = get_connection()
+    cursor = conexion.cursor() 
+    search_term = f"%{query}%"
+    
+    # Consulta directa a la TABLA clientes (Sintaxis Oracle SQL)
+    sql = """
+    SELECT 
+        ID_PROVINCIA, 
+        TRIM(NOMBRE) AS PROVINCIA
+    FROM FIDE_PROVINCIAS_TB 
+    WHERE ID_ESTADO = 1
+    AND LOWER(NOMBRE) LIKE LOWER(:1)
+    FETCH FIRST 8 ROWS ONLY
+    """
+    
+    cursor.execute(sql, (search_term,))
+    resultados = cursor.fetchall()
+    
+    cursor.close()
+    conexion.close()
+
+    # Mapeo de la lista de tuplas de Oracle
+    provincias = [
+        {
+            "id": row[0],
+            "nombre": row[1]
+        }
+        for row in resultados
+    ]
+    
+    return provincias

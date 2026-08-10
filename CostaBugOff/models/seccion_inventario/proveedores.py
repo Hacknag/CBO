@@ -1,12 +1,12 @@
 import oracledb
 from db import get_connection
 
-def insertar_proveedor(id_proveedor, nombre, id_reabastecimiento, id_estado):
+def insertar_proveedor(nombre, id_reabastecimiento, id_estado):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
         cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_PROVEEDORES_INSERT_SP", [
-            id_proveedor, nombre, id_reabastecimiento, id_estado
+            nombre, id_reabastecimiento, id_estado
         ])
         conexion.commit()
     except Exception as e:

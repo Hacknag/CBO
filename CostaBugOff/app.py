@@ -50,8 +50,8 @@ from models.seccion_operaciones.plagas import obtener_plagas, insertar_plaga, ac
 from models.seccion_operaciones.servicios import insertar_servicio, actualizar_servicio, eliminar_servicio_logico, obtener_servicios   
 from models.seccion_operaciones.servicios_realizados import insertar_servicio_realizado, actualizar_servicio_realizado, obtener_servicios_realizados, eliminar_servicio_realizado_logico
 from models.seccion_operaciones.visitas import obtener_visitas, insertar_visita, actualizar_visita, eliminar_visita_logica
-from models.seccion_operaciones.cantones import insertar_canton, actualizar_canton, eliminar_cantones_logico, obtener_cantones
-from models.seccion_operaciones.provincias import insertar_provincia, actualizar_provincia, eliminar_provincia_logico, obtener_provincia
+from models.seccion_operaciones.cantones import insertar_canton, actualizar_canton, eliminar_cantones_logico, obtener_cantones, buscar_cantones
+from models.seccion_operaciones.provincias import insertar_provincia, actualizar_provincia, eliminar_provincia_logico, obtener_provincia, buscar_provincias
 from models.seccion_operaciones.distritos import obtener_distritos, insertar_distrito, actualizar_distrito, eliminar_distrito_logico
 
 #################### Imports Seccion Facturacion y Finanzas ####################
@@ -776,20 +776,20 @@ def proveedores():
     lista_proveedores = obtener_proveedores(id_estado)
     return render_template("seccion_inventario/proveedores.html", proveedores=lista_proveedores, filtro=id_estado)
 
-# @app.route("/api/proveedores/guardar", methods=["POST"])
-# def api_guardar_proveedor():
-#     datos = request.get_json()
-#     try:
-#         insertar_proveedor(
-#             id_proveedor=datos["id_proveedor"],
-#             nombre=datos["nombre"],
-#             id_reabastecimiento=datos.get("id_reabastecimiento"),
-#             id_estado= 1
-#         )
-#         return jsonify({"message": "¡Proveedor agregado con éxito!"}), 200
-#     except Exception as e:
-#         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
-
+@app.route("/api/proveedores/guardar", methods=["POST"])
+def api_guardar_proveedor():
+    datos = request.get_json()
+    try:
+        insertar_proveedor(
+            nombre=datos["nombre"],
+            id_reabastecimiento=datos.get("id_reabastecimiento"),
+            id_estado= 1
+        )
+        return jsonify({"message": "¡Proveedor agregado con éxito en Oracle!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+ 
+ 
 @app.route("/api/proveedores/actualizar", methods=["POST"])
 def api_actualizar_proveedor():
     datos = request.get_json()
@@ -803,8 +803,8 @@ def api_actualizar_proveedor():
         return jsonify({"message": "¡Proveedor actualizado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
-
-
+ 
+ 
 @app.route("/delete/proveedores/<int:id_proveedor>", methods=["POST"])
 def api_eliminar_proveedor(id_proveedor):
     try:
@@ -812,8 +812,7 @@ def api_eliminar_proveedor(id_proveedor):
         return jsonify({'success': True, 'message': '¡Proveedor desactivado con éxito!'}), 200
     except Exception as e:
         return jsonify({'success': False, 'message': f"Error al desactivar en Base de Datos: {str(e)}"}), 500
-
-
+ 
 # ---------------- Telefono Proveedores (vista para Admin/Empleado/Cliente) ----------------
 # ---------------- Telefono Proveedores (vista para Admin/Empleado/Cliente) ----------------
 # ---------------- Telefono Proveedores (vista para Admin/Empleado/Cliente) ----------------
@@ -862,38 +861,47 @@ def api_eliminar_telefono_proveedor(id_proveedor):
 # ---------------- Correos de proveedores (vista para Admin/Empleado) ----------------
 @app.route('/correos_proveedores')
 def correos_proveedores():
-    datos_correos = obtener_correos_proveedores()    
-    return render_template('seccion_inventario/correos_proveedores.html', correos=datos_correos)
-
+    datos_correos = obtener_correos_proveedores()
+    lista_proveedores = obtener_proveedores()
+    return render_template('seccion_inventario/correos_proveedores.html', correos=datos_correos, proveedores=lista_proveedores)
+ 
+@app.route("/delete/correos_proveedores/<int:id_proveedor>/<string:correo>", methods=["POST"])
+def api_eliminar_correo_proveedor(id_proveedor, correo):
+    try:
+        eliminar_correo_proveedor_logico(id_proveedor, correo)
+        return jsonify({"success": True, "message": "Correo eliminado correctamente"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+ 
 @app.route("/api/correos_proveedores/guardar", methods=["POST"])
 def api_guardar_correo_proveedor():
     datos = request.get_json()
     try:
         insertar_correo_proveedor(
-            ID_PROVEEDOR=datos["id_proveedor"],
-            CORREO=datos["correo"],
-            TIPO=datos["tipo"],
-            ID_ESTADO=datos["id_estado"]
+            id_proveedor=datos["id_proveedor"],
+            correo=datos["correo"],
+            tipo=datos["tipo"],
+            id_estado=datos["id_estado"]
         )
-        return jsonify({"message": "¡Correo agregado con éxito!"}), 200
+        return jsonify({"message": "¡Correo agregado con éxito en Oracle!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
-
+ 
 @app.route("/api/correos_proveedores/actualizar", methods=["POST"])
 def api_actualizar_correo_proveedor():
     datos = request.get_json()
     try:
         actualizar_correo_proveedor(
-            ID_PROVEEDOR=datos["id_proveedor"],
-            CORREO=datos["correo"],
-            TIPO=datos["tipo"],
-            ID_ESTADO=datos["id_estado"]
+            id_proveedor=datos["id_proveedor"],
+            correo_actual=datos["correo_actual"],
+            correo_nuevo=datos["correo_nuevo"],
+            tipo=datos["tipo"],
+            id_estado=datos["id_estado"]
         )
-        return jsonify({"message": "¡Correo actualizado con éxito!"}), 200
+        return jsonify({"message": "¡Correo actualizado con éxito en Oracle!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
-
-
+    
 ###########################################################################################
 ################################## SECCION - OPERACIONES ##################################
 ###########################################################################################
@@ -1042,7 +1050,15 @@ def api_actualizar_provincia():
     except Exception as e:
         return jsonify({'success': False, "message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
  
- 
+@app.route('/provincias/buscar', methods=['GET'])
+def api_buscar_provincias():
+    # 1. Extraer el parámetro 'q' de la URL
+    query = request.args.get('q', '').strip()    
+    # 2. Llamar a la función del archivo clientes.py
+    lista_provincia = buscar_provincias(query)
+    # 3. Devolver la respuesta JSON
+    return jsonify(lista_provincia)
+
 
 # ---------------- Cantones (vista para Admin) ----------------
 # ---------------- Cantones (vista para Admin) ----------------
@@ -1084,6 +1100,19 @@ def api_actualizar_canton():
         return jsonify({'success': True, "message": "¡Canton actualizado con éxito!"}), 200
     except Exception as e:
         return jsonify({'success': False, "message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+
+@app.route('/cantones/buscar', methods=['GET'])
+def api_buscar_cantones():
+    # 1. Extraer el parámetro 'q' de la URL
+    query = request.args.get('q', '').strip()    
+    # 2. Llamar a la función del archivo clientes.py
+    lista_canton = buscar_cantones(query)
+    # 3. Devolver la respuesta JSON
+    return jsonify(lista_canton)
+
+
+
+
 # ---------------- Distritos (vista para Admin) ----------------
 # ---------------- Distritos (vista para Admin) ----------------
 # ---------------- Distritos (vista para Admin) ----------------
@@ -1358,7 +1387,7 @@ def detalle_transacciones():
     return render_template("seccion_fyf/detalle_transacciones.html", detalle_transacciones=lista_detalle)
 
 @app.route("/api/proveedores/guardar", methods=["POST"])
-def api_guardar_proveedor():
+def api_guardar_proveedor_detalle():
     datos = request.get_json()
     try:
         insertar_proveedor(

@@ -26,34 +26,37 @@
       <div style="display:flex; flex-direction:column;">
         <div class="search-row">
           <label for="filtro-busqueda">Buscar Telefono:</label>
-          <input type="text" id="filtro-busqueda" data-filter-target="correoProveedor"
+          <input type="text" id="filtro-busqueda" data-filter-target="correos_proveedores"
             placeholder="Escribe el nombre o el correo del proveedor." />
         </div>
       </div>
       <!-- TABLA DE CORREOS -->
       <!-- TABLA DE CORREOS -->
       <div class="panel__body_inverse">
-        <div class="form-card">
-          <h2>Agregar Correo</h2>
+        <div class="form-card" id="cardCorreoProveedor">
+          <h2 id="tituloCorreoProveedor">Agregar Correo</h2>
           <p class="sub">Completa los campos para agregar un correo nuevo.</p>
 
           <div class="field">
-            <label for="buscar_cliente">Nombre del Proveedor</label>
-            <input type="text" id="buscar_cliente" list="lista_clientes" placeholder="Escribe el nombre del proveedor"
-              autocomplete="off" />
-            <!-- Datalist dinámico -->
-            <datalist id="lista_clientes"></datalist>
-
-            <!-- Campo oculto para almacenar el ID del cliente seleccionado -->
-            <input type="hidden" id="id_cliente_seleccionado" name="id_cliente" />
+            <label>Proveedor</label>
+            <select id="proveedor">
+              <option value="">-- Selecciona un proveedor --</option>
+              {% for p in proveedores %}
+              <option value="{{ p[0] }}">{{ p[1] }}</option>
+              {% endfor %}
+            </select>
           </div>
           <div class="field">
             <label>Correo</label>
             <input type="text" id="correo" placeholder="Ingresa el correo del proveedor">
           </div>
-          <div class="field">
-            <label>Tipo</label>
-            <input type="text" id="tipo" placeholder="Ingresa el tipo de correo">
+          <div class="field id-field">
+            <label>Tipo de correo</label>
+            <select name="tipo_correo" id="tipo">
+              <option value="">-- Selecciona una opcion --</option>
+              <option value="Personal">Personal</option>
+              <option value="Empresarial">Empresarial</option>
+            </select>
           </div>
           <div class="field id-field">
             <label>Estado del correo</label>
@@ -65,12 +68,12 @@
           </div>
 
           <div class="btn-row">
-            <button class="btn btn-primary" id="AgregarTelefono">Agregar correo</button>
+            <button class="btn btn-primary" id="AgregarCorreoProveedor">Agregar correo</button>
           </div>
         </div>
 
         <div class="table-wrap">
-          <table class="data-table" data-entity="correoProveedor">
+          <table class="data-table" data-entity="correos_proveedores">
             <thead>
               <tr>
                 <th>ID Proveedor</th>
@@ -78,16 +81,25 @@
                 <th>Correo</th>
                 <th>Tipo</th>
                 <th>Estado</th>
+                <th>Editar</th>
               </tr>
             </thead>
             <tbody>
               {% for c in correos %}
-              <tr>
+              <tr data-id1="{{ c[0] }}" data-id2="{{ c[2] }}" data-entity="correos_proveedores">
                 <td>{{ c[0] }}</td>
                 <td>{{ c[1] }}</td>
                 <td>{{ c[2] }}</td>
                 <td>{{ c[3] }}</td>
                 <td>{{ c[4] }}</td>
+                <td>
+                  <button class="edit-btn" onclick="editarCorreoProveedor(this)">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
+                  <button class="delete-btn" onclick="deleteRow2(this)">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
               </tr>
               {% endfor %}
             </tbody>
@@ -103,82 +115,82 @@
 
   {# SCRIPTS #}
   {# SCRIPTS #}
+  {% include 'plantillas/_default_scripts.html' %}
+
+  {# EDITAR CORREO PROVEEDOR #}
+  <script>
+    let idCorreoProveedorEditando = null;
+    let correoOriginalProveedor = null;
+
+    function editarCorreoProveedor(button) {
+      const fila = button.closest('tr');
+      const celdas = fila.querySelectorAll('td');
+
+      idCorreoProveedorEditando = fila.dataset.id1;
+      correoOriginalProveedor = celdas[2].textContent.trim();
+
+      document.getElementById('proveedor').value = fila.dataset.id1;
+      document.getElementById('correo').value = correoOriginalProveedor;
+      document.getElementById('tipo').value = celdas[3].textContent.trim();
+
+      const estadoTexto = celdas[4].textContent.trim();
+      document.getElementById('estado').value = estadoTexto.toUpperCase() === 'ACTIVO' ? '1' : '2';
+
+      document.getElementById('tituloCorreoProveedor').textContent = 'Editar Correo';
+      document.getElementById('AgregarCorreoProveedor').textContent = 'Guardar cambios';
+      document.getElementById('cardCorreoProveedor').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
 
   <script>
-    const URL_API_CORREOS_PROVEEDORES = 'http://127.0.0.1:5001/api/correos_proveedores'
+    document.getElementById('AgregarCorreoProveedor').addEventListener('click', async () => {
+      const idProveedor = document.getElementById('proveedor').value;
+      const correo = document.getElementById('correo').value.trim();
+      const tipo = document.getElementById('tipo').value.trim();
+      const idEstado = document.getElementById('estado').value;
 
-    function obtenerDatosCorreoProveedor() {
-      return {
-        id_proveedor: parseInt(document.getElementById('cp-proveedor').value),
-        correo: document.getElementById('cp-correo').value,
-        tipo: document.getElementById('cp-tipo').value,
-        id_estado: parseInt(document.getElementById('cp-estado').value),
+      if (!idProveedor || !correo || !tipo || !idEstado) {
+        Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Llena proveedor, correo, tipo y estado.', confirmButtonColor: '#3085d6' });
+        return;
       }
-    }
 
-    document.getElementById('btnAgregarCorreoProveedor').addEventListener('click', async () => {
-      const datos = obtenerDatosCorreoProveedor()
-      if (!datos.id_proveedor || !datos.correo || !datos.tipo || !datos.id_estado)
-        return alert('Llena Proveedor, Correo, Tipo y Estado.')
+      const url = idCorreoProveedorEditando
+        ? '/api/correos_proveedores/actualizar'
+        : '/api/correos_proveedores/guardar';
+
+      const payload = idCorreoProveedorEditando
+        ? {
+          id_proveedor: parseInt(idProveedor),
+          correo_actual: correoOriginalProveedor,
+          correo_nuevo: correo,
+          tipo: tipo,
+          id_estado: parseInt(idEstado)
+        }
+        : {
+          id_proveedor: parseInt(idProveedor),
+          correo: correo,
+          tipo: tipo,
+          id_estado: parseInt(idEstado)
+        };
+
       try {
-        const respuesta = await fetch(`${URL_API_CORREOS_PROVEEDORES}/guardar`, {
+        const respuesta = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
+          body: JSON.stringify(payload)
+        });
+        const resultado = await respuesta.json();
         if (respuesta.ok) {
-          document.getElementById('formCorreosProveedores').reset()
-          location.reload()
+          Swal.fire({ icon: 'success', title: '¡Listo!', text: resultado.message, confirmButtonColor: '#3085d6' })
+            .then(() => location.reload());
+        } else {
+          Swal.fire({ icon: 'error', title: 'Error', text: resultado.message, confirmButtonColor: '#d33' });
         }
       } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
+        Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', confirmButtonColor: '#d33' });
       }
-    })
-
-    document.getElementById('btnActualizarCorreoProveedor').addEventListener('click', async () => {
-      const datos = obtenerDatosCorreoProveedor()
-      if (!datos.id_proveedor || !datos.correo || !datos.tipo || !datos.id_estado)
-        return alert('Llena Proveedor, Correo, Tipo y Estado antes de actualizar.')
-      try {
-        const respuesta = await fetch(`${URL_API_CORREOS_PROVEEDORES}/actualizar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formCorreosProveedores').reset()
-          location.reload()
-        }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
-
-    document.getElementById('btnDesactivarCorreoProveedor').addEventListener('click', async () => {
-      const datos = obtenerDatosCorreoProveedor()
-      if (!datos.id_proveedor || !datos.correo)
-        return alert('Selecciona el Proveedor y el Correo a desactivar.')
-      try {
-        const respuesta = await fetch(
-          `${URL_API_CORREOS_PROVEEDORES}/eliminar/${datos.id_proveedor}/${encodeURIComponent(datos.correo)}`,
-          { method: 'POST' },
-        )
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formCorreosProveedores').reset()
-          location.reload()
-        }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
+    });
   </script>
-  {% include 'plantillas/_default_scripts.html' %}
 </body>
 
 </html>

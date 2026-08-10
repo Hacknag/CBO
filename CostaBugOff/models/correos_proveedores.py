@@ -6,7 +6,7 @@ def insertar_correo_proveedor(id_proveedor, correo, tipo, id_estado):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_CORREOS_PROVEEDORES_INSERT", [
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_CORREOS_PROVEEDORES_INSERT_SP", [
             id_proveedor, correo, tipo, id_estado
         ])
         conexion.commit()
@@ -18,12 +18,12 @@ def insertar_correo_proveedor(id_proveedor, correo, tipo, id_estado):
         conexion.close()
 
 
-def actualizar_correo_proveedor(id_proveedor, correo, tipo, id_estado):
+def actualizar_correo_proveedor(id_proveedor, correo_actual, correo_nuevo, tipo, id_estado):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_CORREOS_PROVEEDORES_UPDATE", [
-            id_proveedor, correo, tipo, id_estado
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_CORREOS_PROVEEDORES_UPDATE_SP", [
+            id_proveedor, correo_actual, correo_nuevo, tipo, id_estado
         ])
         conexion.commit()
     except Exception as e:
@@ -38,7 +38,7 @@ def eliminar_correo_proveedor_logico(id_proveedor, correo):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_CORREOS_PROVEEDORES_DELETE", [
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_CORREOS_PROVEEDORES_DELETE_SP", [
             id_proveedor, correo
         ])
         conexion.commit()
