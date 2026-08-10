@@ -28,11 +28,12 @@ from models.seccion_cliente.direcciones_clientes import insertar_direcciones_cli
 
 #################### Imports Seccion Recursos Humanos y Seguridad ####################
 #################### Imports Seccion Recursos Humanos y Seguridad ####################
-from models.seccion_HR_SEC.puestos import insertar_puesto, actualizar_puesto, eliminar_puesto_logico, obtener_puestos_general
-from models.seccion_HR_SEC.empleados import obtener_empleados, insertar_empleado, actualizar_empleados, obtener_puestos, eliminar_empleados_logica
+from models.seccion_HR_SEC.puestos import insertar_puesto, actualizar_puesto, eliminar_puesto_logico, obtener_puestos_general, buscar_puestos
+from models.seccion_HR_SEC.empleados import obtener_empleados, insertar_empleado, actualizar_empleados, obtener_puestos, eliminar_empleados_logica, buscar_empleados
+from models.seccion_HR_SEC.telefonos_empleados import  insertar_telefono_empleado, actualizar_telefono_empleado, eliminar_telefono_empleado_logico, obtener_telefonos_empleados
 from models.seccion_HR_SEC.correos_empleados import insertar_correo_empleado, actualizar_correo_empleado, eliminar_correo_empleado_logico, obtener_correos_empleados
 from models.seccion_HR_SEC.roles_permisos import obtener_roles_permisos, obtener_roles, obtener_permisos, insertar_permiso_x_rol, eliminar_permiso_x_rol_logico
-from models.seccion_HR_SEC.usuarios import obtener_usuarios, eliminar_usuario_logico
+from models.seccion_HR_SEC.usuarios import obtener_usuarios, eliminar_usuario_logico, insertar_usuario
 
 #################### Imports Seccion Inventario y Proveedores ####################
 #################### Imports Seccion Inventario y Proveedores ####################
@@ -109,25 +110,20 @@ def agregar_cliente():
 
 #UPDATE
 #UPDATE
-@app.route("/clientes/editar/<int:id_cliente>", methods=["GET", "POST"])
-def editar_cliente(id_cliente):
-    if request.method == "POST":
-        try:
-            actualizar_cliente(
-                id_cliente=id_cliente,
-                nombre=request.form["nombre"],
-                apellido_paterno=request.form["apellido_paterno"],
-                apellido_materno=request.form["apellido_materno"],
-                id_estado=request.form["id_estado"],
-            )
-            return redirect(url_for("clientes"))
-        except Exception as e:
-            cliente = next((c for c in obtener_clientes() if c[0] == id_cliente), None)
-            return render_template("editar_Clientes.html", cliente=cliente, error=f"Error al actualizar: {e}")
-
-    cliente = next((c for c in obtener_clientes() if c[0] == id_cliente), None)
-    return render_template("seccion_clientes/editar_Clientes.html", cliente=cliente)
-
+@app.route("/api/clientes/actualizar", methods=["POST"])
+def api_actualizar_cliente():
+    datos = request.get_json()
+    try:
+        actualizar_cliente(
+            id_cliente=datos["id_cliente"],
+            nombre=datos["nombre"],
+            apellido_paterno=datos["apellido_paterno"],
+            apellido_materno=datos["apellido_materno"],
+            id_estado=1
+        )
+        return jsonify({"success": True, "message": "¡Cliente actualizado con éxito!"}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error al actualizar: {str(e)}"}), 500
 
 #DELETE
 #DELETE 
@@ -139,6 +135,8 @@ def eliminar_cliente(id_cliente):
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
 
+#BUSCAR
+#BUSCAR 
 @app.route('/clientes/buscar', methods=['GET'])
 def api_buscar_clientes():
     # 1. Extraer el parámetro 'q' de la URL
@@ -203,7 +201,7 @@ def api_actualizar_telefono_cliente():
             TIPO=datos["tipo"],
             ID_ESTADO=datos["id_estado"]
         )
-        return jsonify({"message": "¡Teléfono actualizado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Teléfono actualizado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
@@ -269,7 +267,7 @@ def api_actualizar_correo_cliente():
             TIPO=datos["tipo"],
             ID_ESTADO=datos["id_estado"]
         )
-        return jsonify({"message": "¡Correo actualizado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Correo actualizado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
@@ -302,7 +300,7 @@ def api_guardar_direccion_cliente():
             TIPO=datos["tipo"],
             ID_ESTADO=datos["id_estado"]
         )
-        return jsonify({"message": "¡Dirección agregada con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Dirección agregada con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
@@ -316,7 +314,7 @@ def api_actualizar_direccion_cliente():
             TIPO=datos["tipo"],
             ID_ESTADO=datos["id_estado"]
         )
-        return jsonify({"message": "¡Dirección actualizada con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Dirección actualizada con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
@@ -344,7 +342,7 @@ def agregar_puesto():
             descripcion=request.form["descripcion"],
             id_estado=int(request.form["id_estado"]),
         )
-        return jsonify({"success": True, "message": "¡Puesto agregado con éxito en Oracle!"}), 200
+        return jsonify({"success": True, "message": "¡Puesto agregado con éxito!"}), 200
     except Exception as e:
         return jsonify({"success": False, "message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
@@ -371,6 +369,17 @@ def api_eliminar_puesto(id_puesto):
     except Exception as e:
         return jsonify({"success": False,"message": f"Error al eliminar en Base de Datos: {str(e)}"}), 500
 
+#BUSCAR
+#BUSCAR 
+@app.route('/puestos/buscar', methods=['GET'])
+def api_buscar_puestos():
+    # 1. Extraer el parámetro 'q' de la URL
+    query = request.args.get('q', '').strip()    
+    # 2. Llamar a la función del archivo clientes.py
+    lista_puestos = buscar_puestos(query)
+    # 3. Devolver la respuesta JSON
+    return jsonify(lista_puestos)
+
 # ---------------- Empleados (vista para Admin/HHRR) ----------------
 # ---------------- Empleados (vista para Admin/HHRR) ----------------
 # ---------------- Empleados (vista para Admin/HHRR) ----------------
@@ -382,36 +391,21 @@ def empleados():
     return render_template("seccion_HR-SEC/empleados.html", empleados=lista_empleados, filtro=id_estado, puestos=lista_puestos)
 
 
-@app.route("/api/empleados/guardar", methods=["POST"])
+@app.route("/empleados/guardar", methods=["POST"])
 def agregar_empleado():
     datos = request.get_json()
     try:
         insertar_empleado(
-            id_empleado=datos["id_empleado"],
             nombre=datos["nombre"],
             apellido_paterno=datos["apellido_paterno"],
             apellido_materno=datos["apellido_materno"],
             id_puesto=datos["id_puesto"],
             id_estado = 1
         )
-        return jsonify({"message": "¡Empleado agregado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Empleado agregado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
-# @app.route("/clientes/agregar", methods=["POST"])
-# def agregar_cliente():
-#     try:
-#         insertar_cliente( 
-#             nombre=request.form["nombre"],
-#             apellido_paterno=request.form["apellido_paterno"],
-#             apellido_materno=request.form["apellido_materno"],
-#             fecha_registro=None,
-#             id_estado=int(request.form["id_estado"]),
-#         )
-#         return jsonify({"success": True, "message": "Cliente agregado exitosamente"}), 200
-#     except Exception as e:
-#         return jsonify({"success": False, "message": f"Error al guardar: {str(e)}"}), 400
-    
 
 @app.route("/api/empleados/actualizar", methods=["POST"])
 def api_actualizar_empleado():
@@ -425,10 +419,10 @@ def api_actualizar_empleado():
             id_puesto=datos["id_puesto"],
             id_estado= 1 
         )
-        return jsonify({"message": "¡Empleado actualizado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Empleado actualizado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
-    
+
 
 @app.route("/delete/empleados/<int:id_empleado>", methods=["POST"])
 def desactivar_empleado(id_empleado):
@@ -438,6 +432,89 @@ def desactivar_empleado(id_empleado):
     except Exception as e:
         return jsonify({'success': False, 'message': f"Error al desactivar en Base de Datos: {str(e)}"}), 500
 
+
+#BUSCAR
+#BUSCAR 
+@app.route('/empleados/buscar', methods=['GET'])
+def api_buscar_empleados():
+    # 1. Extraer el parámetro 'q' de la URL
+    query = request.args.get('q', '').strip()    
+    print(f"--> Búsqueda recibida en Flask: '{query}'") # Impresión de prueba
+    # 2. Llamar a la función del archivo clientes.py
+    lista_empleados = buscar_empleados(query)
+    print(f"--> Empleados encontrados: {lista_empleados}") # Impresión de prueba
+    # 3. Devolver la respuesta JSON
+    return jsonify(lista_empleados)
+
+# ---------------- Telefonos de Empleados (vista para Admin/Empleado) ----------------
+# ---------------- Telefonos de Empleados (vista para Admin/Empleado) ----------------
+# ---------------- Telefonos de Empleados (vista para Admin/Empleado) ----------------
+@app.route('/telefonos_empleados')
+def telefonos_empleados():
+    datos_telefonos = obtener_telefonos_empleados()    
+    return render_template('seccion_HR-SEC/telefonos_empleados.html', telefonos=datos_telefonos)
+
+#INSERT
+#INSERT
+@app.route("/telefonos_empleados/guardar", methods=["POST"])
+def api_guardar_telefono_empleado():
+    datos = request.get_json() or {}
+    
+    id_empleado = datos.get("id_empleado")
+    # .strip() elimina espacios accidentales al inicio o al final
+    telefono = str(datos.get("telefono") or "").strip()
+    tipo = str(datos.get("tipo") or "").strip()
+    id_estado = datos.get("id_estado")
+
+    # VALIDACIONES OBLIGATORIAS
+    if id_empleado is None:
+        return jsonify({"message": "Por favor selecciona un empleado válido."}), 400
+
+    if not telefono:  # Si el teléfono está vacío
+        return jsonify({"message": "El número de teléfono es obligatorio."}), 400
+
+    if id_estado is None:
+        return jsonify({"message": "Por favor selecciona un estado para el teléfono."}), 400
+
+    try:
+        insertar_telefono_empleado(
+            ID_EMPLEADO=int(id_empleado),
+            TELEFONO=telefono,
+            TIPO=tipo,
+            ID_ESTADO=int(id_estado)
+        )
+        return jsonify({"message": "¡Teléfono agregado con éxito!"}), 200
+
+    except Exception as e:
+        return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+
+
+#UPDATE
+#UPDATE
+@app.route("/api/telefonos_empleados/actualizar", methods=["POST"])
+def api_actualizar_telefono_empleado():
+    datos = request.get_json()
+    try:
+        actualizar_telefono_empleado(
+            ID_EMPLEADO=datos["id_empleado"],
+            TELEFONO=datos["telefono"],
+            TIPO=datos["tipo"],
+            ID_ESTADO=datos["id_estado"]
+        )
+        return jsonify({"message": "¡Teléfono actualizado con éxito!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+
+# #DELETE 
+@app.route('/delete/telefonos_empleados/<int:id_empleado>/<string:telefono>', methods=['POST'])
+def eliminar_telefono_empleado(id_empleado, telefono):
+    try:
+        eliminar_telefono_empleado_logico(id_empleado, telefono)
+        return jsonify({'success': True, 'message': 'Telefono eliminado correctamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+  
+
 # ---------------- Correos Empleados (vista para Admin/HHRR) ----------------
 # ---------------- Correos Empleados (vista para Admin/HHRR) ----------------
 # ---------------- Correos Empleados (vista para Admin/HHRR) ----------------
@@ -446,7 +523,7 @@ def correos_empleados():
     datos_correos = obtener_correos_empleados()    
     return render_template('seccion_HR-SEC/correos_empleados.html', correos=datos_correos)
 
-@app.route("/api/correos_empleados/guardar", methods=["POST"])
+@app.route("/correos_empleados/guardar", methods=["POST"])
 def api_guardar_correo_empleado():
     datos = request.get_json()
     try:
@@ -456,7 +533,7 @@ def api_guardar_correo_empleado():
             TIPO=datos["tipo"],
             ID_ESTADO=datos["id_estado"]
         )
-        return jsonify({"message": "¡Correo agregado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Correo agregado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
@@ -470,9 +547,19 @@ def api_actualizar_correo_empleado():
             TIPO=datos["tipo"],
             ID_ESTADO=datos["id_estado"]
         )
-        return jsonify({"message": "¡Correo actualizado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Correo actualizado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+
+#DELETE
+#DELETE 
+@app.route('/delete/correos_empleados/<int:id_empleado>/<string:correo>', methods=['POST'])
+def eliminar_correo_empleado(id_empleado, correo):
+    try:
+        eliminar_correo_empleado_logico(id_empleado, correo)
+        return jsonify({'success': True, 'message': 'Correo eliminado correctamente'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 # ---------------- Roles y Permisos  ----------------
 # ---------------- Roles y Permisos   ----------------
@@ -526,6 +613,31 @@ def api_eliminar_usuario(id_usuario):
     except Exception as e:
         return jsonify({'success': False, 'message': f"Error al desactivar en Base de Datos: {str(e)}"}), 500
 
+# Agregar
+@app.route("/usuarios/agregar", methods=["POST"])
+def agregar_usuario():
+    try:
+        # Lee el JSON enviado desde JavaScript
+        datos = request.get_json()
+        
+        if not datos:
+            return jsonify({"success": False, "message": "No se recibieron datos válidos."}), 400
+
+        # Pasa los parámetros con los nombres correctos
+        insertar_usuario(            
+            USUARIO=datos.get("nombre"),
+            ID_ROL=int(datos.get("id_rol")),
+            ID_ESTADO=int(datos.get("id_estado"))
+        )
+        return jsonify({"success": True, "message": "¡Usuario creado con éxito!"}), 200
+
+    except ValueError as ve:
+        # Captura si el usuario ya existe
+        return jsonify({"success": False, "message": str(ve)}), 400
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
+
+
 ###########################################################################################
 ############################ SECCION - INVENTARIO Y PROVEEDORES ###########################
 ###########################################################################################
@@ -552,21 +664,19 @@ def eliminar_producto(id_producto):
     except Exception as e:
         return jsonify({'success': False, 'message': f"Error al eliminar en Base de Datos: {str(e)}"}), 500
 
-@app.route("/api/productos/guardar", methods=["POST"])
+@app.route("/productos/agregar", methods=["POST"])
 def api_guardar_producto():
-    datos = request.get_json()
     try:
-        insertar_producto(
-            id_producto=datos["id_producto"],
-            nombre=datos["nombre"],
-            descripcion=datos["descripcion"],
-            precio=datos["precio"],
-            unidades=datos["unidades"],
-            id_estado=datos["id_estado"]
+        insertar_producto(            
+            NOMBRE=request.form["nombre"],
+            DESCRIPCION=request.form["descripcion"],
+            PRECIO=int(request.form["precio"]),
+            UNIDADES_ACTUALES=int(request.form["unidades"]),
+            ID_ESTADO=int(request.form["id_estado"]),
         )
-        return jsonify({"message": "¡Producto agregado con éxito en Oracle!"}), 200
+        return jsonify({'success': True, "message": "¡Producto agregado con éxito!"}), 200
     except Exception as e:
-        return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+        return jsonify({'success': False,"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
 
 @app.route("/api/productos/actualizar", methods=["POST"])
@@ -581,7 +691,7 @@ def api_actualizar_producto():
             unidades=datos["unidades"],
             id_estado=datos["id_estado"]
         )
-        return jsonify({"message": "¡Producto actualizado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Producto actualizado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
     
@@ -594,7 +704,7 @@ def api_guardar_producto_x_proveedor():
             id_producto=datos["id_producto"],
             id_proveedor=datos["id_proveedor"]
         )
-        return jsonify({"message": "¡Relación agregada con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Relación agregada con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
@@ -632,7 +742,7 @@ def api_guardar_reabastecimiento():
             cantidad=datos["cantidad"],
             id_estado=datos["id_estado"]
         )
-        return jsonify({"message": "¡Reabastecimiento agregado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Reabastecimiento agregado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
@@ -676,7 +786,7 @@ def proveedores():
 #             id_reabastecimiento=datos.get("id_reabastecimiento"),
 #             id_estado= 1
 #         )
-#         return jsonify({"message": "¡Proveedor agregado con éxito en Oracle!"}), 200
+#         return jsonify({"message": "¡Proveedor agregado con éxito!"}), 200
 #     except Exception as e:
 #         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
@@ -721,7 +831,7 @@ def api_guardar_telefono_proveedor():
             nombre=datos["nombre"],
             id_estado= 1
         )
-        return jsonify({"message": "¡Proveedor agregado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Proveedor agregado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
@@ -765,7 +875,7 @@ def api_guardar_correo_proveedor():
             TIPO=datos["tipo"],
             ID_ESTADO=datos["id_estado"]
         )
-        return jsonify({"message": "¡Correo agregado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Correo agregado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
@@ -779,7 +889,7 @@ def api_actualizar_correo_proveedor():
             TIPO=datos["tipo"],
             ID_ESTADO=datos["id_estado"]
         )
-        return jsonify({"message": "¡Correo actualizado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Correo actualizado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
@@ -846,7 +956,7 @@ def api_guardar_servicio_realizado():
             informe=datos["informe"],
             id_estado=datos["id_estado"]
         )
-        return jsonify({"message": "¡Servicio registrado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Servicio registrado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
@@ -861,7 +971,7 @@ def api_actualizar_servicio_realizado():
             informe=datos["informe"],
             id_estado=datos["id_estado"]
         )
-        return jsonify({"message": "¡Servicio actualizado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Servicio actualizado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
@@ -912,13 +1022,27 @@ def guardar_provincia():
     datos = request.get_json()
     try:
         insertar_provincia(
+            nombre=datos["nombre"],
+            id_estado=datos["id_estado"]
+        )
+        return jsonify({'success': True,"message": "¡Provincia agregada con éxito!"}), 200
+    except Exception as e:
+        return jsonify({'success': False, "message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+
+@app.route("/api/provincias/actualizar", methods=["POST"])
+def api_actualizar_provincia():
+    datos = request.get_json()
+    try:
+        actualizar_provincia(
             id_provincia=datos["id_provincia"],
             nombre=datos["nombre"],
             id_estado=datos["id_estado"]
         )
-        return jsonify({'success': True,"message": "¡Provincia agregada con éxito en Oracle!"}), 200
+        return jsonify({'success': True, "message": "¡Provincia actualizada con éxito!"}), 200
     except Exception as e:
-        return jsonify({'success': False, "message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+        return jsonify({'success': False, "message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+ 
+ 
 
 # ---------------- Cantones (vista para Admin) ----------------
 # ---------------- Cantones (vista para Admin) ----------------
@@ -940,15 +1064,26 @@ def eliminar_canton(id_canton):
 def guardar_canton():
     datos = request.get_json()
     try:
-        insertar_canton(
+        insertar_canton(            
+            nombre=datos["nombre"],
+            id_estado=datos["id_estado"]
+        )
+        return jsonify({'success': True,"message": "¡Canton agregado con éxito!"}), 200
+    except Exception as e:
+        return jsonify({'success': False, "message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+
+@app.route("/api/cantones/actualizar", methods=["POST"])
+def api_actualizar_canton():
+    datos = request.get_json()
+    try:
+        actualizar_canton(
             id_canton=datos["id_canton"],
             nombre=datos["nombre"],
             id_estado=datos["id_estado"]
         )
-        return jsonify({'success': True,"message": "¡Canton agregado con éxito en Oracle!"}), 200
+        return jsonify({'success': True, "message": "¡Canton actualizado con éxito!"}), 200
     except Exception as e:
-        return jsonify({'success': False, "message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
-
+        return jsonify({'success': False, "message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 # ---------------- Distritos (vista para Admin) ----------------
 # ---------------- Distritos (vista para Admin) ----------------
 # ---------------- Distritos (vista para Admin) ----------------
@@ -969,20 +1104,28 @@ def eliminar_distrito(id_distrito):
 def guardar_distrito():
     datos = request.get_json()
     try:
-        insertar_distrito(
+        insertar_distrito(            
+            nombre=datos["nombre"],
+            id_estado=datos["id_estado"]
+        )
+        return jsonify({'success': True,"message": "¡Distrito agregado con éxito!"}), 200
+    except Exception as e:
+        return jsonify({'success': False, "message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+
+@app.route("/api/distritos/actualizar", methods=["POST"])
+def api_actualizar_distrito():
+    datos = request.get_json()
+    try:
+        actualizar_distrito(
             id_distrito=datos["id_distrito"],
             nombre=datos["nombre"],
             id_estado=datos["id_estado"]
         )
-        return jsonify({'success': True,"message": "¡Distrito agregado con éxito en Oracle!"}), 200
+        return jsonify({'success': True, "message": "¡Distrito actualizado con éxito!"}), 200
     except Exception as e:
-        return jsonify({'success': False, "message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
-
-
-
-
-
-
+        return jsonify({'success': False, "message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
+ 
+ 
 ###########################################################################################
 ############################# SECCION - FACTURACION Y FINANZAS ############################
 ###########################################################################################
@@ -1043,7 +1186,31 @@ def eliminar_metodo_pago(id_metodo_pago):
         return jsonify({'success': True, 'message': 'Método de pago desactivado con éxito!'}), 200
     except Exception as e:
         return jsonify({'success': False, 'message': f"Error al desactivar en Base de Datos: {str(e)}"}), 500
-
+ 
+@app.route("/api/metodos_pago/guardar", methods=["POST"])
+def api_guardar_metodo_pago():
+    datos = request.get_json()
+    try:
+        insertar_metodos_pago(
+            NOMBRE=datos["nombre"],
+            ID_ESTADO=datos["id_estado"]
+        )
+        return jsonify({'success': True, "message": "¡Método de pago agregado con éxito!"}), 200
+    except Exception as e:
+        return jsonify({'success': False, "message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
+ 
+@app.route("/api/metodos_pago/actualizar", methods=["POST"])
+def api_actualizar_metodo_pago():
+    datos = request.get_json()
+    try:
+        actualizar_metodos_pago(
+            ID_METODO_PAGO=datos["id_metodo_pago"],
+            NOMBRE=datos["nombre"],
+            ID_ESTADO=datos["id_estado"]
+        )
+        return jsonify({'success': True, "message": "¡Método de pago actualizado con éxito!"}), 200
+    except Exception as e:
+        return jsonify({'success': False, "message": f"Error al actualizar en Base de Datos: {str(e)}"}), 500
 
 # ---------------- Pagos (vista para Admin/Empleado/Cliente) ----------------
 # ---------------- Pagos (vista para Admin/Empleado/Cliente) ----------------
@@ -1064,7 +1231,7 @@ def api_guardar_pago():
             id_metodo_pago=datos["id_metodo_pago"],
             id_estado=datos.get("id_estado", 1)
         )
-        return jsonify({"message": "¡Pago agregado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Pago agregado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
@@ -1106,7 +1273,7 @@ def api_eliminar_pago(id_pago):
 #             id_reabastecimiento=datos.get("id_reabastecimiento"),
 #             id_estado= 1
 #         )
-#         return jsonify({"message": "¡Pago agregado con éxito en Oracle!"}), 200
+#         return jsonify({"message": "¡Pago agregado con éxito!"}), 200
 #     except Exception as e:
 #         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
@@ -1154,7 +1321,7 @@ def api_guardar_transaccion():
             id_reabastecimiento=datos.get("id_reabastecimiento"),
             id_estado= 1
         )
-        return jsonify({"message": "¡Transacción agregada con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Transacción agregada con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
@@ -1200,7 +1367,7 @@ def api_guardar_proveedor():
             id_reabastecimiento=datos.get("id_reabastecimiento"),
             id_estado= 1
         )
-        return jsonify({"message": "¡Proveedor agregado con éxito en Oracle!"}), 200
+        return jsonify({"message": "¡Proveedor agregado con éxito!"}), 200
     except Exception as e:
         return jsonify({"message": f"Error al guardar en Base de Datos: {str(e)}"}), 500
 
@@ -1591,6 +1758,7 @@ def mi_perfil():
                 return render_template("mi_perfil.html", cliente=cliente, error=f"No se pudo actualizar el perfil: {str(e)}")
         cliente = next((c for c in obtener_clientes() if c[0] == id_cliente), None)
     return render_template("mi_perfil.html", cliente=cliente)
+
 
 
 

@@ -1,12 +1,12 @@
 import oracledb
 from db import get_connection
 #tener cuidado con esto que con quitar una linea se pudre toda la pagina xddddddd
-def insertar_producto(id_producto, nombre, descripcion, precio, unidades, id_estado):
+def insertar_producto(NOMBRE, DESCRIPCION, PRECIO, UNIDADES_ACTUALES, ID_ESTADO):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
         cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_PRODUCTOS_INSERT_SP", [
-            id_producto, nombre, descripcion, precio, unidades, id_estado
+            NOMBRE, DESCRIPCION, PRECIO, UNIDADES_ACTUALES, ID_ESTADO
         ])
         conexion.commit()
     except Exception as e:

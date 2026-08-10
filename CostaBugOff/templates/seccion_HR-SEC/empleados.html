@@ -50,8 +50,14 @@
             <input type="text" id="apellido_materno" placeholder="Segundo apellido">
           </div>
           <div class="field">
-            <label>Puesto</label>
-            <input type="text" id="puesto" placeholder="Puesto del empleado">
+            <label for="buscar_puesto">Puesto</label>
+            <input type="text" id="buscar_puesto" list="lista_puestos" placeholder="Escribe el nombre del puesto"
+              autocomplete="off" />
+            <!-- Datalist dinámico -->
+            <datalist id="lista_puestos"></datalist>
+
+            <!-- Campo oculto para almacenar el ID del puesto seleccionado -->
+            <input type="hidden" id="id_puesto_seleccionado" name="id_puesto" />
           </div>
           <div class="field id-field">
             <label>Estado del Cliente</label>
@@ -62,7 +68,7 @@
           </div>
 
           <div class="btn-row">
-            <button class="btn btn-primary" id="AgregarCliente">Agregar empleado</button>
+            <button class="btn btn-primary" id="AgregarEmpleado">Agregar empleado</button>
           </div>
         </div>
 
@@ -120,7 +126,9 @@
         id_puesto: parseInt(document.getElementById('emp-idPuesto').value),
       }
     }
-
+  </script>
+  {#
+  <script>
     document.getElementById('btnAgregarEmpleado').addEventListener('click', async () => {
       const datos = obtenerDatosEmpleado()
       if (!datos.id_empleado || !datos.nombre || !datos.apellido_paterno || !datos.apellido_materno || !datos.id_puesto)
@@ -181,6 +189,183 @@
         alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
       }
     })
+  </script> #}
+
+  <script>
+
+    // 1. Declaración e inicialización de elementos del DOM
+    const inputBuscar = document.getElementById('buscar_puesto');
+    const datalist = document.getElementById('lista_puestos');
+    const inputHiddenId = document.getElementById('id_puesto_seleccionado');
+    const inputNombre = document.getElementById('nombre');
+    const selectPrimerApellido = document.getElementById('apellido_paterno');
+    const selectSegundoApellido = document.getElementById('apellido_mater');
+    const selectEstado = document.getElementById('estado');
+
+    // Mapa global para relacionar: Nombre -> ID del Puesto
+    const puestosMapa = new Map();
+    let debounceTimer;
+
+
+    // -------------------------------------------------------------
+    // 2. LÓGICA DE BÚSQUEDA Y SELECCIÓN DE PUESTO
+    // -------------------------------------------------------------
+    if (inputBuscar) {
+      inputBuscar.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+
+        // Si lo que escribió coincide con un cliente cargado, asignamos su ID
+        if (puestosMapa.has(query)) {
+          inputHiddenId.value = puestosMapa.get(query);
+          return;
+        } else {
+          // Si modifica el texto, borramos el ID hasta que seleccione uno de la lista
+          inputHiddenId.value = '';
+        }
+
+        // Ignorar búsquedas de menos de 2 caracteres
+        if (query.length < 2) {
+          datalist.innerHTML = '';
+          return;
+        }
+
+        // Debounce: espera 300ms a que el usuario deje de escribir
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(async () => {
+          try {
+            const response = await fetch(`/puestos/buscar?q=${encodeURIComponent(query)}`);
+            const puestos = await response.json();
+
+            datalist.innerHTML = '';
+            puestosMapa.clear();
+
+            // Validación: si puestos es null o no es un arreglo, usa []
+            if (Array.isArray(puestos)) {
+              puestos.forEach(puesto => {
+                puestosMapa.set(puesto.nombre, puesto.id);
+
+                const option = document.createElement('option');
+                option.value = puesto.nombre;
+                datalist.appendChild(option);
+              });
+            }
+          } catch (error) {
+            console.error('Error al buscar puesto:', error);
+          }
+        }, 100);
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 4. LÓGICA PARA AGREGAR EL EMPLEADO
+    // -------------------------------------------------------------
+    const btnAgregar = document.getElementById('AgregarEmpleado');
+    if (btnAgregar) {
+      btnAgregar.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        // 1. Lectura de valores de los inputs según el HTML
+        const nombre = document.getElementById('nombre') ? document.getElementById('nombre').value.trim() : '';
+        const apellidoPaterno = document.getElementById('apellido_paterno') ? document.getElementById('apellido_paterno').value.trim() : '';
+        const apellidoMaterno = document.getElementById('apellido_materno') ? document.getElementById('apellido_materno').value.trim() : '';
+        const idPuesto = document.getElementById('id_puesto_seleccionado') ? document.getElementById('id_puesto_seleccionado').value.trim() : '';
+        const idEstado = document.getElementById('estado') ? document.getElementById('estado').value.trim() : '';
+
+        // 2. Validaciones básicas
+        if (!nombre) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Campo incompleto',
+            text: 'Por favor ingresa el nombre del empleado.',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
+        }
+
+        if (!apellidoPaterno) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Campo incompleto',
+            text: 'Por favor ingresa el primer apellido.',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
+        }
+
+        if (!idPuesto) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Puesto no seleccionado',
+            text: 'Por favor busca y selecciona un puesto válido de la lista desplegable.',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
+        }
+
+        if (!idEstado) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Estado no seleccionado',
+            text: 'Por favor selecciona un estado.',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
+        }
+
+        // 3. Petición al servidor
+        try {
+          const response = await fetch('/empleados/guardar', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              nombre: nombre,
+              apellido_paterno: apellidoPaterno,
+              apellido_materno: apellidoMaterno,
+              id_puesto: parseInt(idPuesto, 10),
+              id_estado: parseInt(idEstado, 10)
+            })
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.success !== false) {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Guardado!',
+              text: result.message || 'Empleado agregado con éxito.',
+              confirmButtonColor: '#3085d6'
+            }).then(() => {
+              // Limpiar campos
+              document.getElementById('nombre').value = '';
+              document.getElementById('apellido_paterno').value = '';
+              document.getElementById('apellido_materno').value = '';
+              document.getElementById('buscar_puesto').value = '';
+              document.getElementById('id_puesto_seleccionado').value = '';
+
+              // Recargar la página
+              location.reload();
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: result.message || 'Ocurrió un error al guardar el empleado.',
+              confirmButtonColor: '#d33'
+            });
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error de conexión',
+            text: 'No se pudo conectar con el servidor.',
+            confirmButtonColor: '#d33'
+          });
+        }
+      });
+    }
   </script>
 
   {% include 'plantillas/_default_scripts.html' %}

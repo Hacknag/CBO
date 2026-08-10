@@ -42,19 +42,22 @@
                                 <th>Correo</th>
                                 <th>Tipo</th>
                                 <th>Estado</th>
-                                <th>Borrar</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for t in correos %}
-                            <tr data-id1="{{ t[0] }}" data-id2="{{ t[4] }}" data-entity="correos_clientes">
-                                <td>{{ t[1] }}</td>
-                                <td>{{ t[2] }}</td>
-                                <td>{{ t[3] }}</td>
-                                <td>{{ t[4] }}</td>
-                                <td>{{ t[5] }}</td>
-                                <td>{{ t[6] }}</td>
+                            {% for c in correos %}
+                            <tr data-id1="{{ c[0] }}" data-id2="{{ c[4] }}" data-entity="correos_clientes">
+                                <td>{{ c[1] }}</td>
+                                <td>{{ c[2] }}</td>
+                                <td>{{ c[3] }}</td>
+                                <td>{{ c[4] }}</td>
+                                <td>{{ c[5] }}</td>
+                                <td>{{ c[6] }}</td>
                                 <td>
+                                    <button class="edit-btn" onclick="editarCorreoCliente(this)">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
                                     <button class="delete-btn" onclick="deleteRow2(this)">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
@@ -86,7 +89,7 @@
                     </div>
                     <div class="field id-field">
                         <label>Tipo de correo</label>
-                        <select name="tipo_correo" id="correo">
+                        <select name="tipo_correo" id="tipo">
                             <option value="">-- Selecciona una opcion --</option>
                             <option value="Personal">Personal</option>
                             <option value="Empresarial">Empresarial</option>
@@ -102,7 +105,7 @@
                     </div>
 
                     <div class="btn-row">
-                        <button class="btn btn-primary" id="AgregarCorreo">Agregar cliente</button>
+                        <button class="btn btn-primary" id="AgregarCorreo">Agregar correo</button>
                     </div>
                 </div>
 
@@ -116,75 +119,36 @@
 
     {# SCRIPTS #}
     {# SCRIPTS #}
+
+    <!-- Actualizar -->
     <script>
-        const URL_API = 'http://127.0.0.1:5001/api/correos_clientes'
+        let idClienteCorreoEditando = null;
 
-        function obtenerDatosFormulario() {
-            return {
-                id_cliente: parseInt(document.getElementById('cliente-id').value),
-                correo: document.getElementById('correo').value,
-                tipo: document.getElementById('correo-tipo').value,
-                id_estado: parseInt(document.getElementById('correo-estado').value),
-            }
+        function editarCorreoCliente(button) {
+            const row = button.closest('tr');
+            const celdas = row.querySelectorAll('td');
+
+            idClienteCorreoEditando = row.getAttribute('data-id1');
+
+            document.getElementById('buscar_cliente').value = `${celdas[0].textContent.trim()} ${celdas[1].textContent.trim()} ${celdas[2].textContent.trim()}`;
+            document.getElementById('id_cliente_seleccionado').value = idClienteCorreoEditando;
+
+            document.getElementById('correo_cliente').value = celdas[3].textContent.trim();
+            document.getElementById('correo_cliente').disabled = true;
+
+            document.getElementById('tipo').value = celdas[4].textContent.trim();
+
+            const estadoTexto = celdas[5].textContent.trim();
+            document.getElementById('estado').value = estadoTexto.toUpperCase() === 'ACTIVO' ? '1' : '2';
+
+            document.querySelector('.form-card h2').textContent = 'Editar Correo';
+            document.getElementById('AgregarCorreo').textContent = 'Guardar cambios';
+
+            document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
         }
-
-        document
-            .getElementById('btnAgregar')
-            .addEventListener('click', async () => {
-                const datos = obtenerDatosFormulario()
-                if (!datos.id_cliente || !datos.correo)
-                    return alert('Por favor, llena los campos requeridos.')
-
-                try {
-                    const respuesta = await fetch(`${URL_API}/guardar`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(datos),
-                    })
-                    const resultado = await respuesta.json()
-
-                    alert(resultado.message)
-                    if (respuesta.ok) {
-                        document.getElementById('form_correos_clientes').reset()
-                        location.reload()
-                    }
-                } catch (error) {
-                    alert(
-                        'No se pudo conectar con el servidor de Flask en el puerto 5001.',
-                    )
-                }
-            })
-
-        document
-            .getElementById('btnActualizar')
-            .addEventListener('click', async () => {
-                const datos = obtenerDatosFormulario()
-                if (!datos.id_cliente || !datos.correo)
-                    return alert(
-                        'Especifica el ID del cliente y el correo a actualizar.',
-                    )
-
-                try {
-                    const respuesta = await fetch(`${URL_API}/actualizar`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(datos),
-                    })
-                    const resultado = await respuesta.json()
-
-                    alert(resultado.message)
-                    if (respuesta.ok) {
-                        document.getElementById('form_correos_clientes').reset()
-                        location.reload()
-                    }
-                } catch (error) {
-                    alert(
-                        'No se pudo conectar con el servidor de Flask en el puerto 5001.',
-                    )
-                }
-            })
     </script>
 
+    <!-- AGREGAR -->
     <script>
 
         // 1. Declaración e inicialización de elementos del DOM
@@ -294,7 +258,27 @@
                     });
                     return;
                 }
-
+                // -------- MODO EDITAR --------
+                if (idClienteCorreoEditando) {
+                    try {
+                        const respuesta = await fetch('/api/correos_clientes/actualizar', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                id_cliente: parseInt(idCliente, 10),
+                                correo: correo,
+                                tipo: tipo,
+                                id_estado: parseInt(idEstado, 10)
+                            })
+                        });
+                        const resultado = await respuesta.json();
+                        Swal.fire('¡Listo!', resultado.message, 'success');
+                        location.reload();
+                    } catch (error) {
+                        Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
+                    }
+                    return;
+                }
                 // Petición al servidor
                 try {
                     const response = await fetch('/correos_clientes/guardar', {

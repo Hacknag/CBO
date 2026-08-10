@@ -2,12 +2,12 @@ import oracledb
 from db import get_connection
 
 
-def insertar_canton(id_canton, nombre, id_estado):
+def insertar_canton(nombre, id_estado):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
         cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_CANTONES_INSERT_SP", [
-            id_canton, nombre, id_estado
+            nombre, id_estado
         ])
         conexion.commit()
     except Exception as e:

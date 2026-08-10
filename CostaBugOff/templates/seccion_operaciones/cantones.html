@@ -32,8 +32,8 @@
       </div>
       <div class="panel__body_inverse">
         <div style="display:flex; flex-direction:column; gap:16px;">
-          <div class="form-card">
-            <h2>Agregar Canton</h2>
+          <div class="form-card" id="cardCanton">
+            <h2 id="tituloCanton">Agregar Canton</h2>
             <p class="sub">Completa los campos para agregar un canton nuevo.</p>
             <div class="field">
               <label>Nombre del canton</label>
@@ -49,7 +49,7 @@
             </div>
 
             <div class="btn-row">
-              <button class="btn btn-primary" id="AgregarTelefono">Agregar canton</button>
+              <button class="btn btn-primary" id="AgregarCanton">Agregar canton</button>
             </div>
           </div>
         </div>
@@ -69,6 +69,9 @@
                 <td>{{ p[1] }}</td>
                 <td>{{ p[2] }}</td>
                 <td>
+                  <button class="edit-btn" onclick="editarCanton(this)">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
                   <button class="delete-btn" onclick="deleteRow(this)">
                     <i class="fa-solid fa-trash"></i>
                   </button>
@@ -88,79 +91,63 @@
 
   {# SCRIPTS #}
   {# SCRIPTS #}
-  <script>
-    const URL_API_CANTONES = 'http://127.0.0.1:5001/api/cantones'
-
-    function obtenerDatosCanton() {
-      return {
-        id_canton: parseInt(document.getElementById('can-id').value),
-        nombre: document.getElementById('can-nombre').value,
-        id_estado: parseInt(document.getElementById('can-estado').value),
-      }
-    }
-
-    document.getElementById('btnAgregarCanton').addEventListener('click', async () => {
-      const datos = obtenerDatosCanton()
-      if (!datos.id_canton || !datos.nombre || !datos.id_estado)
-        return alert('Llena ID, Nombre y Estado.')
-      try {
-        const respuesta = await fetch(`${URL_API_CANTONES}/guardar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formCantones').reset()
-          location.reload()
-        }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
-
-    document.getElementById('btnActualizarCanton').addEventListener('click', async () => {
-      const datos = obtenerDatosCanton()
-      if (!datos.id_canton || !datos.nombre || !datos.id_estado)
-        return alert('Llena ID, Nombre y Estado antes de actualizar.')
-      try {
-        const respuesta = await fetch(`${URL_API_CANTONES}/actualizar`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(datos),
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formCantones').reset()
-          location.reload()
-        }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
-
-    document.getElementById('btnDesactivarCanton').addEventListener('click', async () => {
-      const datos = obtenerDatosCanton()
-      if (!datos.id_canton)
-        return alert('Especifica el ID de la canton a desactivar.')
-      try {
-        const respuesta = await fetch(`${URL_API_CANTONES}/eliminar/${datos.id_canton}`, {
-          method: 'POST',
-        })
-        const resultado = await respuesta.json()
-        alert(resultado.message)
-        if (respuesta.ok) {
-          document.getElementById('formCantones').reset()
-          location.reload()
-        }
-      } catch (error) {
-        alert('No se pudo conectar con el servidor de Flask en el puerto 5001.')
-      }
-    })
-  </script>
   {% include 'plantillas/_default_scripts.html' %}
+
+  {# EDITAR CANTON #}
+  <script>
+    let idCantonEditando = null;
+
+    function editarCanton(button) {
+      const fila = button.closest('tr');
+      idCantonEditando = fila.dataset.id;
+
+      document.getElementById('nombre').value = fila.children[0].textContent.trim();
+
+      const estadoTexto = fila.children[1].textContent.trim();
+      document.getElementById('estado').value = estadoTexto.toUpperCase() === 'ACTIVO' ? '1' : '2';
+
+      document.getElementById('tituloCanton').textContent = 'Editar Canton';
+      document.getElementById('AgregarCanton').textContent = 'Guardar cambios';
+      document.getElementById('cardCanton').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+
+  <script>
+    document.getElementById('AgregarCanton').addEventListener('click', async () => {
+      const nombre = document.getElementById('nombre').value.trim();
+      const idEstado = document.getElementById('estado').value;
+
+      if (!nombre || !idEstado) {
+        Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Llena nombre y estado.', confirmButtonColor: '#3085d6' });
+        return;
+      }
+
+      const url = idCantonEditando
+        ? '/api/cantones/actualizar'
+        : '/api/cantones/guardar';
+
+      const payload = idCantonEditando
+        ? { id_canton: parseInt(idCantonEditando), nombre: nombre, id_estado: parseInt(idEstado) }
+        : { nombre: nombre, id_estado: parseInt(idEstado) };
+
+      try {
+        const respuesta = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const resultado = await respuesta.json();
+        if (respuesta.ok) {
+          Swal.fire({ icon: 'success', title: '¡Listo!', text: resultado.message, confirmButtonColor: '#3085d6' })
+            .then(() => location.reload());
+        } else {
+          Swal.fire({ icon: 'error', title: 'Error', text: resultado.message, confirmButtonColor: '#d33' });
+        }
+      } catch (error) {
+        Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'No se pudo conectar con el servidor.', confirmButtonColor: '#d33' });
+      }
+    });
+  </script>
 
 </body>
 

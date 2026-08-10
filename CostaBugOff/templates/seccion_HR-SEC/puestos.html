@@ -96,94 +96,6 @@
   {# SCRIPTS #}
   {# SCRIPTS #}
 
-  <script>
-    const URL_API_PUESTOS = 'http://127.0.0.1:5001/api/puestos'
-
-    function obtenerDatosPuesto() {
-      return {
-        id_puesto: parseInt(document.getElementById('p-id-puesto').value),
-        nombre: document.getElementById('p-nombre').value,
-        descripcion: document.getElementById('p-descripcion').value,
-      }
-    }
-
-    document
-      .getElementById('btnAgregarPuesto')
-      .addEventListener('click', async () => {
-        const datos = obtenerDatosPuesto()
-        if (!datos.id_puesto || !datos.nombre)
-          return alert('Llena al menos el ID y el Nombre.')
-        try {
-          const respuesta = await fetch(`${URL_API_PUESTOS}/guardar`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datos),
-          })
-          const resultado = await respuesta.json()
-          alert(resultado.message)
-          if (respuesta.ok) {
-            document.getElementById('formPuestos').reset()
-            location.reload()
-          }
-        } catch (error) {
-          alert(
-            'No se pudo conectar con el servidor de Flask en el puerto 5001.',
-          )
-        }
-      })
-
-    document
-      .getElementById('btnActualizarPuesto')
-      .addEventListener('click', async () => {
-        const datos = obtenerDatosPuesto()
-        if (!datos.id_puesto || !datos.nombre)
-          return alert('Llena al menos el ID y el Nombre.')
-        try {
-          const respuesta = await fetch(`${URL_API_PUESTOS}/actualizar`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datos),
-          })
-          const resultado = await respuesta.json()
-          alert(resultado.message)
-          if (respuesta.ok) {
-            document.getElementById('formPuestos').reset()
-            location.reload()
-          }
-        } catch (error) {
-          alert(
-            'No se pudo conectar con el servidor de Flask en el puerto 5001.',
-          )
-        }
-      })
-
-    document
-      .getElementById('btnDesactivarPuesto')
-      .addEventListener('click', async () => {
-        const datos = obtenerDatosPuesto()
-        if (!datos.id_puesto)
-          return alert('Especifica el ID del puesto a eliminar.')
-        try {
-          const respuesta = await fetch(
-            `${URL_API_PUESTOS}/eliminar/${datos.id_puesto}`,
-            {
-              method: 'POST',
-            },
-          )
-          const resultado = await respuesta.json()
-          alert(resultado.message)
-          if (respuesta.ok) {
-            document.getElementById('formPuestos').reset()
-            location.reload()
-          }
-        } catch (error) {
-          alert(
-            'No se pudo conectar con el servidor de Flask en el puerto 5001.',
-          )
-        }
-      })
-  </script>
-
   {# AGREGAR PUESTO #}
   <script>
     document.getElementById('AgregarPuesto').addEventListener('click', async (e) => {
@@ -264,6 +176,8 @@
       }
     });
   </script>
+
+
 
   {% include 'plantillas/_default_scripts.html' %}
 </body>

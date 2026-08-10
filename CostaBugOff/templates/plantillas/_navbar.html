@@ -56,7 +56,7 @@
                             data-section="empleados">Empleados</a>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="/telefonos_empleados"
+                        <a class="dropdown-item" href="{{ url_for('telefonos_empleados') }}"
                             data-section="telefonos_empleados">Teléfonos de
                             Empleados</a>
                     </li>
@@ -178,7 +178,7 @@
                 data-bs-toggle="dropdown" aria-expanded="false">A</a>
             <ul class="dropdown-menu text-small" style="">
                 <li><a class="dropdown-item" href="{{ url_for('mi_perfil') }}">Mi Perfil</a></li>
-                <li><a class="dropdown-item" href="#">Contacto</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('contacto') }}">Contacto</a></li>
                 <li><a class="dropdown-item" href="/logout">Cerrar sesión</a></li>
             </ul>
         </div>

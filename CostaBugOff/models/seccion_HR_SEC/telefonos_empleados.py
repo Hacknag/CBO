@@ -2,12 +2,12 @@ import oracledb
 from db import get_connection
 
 
-def insertar_distrito(nombre, id_estado):
+def insertar_telefono_empleado(ID_EMPLEADO, TELEFONO, TIPO, ID_ESTADO):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_DISTRITOS_INSERT_SP", [
-            nombre, id_estado
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_TELEFONOS_EMPLEADOS_INSERT_SP", [
+            ID_EMPLEADO, TELEFONO, TIPO, ID_ESTADO
         ])
         conexion.commit()
     except Exception as e:
@@ -18,12 +18,12 @@ def insertar_distrito(nombre, id_estado):
         conexion.close()
 
 
-def actualizar_distrito(id_distrito, nombre, id_estado):
+def actualizar_telefono_empleado(id_empleado, telefono, tipo, id_estado):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_DISTRITOS_UPDATE_SP", [
-            id_distrito, nombre, id_estado
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_TELEFONOS_EMPLEADOS_UPDATE_SP", [
+            id_empleado, telefono, tipo, id_estado
         ])
         conexion.commit()
     except Exception as e:
@@ -34,12 +34,12 @@ def actualizar_distrito(id_distrito, nombre, id_estado):
         conexion.close()
 
 
-def eliminar_distrito_logico(id_distrito):
+def eliminar_telefono_empleado_logico(id_empleado, telefono):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_DISTRITOS_DELETE_SP", [
-            id_distrito
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_TELEFONOS_EMPLEADOS_DELETE_SP", [
+            id_empleado, telefono
         ])
         conexion.commit()
     except Exception as e:
@@ -50,16 +50,16 @@ def eliminar_distrito_logico(id_distrito):
         conexion.close()
 
 
-def obtener_distritos(id_estado=None):
+def obtener_telefonos_empleados(id_estado=None):
     conn = get_connection()
     cursor = conn.cursor()
     if id_estado:
         cursor.execute(
-            'SELECT * FROM FIDE_DISTRITOS_V WHERE "ID ESTADO" = :id_estado ORDER BY "DISTRITO ID"',
+            'SELECT * FROM FIDE_TELEFONOS_EMPLEADOS_V WHERE "ID ESTADO" = :id_estado ORDER BY "ID EMPLEADO"',
             {"id_estado": id_estado}
         )
     else:
-        cursor.execute('SELECT * FROM FIDE_DISTRITOS_V ORDER BY "DISTRITO ID"')
+        cursor.execute('SELECT * FROM FIDE_TELEFONOS_EMPLEADOS_V ORDER BY "ID EMPLEADO"')
     datos = cursor.fetchall()
     cursor.close()
     conn.close()

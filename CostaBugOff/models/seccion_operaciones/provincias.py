@@ -2,12 +2,12 @@ import oracledb
 from db import get_connection
 
 
-def insertar_provincia(id_provincia, nombre, id_estado):
+def insertar_provincia(nombre, id_estado):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_PROVINCIAS_INSERT", [
-            id_provincia, nombre, id_estado
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_PROVINCIAS_INSERT_SP", [
+            nombre, id_estado
         ])
         conexion.commit()
     except Exception as e:
@@ -22,7 +22,7 @@ def actualizar_provincia(id_provincia, nombre, id_estado):
     conexion = get_connection()
     try:
         cursor = conexion.cursor()
-        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.SP_FIDE_PROVINCIAS_UPDATE", [
+        cursor.callproc("FIDE_PROYECTO_FINAL_PKG.FIDE_PROVINCIAS_UPDATE_SP", [
             id_provincia, nombre, id_estado
         ])
         conexion.commit()

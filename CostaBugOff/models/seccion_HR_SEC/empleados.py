@@ -81,3 +81,52 @@ def obtener_puestos():
     cursor.close()
     conn.close()
     return datos
+
+
+
+# ---------------- Buscar EMPLEADOS ---------------- #
+# ---------------- Buscar EMPLEADOS ---------------- #
+# ---------------- Buscar EMPLEADOS ---------------- #
+def buscar_empleados(query):
+    """Consulta directamente la tabla empleados en Oracle Database y retorna una lista de diccionarios."""
+    if not query:
+        return []
+
+    conexion = None
+    try:
+        conexion = get_connection()
+        cursor = conexion.cursor() 
+        search_term = f"%{query}%"
+        
+        # Consulta directa a la TABLA empleados (Sintaxis Oracle SQL)
+        sql = """
+        SELECT 
+            ID_EMPLEADO, 
+            TRIM(NOMBRE || ' ' || NVL(APELLIDO_PATERNO, '') || ' ' || NVL(APELLIDO_MATERNO, '')) AS nombre_completo
+        FROM FIDE_EMPLEADOS_TB 
+        WHERE ID_ESTADO = 1
+        AND LOWER(NOMBRE || ' ' || NVL(APELLIDO_PATERNO, '') || ' ' || NVL(APELLIDO_MATERNO, '')) LIKE LOWER(:1)
+        FETCH FIRST 8 ROWS ONLY
+        """
+
+        
+        cursor.execute(sql, (search_term,))
+        resultados = cursor.fetchall()
+        cursor.close()
+
+        print(resultados)
+        # Mapeo de la lista de tuplas de Oracle a formato JSON para JavaScript
+        return [
+            {
+                "id": row[0],
+                "nombre_completo": row[1]
+            }
+            for row in resultados
+        ]
+
+    except Exception as e:
+        print(f"Error en buscar_empleados: {e}")
+        return []
+    finally:
+        if conexion:
+            conexion.close()

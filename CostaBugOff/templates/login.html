@@ -6,49 +6,76 @@
 </head>
 
 <body>
-  <header class="topbar">
-    <div class="topbar__brand">
-      <img class="logo-bug rounded-circle" src="/static/img/Jeremy.png" alt="CostaBugOff" />
-      <span class="topbar__logo">CostaBugOff</span>
-      <span class="topbar__view-tag">Iniciar sesión</span>
-    </div>
-  </header>
+  <div class="login-split">
 
-  <main class="app" style="display:flex; justify-content:center;">
-    <section style="max-width:380px; width:100%; margin-top:40px;">
-      <div class="panel__header">
-        <h1>Ingresar</h1>
+    <!-- Panel izquierdo -->
+    <aside class="login-aside">
+      <div class="login-aside__brand">
+        <img src="/static/img/Jeremy.png" alt="CostaBugOff" />
+        <span class="brand-name">Costa<b>BugOff</b></span>
       </div>
 
-      {% if error %}
-      <p style="color:var(--brick); font-size:13.5px;">{{ error }}</p>
-      {% endif %}
-
-      <form class="entity-form" method="POST" action="/login">
-        <div class="field">
-          <label for="correo">Correo electrónico</label>
-          <input type="email" id="correo" name="correo" placeholder="correo@costabugoff.com" required autofocus />
-        </div>
-        <div class="field">
-          <label for="password">Contraseña</label>
-          <input type="password" id="password" name="password" placeholder="Contraseña" required />
-        </div>
-
-        <div class="form-actions">
-          <button type="submit" class="btn btn--primary">Ingresar</button>
-        </div>
-      </form>
-
-      <div style="margin-top:16px; display:flex; justify-content:space-between; font-size:13.5px;">
-        <a href="/registro">Registrarse</a>
-        <a href="/olvide-password">¿Olvidaste tu contraseña?</a>
+      <div class="login-aside__body">
+        <div class="login-aside__eyebrow">Panel de clientes</div>
+        <h1>Su hogar, <em>sin visitas</em> no invitadas.</h1>
+        <p>Ingrese para revisar sus tratamientos programados, historial de visitas y certificados de fumigación en un
+          solo lugar.</p>
       </div>
-    </section>
-  </main>
-  {# FOOTER #}
-  {# FOOTER #}
-  {% include 'plantillas/_footer_inicio.html' %}
 
+      <div class="login-aside__seal">
+        <i class="fa-solid fa-check"></i>
+      </div>
+
+      <div class="login-aside__footer">
+        <span>© {{ now().year if now else '2026' }} CostaBugOff Pest Control International, Inc</span>
+        <div class="login-aside__social">
+          <a href="https://www.instagram.com/costabugoff" target="_blank" rel="noopener"><i
+              class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://www.instagram.com/costabugoff" target="_blank" rel="noopener"><i
+              class="fa-brands fa-instagram"></i></a>
+          <a href="https://www.instagram.com/costabugoff" target="_blank" rel="noopener"><i
+              class="fa-brands fa-tiktok"></i></a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Panel derecho -->
+    <main class="login-main">
+      <div class="login-card">
+        <div class="login-card__eyebrow">Acceso seguro</div>
+        <h2>Ingresar</h2>
+        <p class="login-card__sub">¿Aún no tiene cuenta? <a href="/registro">Regístrese aquí</a></p>
+
+        {% if error %}
+        <p style="color:var(--brick); font-size:13.5px; margin-bottom:14px;">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST" action="/login">
+          <div class="field">
+            <label for="correo">Correo electrónico</label>
+            <input type="email" id="correo" name="correo" placeholder="correo@costabugoff.com" required autofocus />
+          </div>
+          <div class="field">
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" name="password" placeholder="Contraseña" required />
+          </div>
+
+          <div class="form-actions--split">
+            <label class="remember">
+              <input type="checkbox" name="recordarme" />
+              Recordarme
+            </label>
+            <a class="forgot" href="/olvide-password">¿Olvidó su contraseña?</a>
+          </div>
+
+          <button type="submit" class="btn btn--primary">
+            Ingresar <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+      </div>
+    </main>
+
+  </div>
 </body>
 
 </html>
